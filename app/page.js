@@ -139,7 +139,9 @@ function LoginScreen({ onSent }) {
   return (
     <div className="min-h-screen flex items-center justify-center px-6" style={{ background: PAPER, fontFamily: BODY_FONT }}>
       <div className="w-full max-w-sm text-center">
-        <LogoMark size={56} />
+     <div className="flex justify-center">
+          <LogoMark size={84} />
+        </div>
         <div style={{ fontFamily: DISPLAY_FONT, fontSize: 32, color: INK, margin: "16px 0 6px" }}>장편</div>
         <p className="text-sm mb-8" style={{ color: INK_SOFT }}>장애물 없는 편의, 함께 기록해요</p>
 
@@ -173,6 +175,9 @@ function LoginScreen({ onSent }) {
         )}
         <p className="text-xs mt-6" style={{ color: INK_SOFT }}>
           비밀번호 없이, 메일로 온 링크만 누르면 로그인돼요.
+        </p>
+          <p className="text-xs mt-8" style={{ color: '#B8B1A0' }}>
+          제작 · 코드람쥐
         </p>
       </div>
     </div>
