@@ -557,7 +557,11 @@ export default function Page() {
             </div>
           </div>
         )}
-      </main>
+</main>
+
+      <footer className="text-center py-6 text-xs" style={{ color: INK_SOFT }}>
+        장편 · 코드람쥐
+      </footer>
     </div>
   );
 }
