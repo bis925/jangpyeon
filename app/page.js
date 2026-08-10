@@ -143,7 +143,8 @@ function LoginScreen({ onSent }) {
           <LogoMark size={84} />
         </div>
         <div style={{ fontFamily: DISPLAY_FONT, fontSize: 32, color: INK, margin: "16px 0 6px" }}>장편</div>
-        <p className="text-sm mb-8" style={{ color: INK_SOFT }}>장애물 없는 편의, 함께 기록해요</p>
+<p className="text-sm mb-1" style={{ color: INK_SOFT }}>장애물 없는 편의, 함께 기록해요</p> 
+  <p className="text-xs mb-8" style={{ color: '#9A9484' }}>휘체어 접근성 · 장애인 화장실 · 유모차 정보를 지도에서 찾아보세요</p>
 
         {sent ? (
           <div className="rounded-2xl p-6" style={{ background: TEAL_TINT }}>
