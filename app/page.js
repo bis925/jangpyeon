@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
@@ -205,7 +205,45 @@ export default function Page() {
     name: "", address: "", category: "공공기관",
     badges: { ramp: false, door: false, stroller: false, lift: false },
   });
+  const mapContainerRef = useRef(null);
+  const [kakaoLoaded, setKakaoLoaded] = useState(false);
 
+  useEffect(() => {
+    if (window.kakao && window.kakao.maps) { setKakaoLoaded(true); return; }
+    const script = document.createElement("script");
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false&libraries=services`;
+    script.async = true;
+    script.onload = () => { window.kakao.maps.load(() => setKakaoLoaded(true)); };
+    document.head.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (tab !== "map" || !kakaoLoaded || !mapContainerRef.current) return;
+    const kakao = window.kakao;
+    const center = new kakao.maps.LatLng(37.5665, 126.9780);
+    const map = new kakao.maps.Map(mapContainerRef.current, { center, level: 6 });
+    const geocoder = new kakao.maps.services.Geocoder();
+    const filtered = mapCategory ? places.filter((p) => p.category === mapCategory) : places;
+
+    function addMarker(lat, lng, name) {
+      const position = new kakao.maps.LatLng(lat, lng);
+      const marker = new kakao.maps.Marker({ position, map });
+      const infowindow = new kakao.maps.InfoWindow({ content: `<div style="padding:6px 10px;font-size:12px;">${name}</div>` });
+      kakao.maps.event.addListener(marker, "click", () => infowindow.open(map, marker));
+    }
+
+    filtered.forEach((place) => {
+      if (place.lat && place.lng) {
+        addMarker(place.lat, place.lng, place.name);
+      } else if (place.address) {
+        geocoder.addressSearch(place.address, (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            addMarker(parseFloat(result[0].y), parseFloat(result[0].x), place.name);
+          }
+        });
+      }
+    });
+  }, [tab, kakaoLoaded, mapCategory, places]);
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -426,13 +464,7 @@ export default function Page() {
         {/* ===================== 지도·검색 ===================== */}
         {tab === "map" && (
           <div>
-            <div className="relative h-72 rounded-2xl mb-6 overflow-hidden flex items-center justify-center"
-              style={{ background: `repeating-linear-gradient(0deg, ${LINE} 0 1px, transparent 1px 26px), repeating-linear-gradient(90deg, ${LINE} 0 1px, transparent 1px 26px), ${PAPER}` }}>
-              <div className="text-center px-6">
-                <MapPin size={26} color={TEAL} className="mx-auto mb-2" />
-                <div className="text-sm font-bold" style={{ color: INK }}>실제 지도는 카카오맵 API 연동 후 표시돼요</div>
-              </div>
-            </div>
+            <div ref={mapContainerRef} className="w-full h-72 rounded-2xl mb-6 overflow-hidden" style={{ background: PAPER, border: `1px solid ${LINE}` }} />
             <div className="flex flex-wrap gap-2 mb-5">
               {CATEGORIES.map((c) => {
                 const active = mapCategory === c;
