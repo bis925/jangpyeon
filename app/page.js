@@ -216,6 +216,13 @@ export default function Page() {
     script.onload = () => { window.kakao.maps.load(() => setKakaoLoaded(true)); };
     document.head.appendChild(script);
   }, []);
+  
+  useEffect(() => {
+    const daumScript = document.createElement("script");
+    daumScript.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    daumScript.async = true;
+    document.head.appendChild(daumScript);
+  }, []);
 
   useEffect(() => {
     if (tab !== "map" || !kakaoLoaded || !mapContainerRef.current) return;
@@ -318,7 +325,18 @@ export default function Page() {
     fetchProfile();
     fetchHistory();
   }
-
+  function openAddressSearch() {
+    if (!window.daum || !window.daum.Postcode) {
+      alert("주소 검색 기능을 불러오는 중이에요. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        const addr = data.roadAddress || data.jibunAddress;
+        setForm((prev) => ({ ...prev, address: addr }));
+      },
+    }).open();
+  }
   async function submitRegister(e) {
     e.preventDefault();
     if (!form.name.trim()) return;
@@ -506,9 +524,14 @@ export default function Page() {
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
-                <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
-                <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="예) 경기 평택시 동삭로 12"
-                  className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
+                <div className="flex gap-2 mb-4">
+                  <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
+                    className="flex-1 rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: PAPER }} />
+                  <button type="button" onClick={openAddressSearch} className="rounded-xl px-4 py-3 text-sm font-bold whitespace-nowrap transition-all duration-200 active:scale-95" style={{ background: TEAL, color: "#fff" }}>
+                    주소 검색
+                  </button>
+                </div>
 
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
                 <div className="flex flex-wrap gap-2 mb-5">
