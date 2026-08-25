@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail,
+  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera,
 } from "lucide-react";
 
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
@@ -205,6 +205,8 @@ export default function Page() {
     name: "", address: "", category: "공공기관",
     badges: { ramp: false, door: false, stroller: false, lift: false },
   });
+    const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const mapContainerRef = useRef(null);
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
 
@@ -278,8 +280,9 @@ export default function Page() {
     setProfile(data);
   }
   async function fetchPlaces() {
-    const { data } = await supabase.from("places").select("*").eq("status", "approved").order("created_at", { ascending: false });
-    setPlaces(data || []);
+    const { data } = await supabase.from("places").select("*, place_photos(photo_url)").eq("status", "approved").order("created_at", { ascending: false });
+    const withPhoto = (data || []).map((p) => ({ ...p, photo_url: p.place_photos?.[0]?.photo_url || null }));
+    setPlaces(withPhoto);
   }
   async function fetchFavorites() {
     const { data } = await supabase.from("favorites").select("place_id").eq("user_id", session.user.id);
@@ -337,6 +340,13 @@ export default function Page() {
       },
     }).open();
   }
+    function handlePhotoChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      setPhotoFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
+  }
   async function submitRegister(e) {
     e.preventDefault();
     if (!form.name.trim()) return;
@@ -350,8 +360,21 @@ export default function Page() {
       p_has_elevator: form.badges.lift,
     });
     if (error) { showToast("등록 실패: " + error.message); return; }
+
+    if (photoFile) {
+      const fileExt = photoFile.name.split(".").pop();
+      const filePath = `${data.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("place-photos").upload(filePath, photoFile);
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from("place-photos").getPublicUrl(filePath);
+        await supabase.from("place_photos").insert({ place_id: data.id, photo_url: urlData.publicUrl, uploaded_by: session.user.id });
+      }
+    }
+
     setJustRegistered(data);
     setForm({ name: "", address: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });
+    setPhotoFile(null);
+    setPhotoPreview(null);
     fetchPlaces();
     fetchProfile();
     fetchHistory();
@@ -507,7 +530,9 @@ export default function Page() {
           <div className="max-w-lg mx-auto">
             {justRegistered ? (
               <div className="text-center py-16">
-                <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+                    <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }}>
+        {place.photo_url && <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover" />}
+      </div>
                   <Check size={28} color={TEAL} />
                 </div>
                 <div className="font-extrabold text-lg mb-1" style={{ color: INK }}>등록 완료! +2P 적립되었습니다</div>
@@ -557,7 +582,18 @@ export default function Page() {
                     );
                   })}
                 </div>
-
+                <label className="block text-xs font-bold mb-2" style={{ color: INK_SOFT }}>사진 (선택)</label>
+                <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" id="photo-upload" />
+                <label htmlFor="photo-upload" className="flex items-center justify-center rounded-xl mb-6 cursor-pointer transition-all duration-200 hover:opacity-80" style={{ border: `1.5px dashed ${LINE}`, height: photoPreview ? "auto" : 96 }}>
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="미리보기" className="w-full h-40 object-cover rounded-xl" />
+                  ) : (
+                    <div className="text-center py-4">
+                      <Camera size={20} color={INK_SOFT} className="mx-auto mb-1" />
+                      <div className="text-xs font-bold" style={{ color: INK_SOFT }}>사진 추가하기</div>
+                    </div>
+                  )}
+                </label>
                 <button type="submit" disabled={!form.name.trim()}
                   className="w-full rounded-full py-3.5 font-extrabold text-white flex items-center justify-center gap-1 transition-all duration-200 active:scale-[0.98] hover:opacity-90"
                   style={{ background: form.name.trim() ? CORAL : LINE, cursor: form.name.trim() ? "pointer" : "not-allowed" }}>
