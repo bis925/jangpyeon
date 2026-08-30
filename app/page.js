@@ -387,9 +387,22 @@ export default function Page() {
       })
       .eq("id", editingPlaceId);
     if (error) { showToast("수정 실패: " + error.message); return; }
+
+    if (photoFile) {
+      const fileExt = photoFile.name.split(".").pop();
+      const filePath = `${editingPlaceId}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("place-photos").upload(filePath, photoFile);
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from("place-photos").getPublicUrl(filePath);
+        await supabase.from("place_photos").insert({ place_id: editingPlaceId, photo_url: urlData.publicUrl, uploaded_by: session.user.id });
+      }
+    }
+
     showToast("수정 완료!");
     setEditingPlaceId(null);
     setForm({ name: "", address: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });
+    setPhotoFile(null);
+    setPhotoPreview(null);
     setTab("home");
     fetchPlaces();
   }
