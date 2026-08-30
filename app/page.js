@@ -249,12 +249,18 @@ export default function Page() {
     const geocoder = new kakao.maps.services.Geocoder();
     const filtered = mapCategory ? places.filter((p) => p.category === mapCategory) : places;
 
-    function addMarker(placeId, lat, lng, name) {
+       function addMarker(placeId, lat, lng, name) {
       const position = new kakao.maps.LatLng(lat, lng);
       const marker = new kakao.maps.Marker({ position, map });
       const infowindow = new kakao.maps.InfoWindow({ content: `<div style="padding:6px 10px;font-size:12px;">${name}</div>` });
       kakao.maps.event.addListener(marker, "click", () => infowindow.open(map, marker));
       markersRef.current[placeId] = { marker, infowindow, position };
+      if (placeId === pendingFocusId) {
+        map.setCenter(position);
+        map.setLevel(3);
+        infowindow.open(map, marker);
+        setPendingFocusId(null);
+      }
     }
 
     filtered.forEach((place) => {
@@ -270,12 +276,6 @@ export default function Page() {
     });
   }, [tab, kakaoLoaded, mapCategory, places]);
 
-  useEffect(() => {
-    if (tab === "map" && pendingFocusId && markersRef.current[pendingFocusId]) {
-      focusOnPlace(pendingFocusId);
-      setPendingFocusId(null);
-    }
-  });
 
   function focusOnPlace(placeId) {
     const entry = markersRef.current[placeId];
