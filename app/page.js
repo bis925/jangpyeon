@@ -530,9 +530,7 @@ export default function Page() {
           <div className="max-w-lg mx-auto">
             {justRegistered ? (
               <div className="text-center py-16">
-                    <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }}>
-        {place.photo_url && <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover" />}
-      </div>
+                        <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: TEAL_TINT }}>
                   <Check size={28} color={TEAL} />
                 </div>
                 <div className="font-extrabold text-lg mb-1" style={{ color: INK }}>등록 완료! +2P 적립되었습니다</div>
