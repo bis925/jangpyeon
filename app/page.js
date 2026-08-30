@@ -208,6 +208,7 @@ export default function Page() {
   const [query, setQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
   const [mapCategory, setMapCategory] = useState(null);
+    const [pendingFocusId, setPendingFocusId] = useState(null);
   const [toast, setToast] = useState(null);
   const [justRegistered, setJustRegistered] = useState(null);
   const [form, setForm] = useState({
@@ -268,6 +269,13 @@ export default function Page() {
       }
     });
   }, [tab, kakaoLoaded, mapCategory, places]);
+
+  useEffect(() => {
+    if (tab === "map" && pendingFocusId && markersRef.current[pendingFocusId]) {
+      focusOnPlace(pendingFocusId);
+      setPendingFocusId(null);
+    }
+  });
 
   function focusOnPlace(placeId) {
     const entry = markersRef.current[placeId];
@@ -563,9 +571,11 @@ export default function Page() {
               )}
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-3">
-                          {filteredPlaces.map((p) => (
-                <PlaceCard key={p.id} place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} />
+               <div className="grid sm:grid-cols-2 gap-3">
+              {filteredPlaces.map((p) => (
+                <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
+                  <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} />
+                </div>
               ))}
               {filteredPlaces.length === 0 && (
                 <div className="col-span-2 text-center py-14 text-sm" style={{ color: INK_SOFT }}>
