@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera,
+  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil,
 } from "lucide-react";
 
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
@@ -78,7 +78,7 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner }) {
   const badges = getBadges(place);
   return (
     <div className="flex gap-4 rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
@@ -91,9 +91,16 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite }) {
             <div className="font-extrabold" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
             <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
           </div>
-          <button onClick={() => onToggleFavorite(place.id)} className="flex-shrink-0 rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
-            <Star size={16} color={isFavorite ? YELLOW : LINE} fill={isFavorite ? YELLOW : "none"} />
-          </button>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+            {isOwner && (
+              <button onClick={() => onEdit(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정">
+                <Pencil size={15} color={INK_SOFT} />
+              </button>
+            )}
+            <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
+              <Star size={16} color={isFavorite ? YELLOW : LINE} fill={isFavorite ? YELLOW : "none"} />
+            </button>
+          </div>
         </div>
         <div className="flex flex-wrap gap-1.5 mb-2">
           {badges.map((b) => <Badge key={b} badgeKey={b} />)}
@@ -209,6 +216,7 @@ export default function Page() {
   });
     const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+    const [editingPlaceId, setEditingPlaceId] = useState(null);
   const mapContainerRef = useRef(null);
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
 
@@ -349,9 +357,47 @@ export default function Page() {
       setPhotoPreview(URL.createObjectURL(file));
     }
   }
+    function startEdit(place) {
+    setEditingPlaceId(place.id);
+    setForm({
+      name: place.name,
+      address: place.address,
+      category: place.category,
+      badges: {
+        ramp: place.has_ramp,
+        door: place.has_restroom,
+        stroller: place.has_stroller_access,
+        lift: place.has_elevator,
+      },
+    });
+    setTab("register");
+  }
+  async function submitEdit() {
+    if (!form.name.trim()) return;
+    const { error } = await supabase
+      .from("places")
+      .update({
+        name: form.name.trim(),
+        address: form.address.trim() || "주소 정보 없음",
+        category: form.category,
+        has_ramp: form.badges.ramp,
+        has_restroom: form.badges.door,
+        has_stroller_access: form.badges.stroller,
+        has_elevator: form.badges.lift,
+      })
+      .eq("id", editingPlaceId);
+    if (error) { showToast("수정 실패: " + error.message); return; }
+    showToast("수정 완료!");
+    setEditingPlaceId(null);
+    setForm({ name: "", address: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });
+    setTab("home");
+    fetchPlaces();
+  }
+
   async function submitRegister(e) {
     e.preventDefault();
     if (!form.name.trim()) return;
+    if (editingPlaceId) { await submitEdit(); return; }
     const { data, error } = await supabase.rpc("register_place", {
       p_name: form.name.trim(),
       p_address: form.address.trim() || "주소 정보 없음",
@@ -492,8 +538,8 @@ export default function Page() {
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3">
-              {filteredPlaces.map((p) => (
-                <PlaceCard key={p.id} place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} />
+                          {filteredPlaces.map((p) => (
+                <PlaceCard key={p.id} place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} />
               ))}
               {filteredPlaces.length === 0 && (
                 <div className="col-span-2 text-center py-14 text-sm" style={{ color: INK_SOFT }}>
@@ -520,8 +566,8 @@ export default function Page() {
               })}
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
-              {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
-                <PlaceCard key={p.id} place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} />
+                           {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
+                <PlaceCard key={p.id} place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} />
               ))}
             </div>
           </div>
@@ -543,7 +589,7 @@ export default function Page() {
               </div>
             ) : (
               <form onSubmit={submitRegister}>
-                <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>장소 등록</h2>
+                              <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
 
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>장소명</label>
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
@@ -597,7 +643,7 @@ export default function Page() {
                 <button type="submit" disabled={!form.name.trim()}
                   className="w-full rounded-full py-3.5 font-extrabold text-white flex items-center justify-center gap-1 transition-all duration-200 active:scale-[0.98] hover:opacity-90"
                   style={{ background: form.name.trim() ? CORAL : LINE, cursor: form.name.trim() ? "pointer" : "not-allowed" }}>
-                  등록하고 2P 받기 <ChevronRight size={16} />
+                                    {editingPlaceId ? "수정 완료" : "등록하고 2P 받기"} <ChevronRight size={16} />
                 </button>
               </form>
             )}
