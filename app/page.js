@@ -218,6 +218,8 @@ export default function Page() {
   const [photoPreview, setPhotoPreview] = useState(null);
     const [editingPlaceId, setEditingPlaceId] = useState(null);
   const mapContainerRef = useRef(null);
+    const mapInstanceRef = useRef(null);
+  const markersRef = useRef({});
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
 
   useEffect(() => {
@@ -241,28 +243,39 @@ export default function Page() {
     const kakao = window.kakao;
     const center = new kakao.maps.LatLng(37.5665, 126.9780);
     const map = new kakao.maps.Map(mapContainerRef.current, { center, level: 6 });
+    mapInstanceRef.current = map;
+    markersRef.current = {};
     const geocoder = new kakao.maps.services.Geocoder();
     const filtered = mapCategory ? places.filter((p) => p.category === mapCategory) : places;
 
-    function addMarker(lat, lng, name) {
+    function addMarker(placeId, lat, lng, name) {
       const position = new kakao.maps.LatLng(lat, lng);
       const marker = new kakao.maps.Marker({ position, map });
       const infowindow = new kakao.maps.InfoWindow({ content: `<div style="padding:6px 10px;font-size:12px;">${name}</div>` });
       kakao.maps.event.addListener(marker, "click", () => infowindow.open(map, marker));
+      markersRef.current[placeId] = { marker, infowindow, position };
     }
 
     filtered.forEach((place) => {
       if (place.lat && place.lng) {
-        addMarker(place.lat, place.lng, place.name);
+        addMarker(place.id, place.lat, place.lng, place.name);
       } else if (place.address) {
         geocoder.addressSearch(place.address, (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
-            addMarker(parseFloat(result[0].y), parseFloat(result[0].x), place.name);
+            addMarker(place.id, parseFloat(result[0].y), parseFloat(result[0].x), place.name);
           }
         });
       }
     });
   }, [tab, kakaoLoaded, mapCategory, places]);
+
+  function focusOnPlace(placeId) {
+    const entry = markersRef.current[placeId];
+    if (!entry || !mapInstanceRef.current) return;
+    mapInstanceRef.current.setCenter(entry.position);
+    mapInstanceRef.current.setLevel(3);
+    entry.infowindow.open(mapInstanceRef.current, entry.marker);
+  }
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -578,9 +591,11 @@ export default function Page() {
                 );
               })}
             </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-                           {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
-                <PlaceCard key={p.id} place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} />
+                    <div className="grid sm:grid-cols-2 gap-3">
+              {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
+                <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
+                  <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} />
+                </div>
               ))}
             </div>
           </div>
