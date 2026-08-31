@@ -151,49 +151,89 @@ function LoginScreen({ onSent }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: PAPER, fontFamily: BODY_FONT }}>
-      <div className="w-full max-w-sm text-center">
-     <div className="flex justify-center">
-          <LogoMark size={84} />
-        </div>
-        <div style={{ fontFamily: DISPLAY_FONT, fontSize: 32, color: INK, margin: "16px 0 6px" }}>장편</div>
-<p className="text-sm mb-1" style={{ color: INK_SOFT }}>장애물 없는 편의, 함께 기록해요</p> 
-  <p className="text-xs mb-8" style={{ color: '#9A9484' }}>휠체어 접근성 · 장애인 화장실 · 유모차 정보를 지도에서 찾아보세요</p>
-
-        {sent ? (
-          <div className="rounded-2xl p-6" style={{ background: TEAL_TINT }}>
-            <Mail size={22} color={TEAL} className="mx-auto mb-2" />
-            <div className="font-bold text-sm" style={{ color: TEAL_DARK }}>메일함을 확인해주세요</div>
-            <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{email}로 로그인 링크를 보냈어요</div>
+    <div style={{ background: PAPER, fontFamily: BODY_FONT, minHeight: "100vh" }}>
+      <div className="px-6 pt-16 pb-10">
+        <div className="w-full max-w-sm mx-auto text-center">
+          <div className="flex justify-center">
+            <LogoMark size={84} />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="이메일 주소"
-              className="w-full rounded-xl px-4 py-3 mb-3 text-sm outline-none"
-              style={{ border: `1.4px solid ${LINE}`, color: INK }}
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-full py-3.5 font-extrabold text-white transition-all duration-200 active:scale-[0.98] hover:opacity-90"
-              style={{ background: CORAL }}
-            >
-              {loading ? "보내는 중..." : "이메일로 로그인 링크 받기"}
-            </button>
-            {errorMsg && <p className="text-xs mt-3" style={{ color: CORAL }}>{errorMsg}</p>}
-          </form>
-        )}
-        <p className="text-xs mt-6" style={{ color: INK_SOFT }}>
-          비밀번호 없이, 메일로 온 링크만 누르면 로그인돼요.
-        </p>
-          <p className="text-xs mt-8" style={{ color: '#B8B1A0' }}>
-          제작 · 코드람쥐
-        </p>
+          <div style={{ fontFamily: DISPLAY_FONT, fontSize: 32, color: INK, margin: "16px 0 6px" }}>장편</div>
+          <p className="text-sm mb-1" style={{ color: INK_SOFT }}>장애물 없는 편의, 함께 기록해요</p>
+          <p className="text-xs mb-8" style={{ color: '#9A9484' }}>휠체어 접근성 · 장애인 화장실 · 유모차 정보를 지도에서 찾아보세요</p>
+
+          {sent ? (
+            <div className="rounded-2xl p-6" style={{ background: TEAL_TINT }}>
+              <Mail size={22} color={TEAL} className="mx-auto mb-2" />
+              <div className="font-bold text-sm" style={{ color: TEAL_DARK }}>메일함을 확인해주세요</div>
+              <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{email}로 로그인 링크를 보냈어요</div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="이메일 주소"
+                className="w-full rounded-xl px-4 py-3 mb-3 text-sm outline-none"
+                style={{ border: `1.4px solid ${LINE}`, color: INK }}
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-full py-3.5 font-extrabold text-white transition-all duration-200 active:scale-[0.98] hover:opacity-90"
+                style={{ background: CORAL }}
+              >
+                {loading ? "보내는 중..." : "이메일로 로그인 링크 받기"}
+              </button>
+              {errorMsg && <p className="text-xs mt-3" style={{ color: CORAL }}>{errorMsg}</p>}
+            </form>
+          )}
+          <p className="text-xs mt-6" style={{ color: INK_SOFT }}>
+            비밀번호 없이, 메일로 온 링크만 누르면 로그인돼요.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-6 pb-16">
+        <div className="text-center mb-8">
+          <div className="font-extrabold text-lg" style={{ color: INK, fontFamily: DISPLAY_FONT }}>장편으로 할 수 있는 일</div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4 mb-10">
+          <div className="rounded-2xl p-5" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+            <MapPin size={20} color={TEAL} className="mb-2" />
+            <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>지도에서 찾기</div>
+            <div className="text-xs" style={{ color: INK_SOFT }}>휠체어 출입, 장애인 화장실, 유모차 접근성 정보를 지도에서 한눈에 확인해요.</div>
+          </div>
+          <div className="rounded-2xl p-5" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+            <Plus size={20} color={TEAL} className="mb-2" />
+            <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>함께 등록하기</div>
+            <div className="text-xs" style={{ color: INK_SOFT }}>직접 방문한 장소의 접근성 정보를 등록하고 포인트를 받아요.</div>
+          </div>
+          <div className="rounded-2xl p-5" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+            <Megaphone size={20} color={TEAL} className="mb-2" />
+            <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>공지사항</div>
+            <div className="text-xs" style={{ color: INK_SOFT }}>이벤트와 서비스 소식을 공지사항에서 확인할 수 있어요.</div>
+          </div>
+          <div className="rounded-2xl p-5" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+            <Sparkles size={20} color={TEAL} className="mb-2" />
+            <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>포인트 적립</div>
+            <div className="text-xs" style={{ color: INK_SOFT }}>등록, 응원 등 활동할수록 포인트가 쌓이고 등급이 올라가요.</div>
+          </div>
+        </div>
+
+        <div className="text-center mb-4">
+          <div className="font-extrabold text-lg" style={{ color: INK, fontFamily: DISPLAY_FONT }}>이런 곳을 확인할 수 있어요</div>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2 mb-10">
+          {CATEGORIES.map((c) => (
+            <span key={c} className="rounded-full px-4 py-2 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>{c}</span>
+          ))}
+        </div>
+
+        <div className="text-center">
+          <p className="text-xs" style={{ color: '#B8B1A0' }}>제작 · 코드람쥐</p>
+        </div>
       </div>
     </div>
   );
