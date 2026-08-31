@@ -235,6 +235,7 @@ export default function Page() {
   const [noticeImagePreview, setNoticeImagePreview] = useState(null);
   const [noticeAttachedFile, setNoticeAttachedFile] = useState(null);
   const noticeContentRef = useRef(null);
+    const [editingNoticeId, setEditingNoticeId] = useState(null);
   const [replyDrafts, setReplyDrafts] = useState({});
     const [campaigns, setCampaigns] = useState([]);
   const [campaignIndex, setCampaignIndex] = useState(0);
@@ -396,11 +397,23 @@ export default function Page() {
     const newText = text.slice(0, start) + "**" + selected + "**" + text.slice(end);
     setNoticeForm({ ...noticeForm, content: newText });
   }
+    function startEditNotice(n) {
+    setEditingNoticeId(n.id);
+    setNoticeForm({ title: n.title, content: n.content, link_url: n.link_url || "" });
+    setNoticeImagePreview(n.image_url || null);
+    setNoticeImageFile(null);
+    setNoticeAttachedFile(null);
+  }
+
+  async function deleteNotice(id) {
+    await supabase.from("notices").delete().eq("id", id);
+    fetchNotices();
+  }
   async function submitNotice(e) {
     e.preventDefault();
     if (!noticeForm.title.trim() || !noticeForm.content.trim()) return;
 
-    let imageUrl = null;
+    let imageUrl = editingNoticeId ? noticeImagePreview : null;
     if (noticeImageFile) {
       const fileExt = noticeImageFile.name.split(".").pop();
       const filePath = `images/${Date.now()}.${fileExt}`;
@@ -424,27 +437,30 @@ export default function Page() {
       }
     }
 
-    const { error } = await supabase.from("notices").insert({
+    const noticeData = {
       title: noticeForm.title.trim(),
       content: noticeForm.content.trim(),
       link_url: noticeForm.link_url.trim() || null,
       image_url: imageUrl,
-      file_url: fileUrl,
-      file_name: fileName,
-    });
-    if (error) { showToast("공지 등록 실패: " + error.message); return; }
+    };
+    if (fileUrl) { noticeData.file_url = fileUrl; noticeData.file_name = fileName; }
+
+    let error;
+    if (editingNoticeId) {
+      ({ error } = await supabase.from("notices").update(noticeData).eq("id", editingNoticeId));
+    } else {
+      ({ error } = await supabase.from("notices").insert(noticeData));
+    }
+    if (error) { showToast("저장 실패: " + error.message); return; }
+
     setNoticeForm({ title: "", content: "", link_url: "" });
     setNoticeImageFile(null);
     setNoticeImagePreview(null);
     setNoticeAttachedFile(null);
+    setEditingNoticeId(null);
     fetchNotices();
-    showToast("공지사항이 등록됐어요");
+    showToast(editingNoticeId ? "공지사항이 수정됐어요" : "공지사항이 등록됐어요");
   }
-  async function deleteNotice(id) {
-    await supabase.from("notices").delete().eq("id", id);
-    fetchNotices();
-  }
-
     function handleCampaignPhotoChange(e) {
     const file = e.target.files && e.target.files[0];
     if (file) {
@@ -1113,7 +1129,7 @@ export default function Page() {
                 </div>
               ))}
             </div>
-            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>공지사항 작성</div>
+                      <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>{editingNoticeId ? "공지사항 수정" : "공지사항 작성"}</div>
             <form onSubmit={submitNotice} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                            <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
@@ -1145,7 +1161,14 @@ export default function Page() {
                 {noticeAttachedFile ? noticeAttachedFile.name : "파일 첨부 (선택)"}
               </label>
 
-              <button type="submit" className="w-full rounded-full py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>공지 등록</button>
+                          <button type="submit" className="w-full rounded-full py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>
+                {editingNoticeId ? "수정 완료" : "공지 등록"}
+              </button>
+              {editingNoticeId && (
+                <button type="button" onClick={() => { setEditingNoticeId(null); setNoticeForm({ title: "", content: "", link_url: "" }); setNoticeImageFile(null); setNoticeImagePreview(null); setNoticeAttachedFile(null); }} className="w-full text-xs font-bold mt-2" style={{ color: INK_SOFT }}>
+                  취소
+                </button>
+              )}
             </form>
 
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>등록된 공지 목록</div>
@@ -1157,7 +1180,10 @@ export default function Page() {
                     <div className="text-sm font-bold" style={{ color: INK }}>{n.title}</div>
                     <div className="text-xs mt-0.5" style={{ color: INK_SOFT }}>{n.content}</div>
                   </div>
-                  <button onClick={() => deleteNotice(n.id)} className="text-xs font-bold flex-shrink-0" style={{ color: CORAL }}>삭제</button>
+                               <div className="flex gap-2 flex-shrink-0">
+                    <button onClick={() => startEditNotice(n)} className="text-xs font-bold" style={{ color: TEAL }}>수정</button>
+                    <button onClick={() => deleteNotice(n.id)} className="text-xs font-bold" style={{ color: CORAL }}>삭제</button>
+                  </div>
                 </div>
               ))}
             </div>
