@@ -83,9 +83,13 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
   const badges = getBadges(place);
   return (
     <div className="flex gap-4 rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-      <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }}>
-              {place.photo_url && <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-125" />}
-      </div>
+      {place.photo_url ? (
+        <button type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_url); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden">
+          <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover" />
+        </button>
+      ) : (
+        <div className="w-16 h-16 rounded-xl flex-shrink-0" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -219,6 +223,7 @@ export default function Page() {
     const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
     const [editingPlaceId, setEditingPlaceId] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
     const [notices, setNotices] = useState([]);
   const [inquiries, setInquiries] = useState([]);
   const [allInquiries, setAllInquiries] = useState([]);
@@ -592,7 +597,15 @@ export default function Page() {
           );
         })}
       </div>
-
+      {/* ===== IMAGE PREVIEW ===== */}
+      {previewImage && (
+        <div onClick={() => setPreviewImage(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
+          <img src={previewImage} alt="확대 이미지" className="max-w-full max-h-full rounded-2xl" />
+          <button onClick={() => setPreviewImage(null)} className="absolute top-5 right-5 rounded-full p-3" style={{ background: "rgba(255,255,255,0.15)" }} aria-label="닫기">
+            <X size={22} color="#fff" />
+          </button>
+        </div>
+      )}
       {/* ===== TOAST ===== */}
       <div className="fixed left-1/2 z-50 pointer-events-none transition-all duration-300"
         style={{ bottom: toast ? 24 : 0, opacity: toast ? 1 : 0, transform: `translateX(-50%) translateY(${toast ? 0 : 10}px)` }}>
@@ -647,7 +660,7 @@ export default function Page() {
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                  <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -677,7 +690,7 @@ export default function Page() {
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                  <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} />
+                              <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} />
                 </div>
               ))}
             </div>
