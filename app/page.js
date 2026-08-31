@@ -283,6 +283,9 @@ export default function Page() {
   const [campaignFile, setCampaignFile] = useState(null);
   const [campaignPreview, setCampaignPreview] = useState(null);
   const [editingCampaignId, setEditingCampaignId] = useState(null);
+    const [allProfiles, setAllProfiles] = useState([]);
+  const [memberSearch, setMemberSearch] = useState("");
+  const [adjustDrafts, setAdjustDrafts] = useState({});
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -379,6 +382,7 @@ export default function Page() {
       fetchInquiries();
       fetchAllInquiries();
       fetchCampaigns();
+      fetchAllProfiles();
     }
   }, [session]);
 
@@ -407,6 +411,11 @@ export default function Page() {
     if (session.user.email !== ADMIN_EMAIL) return;
     const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
     setAllInquiries(data || []);
+  }
+    async function fetchAllProfiles() {
+    if (session.user.email !== ADMIN_EMAIL) return;
+    const { data } = await supabase.from("profiles").select("*").order("points", { ascending: false });
+    setAllProfiles(data || []);
   }
     async function fetchCampaigns() {
     const { data } = await supabase.from("campaigns").select("*").order("sort_order", { ascending: true });
@@ -575,6 +584,17 @@ export default function Page() {
   async function deleteCampaign(id) {
     await supabase.from("campaigns").delete().eq("id", id);
     fetchCampaigns();
+  }
+    async function submitAdjustPoints(userId) {
+    const draft = adjustDrafts[userId];
+    if (!draft || !draft.amount || !draft.note?.trim()) { showToast("포인트와 사유를 모두 입력해주세요"); return; }
+    const amount = parseInt(draft.amount, 10);
+    if (isNaN(amount) || amount === 0) { showToast("올바른 숫자를 입력해주세요"); return; }
+    const { error } = await supabase.rpc("admin_adjust_points", { p_user_id: userId, p_amount: amount, p_note: draft.note.trim() });
+    if (error) { showToast("조정 실패: " + error.message); return; }
+    setAdjustDrafts({ ...adjustDrafts, [userId]: { amount: "", note: "" } });
+    fetchAllProfiles();
+    showToast("포인트가 조정됐어요");
   }
   function showToast(message) {
     setToast(message);
@@ -1123,7 +1143,32 @@ export default function Page() {
         {tab === "admin" && isAdmin && (
           <div className="max-w-2xl mx-auto">
             <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>관리자</h2>
-
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
+            <input value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} placeholder="이메일 또는 닉네임으로 검색"
+              className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {allProfiles.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>회원이 없어요</div>}
+              {allProfiles
+                .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
+                .map((p) => (
+                <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <div className="text-sm font-bold" style={{ color: INK }}>{p.email || "(이메일 없음)"}</div>
+                      <div className="text-xs" style={{ color: INK_SOFT }}>{p.nickname} · {currentTier(p.points).label}</div>
+                    </div>
+                    <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 15 }}>{p.points.toLocaleString()}P</div>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <input type="number" value={adjustDrafts[p.id]?.amount || ""} onChange={(e) => setAdjustDrafts({ ...adjustDrafts, [p.id]: { ...adjustDrafts[p.id], amount: e.target.value } })} placeholder="±숫자"
+                      className="w-24 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    <input value={adjustDrafts[p.id]?.note || ""} onChange={(e) => setAdjustDrafts({ ...adjustDrafts, [p.id]: { ...adjustDrafts[p.id], note: e.target.value } })} placeholder="사유 (예: 2월 이벤트 당첨)"
+                      className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    <button onClick={() => submitAdjustPoints(p.id)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>적용</button>
+                  </div>
+                </div>
+              ))}
+            </div>
                       <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>캠페인 배너 관리</div>
             <form onSubmit={submitCampaign} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                      <input value={campaignForm.title} onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })} placeholder="배너 제목 (선택)"
