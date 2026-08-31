@@ -714,8 +714,8 @@ export default function Page() {
               </div>
             )}
                  {campaigns.length > 0 ? (
-              <div className="relative rounded-2xl overflow-hidden mb-6" style={{ height: 160 }}>
-                <img src={campaigns[campaignIndex].image_url} alt={campaigns[campaignIndex].title || "캠페인"} className="w-full h-full object-cover" />
+                            <div className="relative rounded-2xl overflow-hidden mb-6" style={{ height: 160, background: PAPER }}>
+                <img src={campaigns[campaignIndex].image_url} alt={campaigns[campaignIndex].title || "캠페인"} className="w-full h-full object-contain" />
                 {campaigns[campaignIndex].title && (
                   <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}>
                     <div className="text-white font-extrabold text-sm">{campaigns[campaignIndex].title}</div>
