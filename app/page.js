@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck,
 } from "lucide-react";
 
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
@@ -54,6 +54,7 @@ function getBadges(place) {
 }
 
 const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설"];
+const ADMIN_EMAIL = "bis925@naver.com";
 
 /* ===================== 작은 컴포넌트 ===================== */
 function LogoMark({ size = 30 }) {
@@ -218,6 +219,13 @@ export default function Page() {
     const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
     const [editingPlaceId, setEditingPlaceId] = useState(null);
+    const [notices, setNotices] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
+  const [allInquiries, setAllInquiries] = useState([]);
+  const [inquiryForm, setInquiryForm] = useState({ title: "", content: "" });
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [noticeForm, setNoticeForm] = useState({ title: "", content: "" });
+  const [replyDrafts, setReplyDrafts] = useState({});
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -303,6 +311,9 @@ export default function Page() {
       fetchPlaces();
       fetchFavorites();
       fetchHistory();
+      fetchNotices();
+      fetchInquiries();
+      fetchAllInquiries();
     }
   }, [session]);
 
@@ -319,11 +330,62 @@ export default function Page() {
     const { data } = await supabase.from("favorites").select("place_id").eq("user_id", session.user.id);
     setFavorites(new Set((data || []).map((f) => f.place_id)));
   }
+    async function fetchNotices() {
+    const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
+    setNotices(data || []);
+  }
+  async function fetchInquiries() {
+    const { data } = await supabase.from("inquiries").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
+    setInquiries(data || []);
+  }
+  async function fetchAllInquiries() {
+    if (session.user.email !== ADMIN_EMAIL) return;
+    const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
+    setAllInquiries(data || []);
+  }
   async function fetchHistory() {
     const { data } = await supabase.from("point_history").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false }).limit(30);
     setHistory(data || []);
   }
-
+  async function submitNotice(e) {
+    e.preventDefault();
+    if (!noticeForm.title.trim() || !noticeForm.content.trim()) return;
+    const { error } = await supabase.from("notices").insert({ title: noticeForm.title.trim(), content: noticeForm.content.trim() });
+    if (error) { showToast("공지 등록 실패: " + error.message); return; }
+    setNoticeForm({ title: "", content: "" });
+    fetchNotices();
+    showToast("공지사항이 등록됐어요");
+  }
+  async function deleteNotice(id) {
+    await supabase.from("notices").delete().eq("id", id);
+    fetchNotices();
+  }
+    async function submitInquiry(e) {
+    e.preventDefault();
+    if (!inquiryForm.title.trim() || !inquiryForm.content.trim()) return;
+    const { error } = await supabase.from("inquiries").insert({
+      user_id: session.user.id,
+      title: inquiryForm.title.trim(),
+      content: inquiryForm.content.trim(),
+    });
+    if (error) { showToast("문의 등록 실패: " + error.message); return; }
+    setInquiryForm({ title: "", content: "" });
+    setShowInquiryForm(false);
+    fetchInquiries();
+    showToast("문의가 접수됐어요");
+  }
+  async function submitReply(id) {
+    const answer = replyDrafts[id];
+    if (!answer || !answer.trim()) return;
+    const { error } = await supabase.from("inquiries").update({
+      answer: answer.trim(),
+      status: "answered",
+      answered_at: new Date().toISOString(),
+    }).eq("id", id);
+    if (error) { showToast("답변 실패: " + error.message); return; }
+    fetchAllInquiries();
+    showToast("답변이 등록됐어요");
+  }
   function showToast(message) {
     setToast(message);
     setTimeout(() => setToast((cur) => (cur === message ? null : cur)), 2200);
@@ -474,6 +536,7 @@ export default function Page() {
   const next = nextTier(points);
   const registerCount = history.filter((h) => h.activity_type === "register_place").length;
   const helpfulCount = history.filter((h) => h.activity_type === "helpful_received").length;
+  const isAdmin = session.user.email === ADMIN_EMAIL;
   const favoriteCount = favorites.size;
 
   const NAV = [
@@ -481,6 +544,7 @@ export default function Page() {
     { id: "map", label: "지도·검색", icon: MapPin },
     { id: "register", label: "등록", icon: Plus },
     { id: "my", label: "마이페이지", icon: User },
+    ...(isAdmin ? [{ id: "admin", label: "관리자", icon: ShieldCheck }] : []),
   ];
 
   return (
@@ -558,7 +622,15 @@ export default function Page() {
                 })}
               </div>
             </div>
-
+            {notices.length > 0 && (
+              <div className="rounded-2xl p-4 mb-4 flex items-start gap-3" style={{ background: TEAL_TINT }}>
+                <Megaphone size={18} color={TEAL_DARK} className="flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-extrabold text-sm mb-0.5" style={{ color: TEAL_DARK }}>{notices[0].title}</div>
+                  <div className="text-xs" style={{ color: INK_SOFT }}>{notices[0].content}</div>
+                </div>
+              </div>
+            )}
             <div className="rounded-2xl p-5 mb-6 text-white" style={{ background: `linear-gradient(120deg, ${CORAL}, #F58152)` }}>
               <div className="text-xs font-bold opacity-85 mb-1">이번 달 캠페인</div>
               <div className="font-extrabold text-lg leading-snug">신규 장소 등록하고 2P 받아가세요</div>
@@ -733,6 +805,102 @@ export default function Page() {
                     <div className="text-[11px]" style={{ color: INK_SOFT }}>{new Date(h.created_at).toLocaleDateString("ko-KR")}</div>
                   </div>
                   <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 13 }}>+{h.points}P</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between mb-3 mt-8">
+              <span className="font-extrabold text-sm" style={{ color: INK }}>1:1 문의</span>
+              <button onClick={() => setShowInquiryForm(!showInquiryForm)} className="text-xs font-bold" style={{ color: TEAL }}>
+                {showInquiryForm ? "닫기" : "+ 문의하기"}
+              </button>
+            </div>
+
+            {showInquiryForm && (
+              <form onSubmit={submitInquiry} className="rounded-2xl p-4 mb-4" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+                <input value={inquiryForm.title} onChange={(e) => setInquiryForm({ ...inquiryForm, title: e.target.value })} placeholder="제목"
+                  className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                <textarea value={inquiryForm.content} onChange={(e) => setInquiryForm({ ...inquiryForm, content: e.target.value })} placeholder="문의 내용을 입력해주세요" rows={4}
+                  className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                <button type="submit" className="w-full rounded-full py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>문의 등록</button>
+              </form>
+            )}
+
+            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {inquiries.length === 0 && (
+                <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>문의 내역이 없어요</div>
+              )}
+              {inquiries.map((q) => (
+                <div key={q.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-bold" style={{ color: INK }}>{q.title}</div>
+                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: q.status === "answered" ? TEAL_TINT : CORAL_TINT, color: q.status === "answered" ? TEAL_DARK : CORAL }}>
+                      {q.status === "answered" ? "답변완료" : "답변대기"}
+                    </span>
+                  </div>
+                  <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{q.content}</div>
+                  {q.answer && (
+                    <div className="mt-2 rounded-xl p-3 text-xs" style={{ background: PAPER, color: INK }}>
+                      <span className="font-bold" style={{ color: TEAL }}>답변: </span>{q.answer}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+          
+        {/* ===================== 관리자 ===================== */}
+        {tab === "admin" && isAdmin && (
+          <div className="max-w-2xl mx-auto">
+            <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>관리자</h2>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>공지사항 작성</div>
+            <form onSubmit={submitNotice} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+              <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
+                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <textarea value={noticeForm.content} onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })} placeholder="공지 내용" rows={3}
+                className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <button type="submit" className="w-full rounded-full py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>공지 등록</button>
+            </form>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>등록된 공지 목록</div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {notices.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>공지사항이 없어요</div>}
+              {notices.map((n) => (
+                <div key={n.id} className="flex items-start justify-between px-4 py-3 gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div>
+                    <div className="text-sm font-bold" style={{ color: INK }}>{n.title}</div>
+                    <div className="text-xs mt-0.5" style={{ color: INK_SOFT }}>{n.content}</div>
+                  </div>
+                  <button onClick={() => deleteNotice(n.id)} className="text-xs font-bold flex-shrink-0" style={{ color: CORAL }}>삭제</button>
+                </div>
+              ))}
+            </div>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
+            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {allInquiries.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>문의가 없어요</div>}
+              {allInquiries.map((q) => (
+                <div key={q.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-bold" style={{ color: INK }}>{q.title}</div>
+                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: q.status === "answered" ? TEAL_TINT : CORAL_TINT, color: q.status === "answered" ? TEAL_DARK : CORAL }}>
+                      {q.status === "answered" ? "답변완료" : "답변대기"}
+                    </span>
+                  </div>
+                  <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{q.content}</div>
+                  {q.answer ? (
+                    <div className="mt-2 rounded-xl p-3 text-xs" style={{ background: PAPER, color: INK }}>
+                      <span className="font-bold" style={{ color: TEAL }}>답변: </span>{q.answer}
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 mt-2">
+                      <input value={replyDrafts[q.id] || ""} onChange={(e) => setReplyDrafts({ ...replyDrafts, [q.id]: e.target.value })} placeholder="답변 입력"
+                        className="flex-1 rounded-xl px-3 py-2 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                      <button onClick={() => submitReply(q.id)} className="rounded-xl px-3 py-2 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>답변</button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
