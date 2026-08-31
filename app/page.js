@@ -233,7 +233,7 @@ export default function Page() {
   const [replyDrafts, setReplyDrafts] = useState({});
     const [campaigns, setCampaigns] = useState([]);
   const [campaignIndex, setCampaignIndex] = useState(0);
-  const [campaignForm, setCampaignForm] = useState({ title: "" });
+  const [campaignForm, setCampaignForm] = useState({ title: "", link_url: "" });
   const [campaignFile, setCampaignFile] = useState(null);
   const [campaignPreview, setCampaignPreview] = useState(null);
   const [editingCampaignId, setEditingCampaignId] = useState(null);
@@ -432,18 +432,18 @@ export default function Page() {
     }
 
     if (editingCampaignId) {
-      const updateData = { title: campaignForm.title.trim() || null };
+      const updateData = { title: campaignForm.title.trim() || null, link_url: campaignForm.link_url.trim() || null };
       if (imageUrl) updateData.image_url = imageUrl;
       const { error } = await supabase.from("campaigns").update(updateData).eq("id", editingCampaignId);
       if (error) { showToast("수정 실패: " + error.message); return; }
       showToast("캠페인이 수정됐어요");
     } else {
-      const { error } = await supabase.from("campaigns").insert({ title: campaignForm.title.trim() || null, image_url: imageUrl, sort_order: campaigns.length });
+      const { error } = await supabase.from("campaigns").insert({ title: campaignForm.title.trim() || null, link_url: campaignForm.link_url.trim() || null, image_url: imageUrl, sort_order: campaigns.length });
       if (error) { showToast("등록 실패: " + error.message); return; }
       showToast("캠페인이 등록됐어요");
     }
 
-    setCampaignForm({ title: "" });
+    setCampaignForm({ title: "", link_url: "" });
     setCampaignFile(null);
     setCampaignPreview(null);
     setEditingCampaignId(null);
@@ -451,7 +451,7 @@ export default function Page() {
   }
   function startEditCampaign(c) {
     setEditingCampaignId(c.id);
-    setCampaignForm({ title: c.title || "" });
+    setCampaignForm({ title: c.title || "", link_url: c.link_url || "" });
     setCampaignPreview(c.image_url);
     setCampaignFile(null);
   }
@@ -714,7 +714,11 @@ export default function Page() {
               </div>
             )}
                  {campaigns.length > 0 ? (
-                      <div className="relative rounded-2xl overflow-hidden mb-6" style={{ aspectRatio: "3 / 1", background: PAPER }}>
+                                    <div
+                onClick={() => { if (campaigns[campaignIndex].link_url) window.open(campaigns[campaignIndex].link_url, "_blank"); }}
+                className="relative rounded-2xl overflow-hidden mb-6"
+                style={{ aspectRatio: "3 / 1", background: PAPER, cursor: campaigns[campaignIndex].link_url ? "pointer" : "default" }}
+              >
                 <img src={campaigns[campaignIndex].image_url} alt={campaigns[campaignIndex].title || "캠페인"} className="w-full h-full object-cover" />
                 {campaigns[campaignIndex].title && (
                   <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}>
@@ -957,7 +961,9 @@ export default function Page() {
 
                       <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>캠페인 배너 관리</div>
             <form onSubmit={submitCampaign} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-              <input value={campaignForm.title} onChange={(e) => setCampaignForm({ title: e.target.value })} placeholder="배너 제목 (선택)"
+                     <input value={campaignForm.title} onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })} placeholder="배너 제목 (선택)"
+                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <input value={campaignForm.link_url} onChange={(e) => setCampaignForm({ ...campaignForm, link_url: e.target.value })} placeholder="누르면 이동할 링크 (선택, 예: https://...)"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
               <input type="file" accept="image/*" onChange={handleCampaignPhotoChange} className="hidden" id="campaign-upload" />
               <label htmlFor="campaign-upload" className="flex items-center justify-center rounded-xl mb-3 cursor-pointer transition-all duration-200 hover:opacity-80" style={{ border: `1.5px dashed ${LINE}`, height: campaignPreview ? "auto" : 96 }}>
@@ -974,7 +980,7 @@ export default function Page() {
                 {editingCampaignId ? "수정 완료" : "배너 등록"}
               </button>
               {editingCampaignId && (
-                <button type="button" onClick={() => { setEditingCampaignId(null); setCampaignForm({ title: "" }); setCampaignFile(null); setCampaignPreview(null); }} className="w-full text-xs font-bold mt-2" style={{ color: INK_SOFT }}>
+                            <button type="button" onClick={() => { setEditingCampaignId(null); setCampaignForm({ title: "", link_url: "" }); setCampaignFile(null); setCampaignPreview(null); }} className="w-full text-xs font-bold mt-2" style={{ color: INK_SOFT }}>
                   취소
                 </button>
               )}
