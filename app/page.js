@@ -224,6 +224,7 @@ export default function Page() {
   const [photoPreview, setPhotoPreview] = useState(null);
     const [editingPlaceId, setEditingPlaceId] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
+      const [selectedNoticeId, setSelectedNoticeId] = useState(null);
     const [notices, setNotices] = useState([]);
   const [inquiries, setInquiries] = useState([]);
   const [allInquiries, setAllInquiries] = useState([]);
@@ -233,7 +234,7 @@ export default function Page() {
   const [replyDrafts, setReplyDrafts] = useState({});
     const [campaigns, setCampaigns] = useState([]);
   const [campaignIndex, setCampaignIndex] = useState(0);
-  const [campaignForm, setCampaignForm] = useState({ title: "", link_url: "" });
+  const [campaignForm, setCampaignForm] = useState({ title: "", link_url: "", notice_id: "" });
   const [campaignFile, setCampaignFile] = useState(null);
   const [campaignPreview, setCampaignPreview] = useState(null);
   const [editingCampaignId, setEditingCampaignId] = useState(null);
@@ -432,18 +433,18 @@ export default function Page() {
     }
 
     if (editingCampaignId) {
-      const updateData = { title: campaignForm.title.trim() || null, link_url: campaignForm.link_url.trim() || null };
+      const updateData = { title: campaignForm.title.trim() || null, link_url: campaignForm.link_url.trim() || null, notice_id: campaignForm.notice_id || null };
       if (imageUrl) updateData.image_url = imageUrl;
       const { error } = await supabase.from("campaigns").update(updateData).eq("id", editingCampaignId);
       if (error) { showToast("수정 실패: " + error.message); return; }
       showToast("캠페인이 수정됐어요");
     } else {
-      const { error } = await supabase.from("campaigns").insert({ title: campaignForm.title.trim() || null, link_url: campaignForm.link_url.trim() || null, image_url: imageUrl, sort_order: campaigns.length });
+      const { error } = await supabase.from("campaigns").insert({ title: campaignForm.title.trim() || null, link_url: campaignForm.link_url.trim() || null, notice_id: campaignForm.notice_id || null, image_url: imageUrl, sort_order: campaigns.length });
       if (error) { showToast("등록 실패: " + error.message); return; }
       showToast("캠페인이 등록됐어요");
     }
 
-    setCampaignForm({ title: "", link_url: "" });
+    setCampaignForm({ title: "", link_url: "", notice_id: "" });
     setCampaignFile(null);
     setCampaignPreview(null);
     setEditingCampaignId(null);
@@ -451,7 +452,7 @@ export default function Page() {
   }
   function startEditCampaign(c) {
     setEditingCampaignId(c.id);
-    setCampaignForm({ title: c.title || "", link_url: c.link_url || "" });
+    setCampaignForm({ title: c.title || "", link_url: c.link_url || "", notice_id: c.notice_id || "" });
     setCampaignPreview(c.image_url);
     setCampaignFile(null);
   }
@@ -715,10 +716,21 @@ export default function Page() {
               </div>
             )}
                  {campaigns.length > 0 ? (
-                                    <div
-                onClick={() => { if (campaigns[campaignIndex].link_url) window.open(campaigns[campaignIndex].link_url, "_blank"); }}
+                             <div
+                onClick={() => {
+                  const c = campaigns[campaignIndex];
+                  if (c.notice_id) {
+                    setSelectedNoticeId(c.notice_id);
+                    setTab("notice");
+                    setTimeout(() => {
+                      document.getElementById(`notice-${c.notice_id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 100);
+                  } else if (c.link_url) {
+                    window.open(c.link_url, "_blank");
+                  }
+                }}
                 className="relative rounded-2xl overflow-hidden mb-6"
-                style={{ aspectRatio: "3 / 1", background: PAPER, cursor: campaigns[campaignIndex].link_url ? "pointer" : "default" }}
+                style={{ aspectRatio: "3 / 1", background: PAPER, cursor: (campaigns[campaignIndex].notice_id || campaigns[campaignIndex].link_url) ? "pointer" : "default" }}
               >
                 <img src={campaigns[campaignIndex].image_url} alt={campaigns[campaignIndex].title || "캠페인"} className="w-full h-full object-cover" />
                 {campaigns[campaignIndex].title && (
@@ -872,8 +884,8 @@ export default function Page() {
               {notices.length === 0 && (
                 <div className="text-center py-14 text-sm" style={{ color: INK_SOFT }}>등록된 공지사항이 없어요</div>
               )}
-              {notices.map((n) => (
-                <div key={n.id} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}` }}>
+                           {notices.map((n) => (
+                <div key={n.id} id={`notice-${n.id}`} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}`, background: n.id === selectedNoticeId ? TEAL_TINT : "transparent" }}>
                   <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>{n.title}</div>
                   <div className="text-xs mb-1" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
                   <div className="text-sm mb-2" style={{ color: INK }}>{n.content}</div>
@@ -988,6 +1000,13 @@ export default function Page() {
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
               <input value={campaignForm.link_url} onChange={(e) => setCampaignForm({ ...campaignForm, link_url: e.target.value })} placeholder="누르면 이동할 링크 (선택, 예: https://...)"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                                <select value={campaignForm.notice_id} onChange={(e) => setCampaignForm({ ...campaignForm, notice_id: e.target.value })}
+                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
+                <option value="">연결할 공지 없음 (링크만 사용)</option>
+                {notices.map((n) => (
+                  <option key={n.id} value={n.id}>{n.title}</option>
+                ))}
+              </select>
               <input type="file" accept="image/*" onChange={handleCampaignPhotoChange} className="hidden" id="campaign-upload" />
               <label htmlFor="campaign-upload" className="flex items-center justify-center rounded-xl mb-3 cursor-pointer transition-all duration-200 hover:opacity-80" style={{ border: `1.5px dashed ${LINE}`, height: campaignPreview ? "auto" : 96 }}>
                 {campaignPreview ? (
@@ -1003,7 +1022,7 @@ export default function Page() {
                 {editingCampaignId ? "수정 완료" : "배너 등록"}
               </button>
               {editingCampaignId && (
-                            <button type="button" onClick={() => { setEditingCampaignId(null); setCampaignForm({ title: "", link_url: "" }); setCampaignFile(null); setCampaignPreview(null); }} className="w-full text-xs font-bold mt-2" style={{ color: INK_SOFT }}>
+         <button type="button" onClick={() => { setEditingCampaignId(null); setCampaignForm({ title: "", link_url: "", notice_id: "" }); setCampaignFile(null); setCampaignPreview(null); }} className="w-full text-xs font-bold mt-2" style={{ color: INK_SOFT }}>
                   취소
                 </button>
               )}
