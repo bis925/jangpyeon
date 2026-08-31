@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold,
 } from "lucide-react";
 
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
@@ -231,6 +231,10 @@ export default function Page() {
   const [inquiryForm, setInquiryForm] = useState({ title: "", content: "" });
   const [showInquiryForm, setShowInquiryForm] = useState(false);
    const [noticeForm, setNoticeForm] = useState({ title: "", content: "", link_url: "" });
+    const [noticeImageFile, setNoticeImageFile] = useState(null);
+  const [noticeImagePreview, setNoticeImagePreview] = useState(null);
+  const [noticeAttachedFile, setNoticeAttachedFile] = useState(null);
+  const noticeContentRef = useRef(null);
   const [replyDrafts, setReplyDrafts] = useState({});
     const [campaigns, setCampaigns] = useState([]);
   const [campaignIndex, setCampaignIndex] = useState(0);
@@ -371,12 +375,68 @@ export default function Page() {
     const { data } = await supabase.from("point_history").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false }).limit(30);
     setHistory(data || []);
   }
+    function handleNoticeImageChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      setNoticeImageFile(file);
+      setNoticeImagePreview(URL.createObjectURL(file));
+    }
+  }
+  function handleNoticeFileChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) setNoticeAttachedFile(file);
+  }
+  function applyBoldToNoticeContent() {
+    const textarea = noticeContentRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = noticeForm.content;
+    const selected = text.slice(start, end) || "굵은 글씨";
+    const newText = text.slice(0, start) + "**" + selected + "**" + text.slice(end);
+    setNoticeForm({ ...noticeForm, content: newText });
+  }
   async function submitNotice(e) {
     e.preventDefault();
     if (!noticeForm.title.trim() || !noticeForm.content.trim()) return;
-    const { error } = await supabase.from("notices").insert({ title: noticeForm.title.trim(), content: noticeForm.content.trim(), link_url: noticeForm.link_url.trim() || null });
+
+    let imageUrl = null;
+    if (noticeImageFile) {
+      const fileExt = noticeImageFile.name.split(".").pop();
+      const filePath = `images/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("notice-attachments").upload(filePath, noticeImageFile);
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from("notice-attachments").getPublicUrl(filePath);
+        imageUrl = urlData.publicUrl;
+      }
+    }
+
+    let fileUrl = null;
+    let fileName = null;
+    if (noticeAttachedFile) {
+      const fileExt = noticeAttachedFile.name.split(".").pop();
+      const filePath = `files/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("notice-attachments").upload(filePath, noticeAttachedFile);
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from("notice-attachments").getPublicUrl(filePath);
+        fileUrl = urlData.publicUrl;
+        fileName = noticeAttachedFile.name;
+      }
+    }
+
+    const { error } = await supabase.from("notices").insert({
+      title: noticeForm.title.trim(),
+      content: noticeForm.content.trim(),
+      link_url: noticeForm.link_url.trim() || null,
+      image_url: imageUrl,
+      file_url: fileUrl,
+      file_name: fileName,
+    });
     if (error) { showToast("공지 등록 실패: " + error.message); return; }
     setNoticeForm({ title: "", content: "", link_url: "" });
+    setNoticeImageFile(null);
+    setNoticeImagePreview(null);
+    setNoticeAttachedFile(null);
     fetchNotices();
     showToast("공지사항이 등록됐어요");
   }
@@ -885,14 +945,28 @@ export default function Page() {
                 <div className="text-center py-14 text-sm" style={{ color: INK_SOFT }}>등록된 공지사항이 없어요</div>
               )}
                            {notices.map((n) => (
-                <div key={n.id} id={`notice-${n.id}`} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}`, background: n.id === selectedNoticeId ? TEAL_TINT : "transparent" }}>
+                             <div key={n.id} id={`notice-${n.id}`} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}`, background: n.id === selectedNoticeId ? TEAL_TINT : "transparent" }}>
                   <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>{n.title}</div>
-                  <div className="text-xs mb-1" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
-                  <div className="text-sm mb-2" style={{ color: INK }}>{n.content}</div>
-                  {n.link_url && (
-                    <a href={n.link_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: TEAL }}>
-                      자세히 보기 <ChevronRight size={13} />
+                  <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
+                  {n.image_url && (
+                    <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
+                  )}
+                  <div className="text-sm mb-2 whitespace-pre-wrap" style={{ color: INK }}>
+                    {n.content.split("**").map((part, i) =>
+                      i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+                    )}
+                  </div>
+                  {n.file_url && (
+                    <a href={n.file_url} target="_blank" rel="noopener noreferrer" download className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 mb-2 text-xs font-bold" style={{ background: PAPER, color: INK }}>
+                      <Paperclip size={13} /> {n.file_name || "첨부파일"}
                     </a>
+                  )}
+                  {n.link_url && (
+                    <div>
+                      <a href={n.link_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: TEAL }}>
+                        자세히 보기 <ChevronRight size={13} />
+                      </a>
+                    </div>
                   )}
                 </div>
               ))}
@@ -1041,12 +1115,36 @@ export default function Page() {
             </div>
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>공지사항 작성</div>
             <form onSubmit={submitNotice} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-              <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
+                           <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-                           <textarea value={noticeForm.content} onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })} placeholder="공지 내용" rows={3}
+
+              <button type="button" onClick={applyBoldToNoticeContent} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 mb-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                <Bold size={12} /> 굵게
+              </button>
+              <textarea ref={noticeContentRef} value={noticeForm.content} onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })} placeholder="공지 내용 (굵게 하고 싶은 글자를 선택하고 위 버튼을 눌러보세요)" rows={4}
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+
               <input value={noticeForm.link_url} onChange={(e) => setNoticeForm({ ...noticeForm, link_url: e.target.value })} placeholder="이벤트 링크 (선택, 예: https://...)"
-                className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+
+              <input type="file" accept="image/*" onChange={handleNoticeImageChange} className="hidden" id="notice-image-upload" />
+              <label htmlFor="notice-image-upload" className="flex items-center justify-center rounded-xl mb-2 cursor-pointer transition-all duration-200 hover:opacity-80" style={{ border: `1.5px dashed ${LINE}`, height: noticeImagePreview ? "auto" : 80 }}>
+                {noticeImagePreview ? (
+                  <img src={noticeImagePreview} alt="미리보기" className="w-full h-28 object-cover rounded-xl" />
+                ) : (
+                  <div className="text-center py-3">
+                    <Camera size={18} color={INK_SOFT} className="mx-auto mb-1" />
+                    <div className="text-xs font-bold" style={{ color: INK_SOFT }}>사진 첨부 (선택)</div>
+                  </div>
+                )}
+              </label>
+
+              <input type="file" onChange={handleNoticeFileChange} className="hidden" id="notice-file-upload" />
+              <label htmlFor="notice-file-upload" className="flex items-center gap-2 rounded-xl px-4 py-2.5 mb-3 cursor-pointer text-xs font-bold" style={{ border: `1.4px dashed ${LINE}`, color: INK_SOFT }}>
+                <Paperclip size={14} />
+                {noticeAttachedFile ? noticeAttachedFile.name : "파일 첨부 (선택)"}
+              </label>
+
               <button type="submit" className="w-full rounded-full py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>공지 등록</button>
             </form>
 
