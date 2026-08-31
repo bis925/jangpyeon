@@ -572,8 +572,9 @@ export default function Page() {
             <Sparkles size={14} color={CORAL} />
             <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 13 }}>{points.toLocaleString()}P</span>
           </div>
-          <button onClick={() => supabase.auth.signOut()} className="p-2 rounded-full hover:bg-black/5" aria-label="로그아웃">
-            <LogOut size={16} color={INK_SOFT} />
+                  <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+            <LogOut size={14} />
+            로그아웃
           </button>
         </div>
       </div>
