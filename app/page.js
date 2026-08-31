@@ -229,7 +229,7 @@ export default function Page() {
   const [allInquiries, setAllInquiries] = useState([]);
   const [inquiryForm, setInquiryForm] = useState({ title: "", content: "" });
   const [showInquiryForm, setShowInquiryForm] = useState(false);
-  const [noticeForm, setNoticeForm] = useState({ title: "", content: "" });
+   const [noticeForm, setNoticeForm] = useState({ title: "", content: "", link_url: "" });
   const [replyDrafts, setReplyDrafts] = useState({});
     const [campaigns, setCampaigns] = useState([]);
   const [campaignIndex, setCampaignIndex] = useState(0);
@@ -373,9 +373,9 @@ export default function Page() {
   async function submitNotice(e) {
     e.preventDefault();
     if (!noticeForm.title.trim() || !noticeForm.content.trim()) return;
-    const { error } = await supabase.from("notices").insert({ title: noticeForm.title.trim(), content: noticeForm.content.trim() });
+    const { error } = await supabase.from("notices").insert({ title: noticeForm.title.trim(), content: noticeForm.content.trim(), link_url: noticeForm.link_url.trim() || null });
     if (error) { showToast("공지 등록 실패: " + error.message); return; }
-    setNoticeForm({ title: "", content: "" });
+    setNoticeForm({ title: "", content: "", link_url: "" });
     fetchNotices();
     showToast("공지사항이 등록됐어요");
   }
@@ -616,6 +616,7 @@ export default function Page() {
     { id: "home", label: "홈", icon: Search },
     { id: "map", label: "지도·검색", icon: MapPin },
     { id: "register", label: "등록", icon: Plus },
+    { id: "notice", label: "공지사항", icon: Megaphone },
     { id: "my", label: "마이페이지", icon: User },
     ...(isAdmin ? [{ id: "admin", label: "관리자", icon: ShieldCheck }] : []),
   ];
@@ -863,7 +864,29 @@ export default function Page() {
             )}
           </div>
         )}
-
+        {/* ===================== 공지사항 ===================== */}
+        {tab === "notice" && (
+          <div className="max-w-2xl mx-auto">
+            <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>공지사항</h2>
+            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {notices.length === 0 && (
+                <div className="text-center py-14 text-sm" style={{ color: INK_SOFT }}>등록된 공지사항이 없어요</div>
+              )}
+              {notices.map((n) => (
+                <div key={n.id} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>{n.title}</div>
+                  <div className="text-xs mb-1" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
+                  <div className="text-sm mb-2" style={{ color: INK }}>{n.content}</div>
+                  {n.link_url && (
+                    <a href={n.link_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: TEAL }}>
+                      자세히 보기 <ChevronRight size={13} />
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {/* ===================== 마이페이지 ===================== */}
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
@@ -1001,8 +1024,10 @@ export default function Page() {
             <form onSubmit={submitNotice} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
               <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-              <textarea value={noticeForm.content} onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })} placeholder="공지 내용" rows={3}
-                className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                           <textarea value={noticeForm.content} onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })} placeholder="공지 내용" rows={3}
+                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <input value={noticeForm.link_url} onChange={(e) => setNoticeForm({ ...noticeForm, link_url: e.target.value })} placeholder="이벤트 링크 (선택, 예: https://...)"
+                className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
               <button type="submit" className="w-full rounded-full py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>공지 등록</button>
             </form>
 
