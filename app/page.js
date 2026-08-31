@@ -231,6 +231,12 @@ export default function Page() {
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [noticeForm, setNoticeForm] = useState({ title: "", content: "" });
   const [replyDrafts, setReplyDrafts] = useState({});
+    const [campaigns, setCampaigns] = useState([]);
+  const [campaignIndex, setCampaignIndex] = useState(0);
+  const [campaignForm, setCampaignForm] = useState({ title: "" });
+  const [campaignFile, setCampaignFile] = useState(null);
+  const [campaignPreview, setCampaignPreview] = useState(null);
+  const [editingCampaignId, setEditingCampaignId] = useState(null);
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -289,7 +295,14 @@ export default function Page() {
     });
   }, [tab, kakaoLoaded, mapCategory, places]);
 
-
+  useEffect(() => {
+    if (campaigns.length <= 1) return;
+    const timer = setInterval(() => {
+      setCampaignIndex((i) => (i + 1) % campaigns.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [campaigns]);
+  
   function focusOnPlace(placeId) {
     const entry = markersRef.current[placeId];
     if (!entry || !mapInstanceRef.current) return;
@@ -319,6 +332,7 @@ export default function Page() {
       fetchNotices();
       fetchInquiries();
       fetchAllInquiries();
+      fetchCampaigns();
     }
   }, [session]);
 
@@ -348,6 +362,10 @@ export default function Page() {
     const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
     setAllInquiries(data || []);
   }
+    async function fetchCampaigns() {
+    const { data } = await supabase.from("campaigns").select("*").order("sort_order", { ascending: true });
+    setCampaigns(data || []);
+  }
   async function fetchHistory() {
     const { data } = await supabase.from("point_history").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false }).limit(30);
     setHistory(data || []);
@@ -364,6 +382,14 @@ export default function Page() {
   async function deleteNotice(id) {
     await supabase.from("notices").delete().eq("id", id);
     fetchNotices();
+  }
+
+    function handleCampaignPhotoChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      setCampaignFile(file);
+      setCampaignPreview(URL.createObjectURL(file));
+    }
   }
     async function submitInquiry(e) {
     e.preventDefault();
@@ -390,6 +416,48 @@ export default function Page() {
     if (error) { showToast("답변 실패: " + error.message); return; }
     fetchAllInquiries();
     showToast("답변이 등록됐어요");
+  }
+    async function submitCampaign(e) {
+    e.preventDefault();
+    if (!editingCampaignId && !campaignFile) { showToast("이미지를 선택해주세요"); return; }
+
+    let imageUrl = null;
+    if (campaignFile) {
+      const fileExt = campaignFile.name.split(".").pop();
+      const filePath = `${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("campaign-images").upload(filePath, campaignFile);
+      if (uploadError) { showToast("이미지 업로드 실패: " + uploadError.message); return; }
+      const { data: urlData } = supabase.storage.from("campaign-images").getPublicUrl(filePath);
+      imageUrl = urlData.publicUrl;
+    }
+
+    if (editingCampaignId) {
+      const updateData = { title: campaignForm.title.trim() || null };
+      if (imageUrl) updateData.image_url = imageUrl;
+      const { error } = await supabase.from("campaigns").update(updateData).eq("id", editingCampaignId);
+      if (error) { showToast("수정 실패: " + error.message); return; }
+      showToast("캠페인이 수정됐어요");
+    } else {
+      const { error } = await supabase.from("campaigns").insert({ title: campaignForm.title.trim() || null, image_url: imageUrl, sort_order: campaigns.length });
+      if (error) { showToast("등록 실패: " + error.message); return; }
+      showToast("캠페인이 등록됐어요");
+    }
+
+    setCampaignForm({ title: "" });
+    setCampaignFile(null);
+    setCampaignPreview(null);
+    setEditingCampaignId(null);
+    fetchCampaigns();
+  }
+  function startEditCampaign(c) {
+    setEditingCampaignId(c.id);
+    setCampaignForm({ title: c.title || "" });
+    setCampaignPreview(c.image_url);
+    setCampaignFile(null);
+  }
+  async function deleteCampaign(id) {
+    await supabase.from("campaigns").delete().eq("id", id);
+    fetchCampaigns();
   }
   function showToast(message) {
     setToast(message);
@@ -645,10 +713,28 @@ export default function Page() {
                 </div>
               </div>
             )}
-            <div className="rounded-2xl p-5 mb-6 text-white" style={{ background: `linear-gradient(120deg, ${CORAL}, #F58152)` }}>
-              <div className="text-xs font-bold opacity-85 mb-1">이번 달 캠페인</div>
-              <div className="font-extrabold text-lg leading-snug">신규 장소 등록하고 2P 받아가세요</div>
-            </div>
+                 {campaigns.length > 0 ? (
+              <div className="relative rounded-2xl overflow-hidden mb-6" style={{ height: 160 }}>
+                <img src={campaigns[campaignIndex].image_url} alt={campaigns[campaignIndex].title || "캠페인"} className="w-full h-full object-cover" />
+                {campaigns[campaignIndex].title && (
+                  <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}>
+                    <div className="text-white font-extrabold text-sm">{campaigns[campaignIndex].title}</div>
+                  </div>
+                )}
+                {campaigns.length > 1 && (
+                  <div className="absolute bottom-2 right-3 flex gap-1.5">
+                    {campaigns.map((_, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: i === campaignIndex ? "#fff" : "rgba(255,255,255,0.4)" }} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-2xl p-5 mb-6 text-white" style={{ background: `linear-gradient(120deg, ${CORAL}, #F58152)` }}>
+                <div className="text-xs font-bold opacity-85 mb-1">이번 달 캠페인</div>
+                <div className="font-extrabold text-lg leading-snug">신규 장소 등록하고 2P 받아가세요</div>
+              </div>
+            )}
 
             <div className="flex items-center justify-between mb-3">
               <span className="font-extrabold text-sm" style={{ color: INK }}>등록된 장소 {filteredPlaces.length}곳</span>
@@ -869,6 +955,42 @@ export default function Page() {
           <div className="max-w-2xl mx-auto">
             <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>관리자</h2>
 
+                      <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>캠페인 배너 관리</div>
+            <form onSubmit={submitCampaign} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+              <input value={campaignForm.title} onChange={(e) => setCampaignForm({ title: e.target.value })} placeholder="배너 제목 (선택)"
+                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <input type="file" accept="image/*" onChange={handleCampaignPhotoChange} className="hidden" id="campaign-upload" />
+              <label htmlFor="campaign-upload" className="flex items-center justify-center rounded-xl mb-3 cursor-pointer transition-all duration-200 hover:opacity-80" style={{ border: `1.5px dashed ${LINE}`, height: campaignPreview ? "auto" : 96 }}>
+                {campaignPreview ? (
+                  <img src={campaignPreview} alt="미리보기" className="w-full h-32 object-cover rounded-xl" />
+                ) : (
+                  <div className="text-center py-4">
+                    <Camera size={20} color={INK_SOFT} className="mx-auto mb-1" />
+                    <div className="text-xs font-bold" style={{ color: INK_SOFT }}>배너 이미지 선택</div>
+                  </div>
+                )}
+              </label>
+              <button type="submit" className="w-full rounded-full py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>
+                {editingCampaignId ? "수정 완료" : "배너 등록"}
+              </button>
+              {editingCampaignId && (
+                <button type="button" onClick={() => { setEditingCampaignId(null); setCampaignForm({ title: "" }); setCampaignFile(null); setCampaignPreview(null); }} className="w-full text-xs font-bold mt-2" style={{ color: INK_SOFT }}>
+                  취소
+                </button>
+              )}
+            </form>
+
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {campaigns.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>등록된 배너가 없어요</div>}
+              {campaigns.map((c) => (
+                <div key={c.id} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <img src={c.image_url} alt={c.title || "배너"} className="w-16 h-12 rounded-lg object-cover flex-shrink-0" />
+                  <div className="flex-1 min-w-0 text-sm font-bold truncate" style={{ color: INK }}>{c.title || "(제목 없음)"}</div>
+                  <button onClick={() => startEditCampaign(c)} className="text-xs font-bold flex-shrink-0" style={{ color: TEAL }}>수정</button>
+                  <button onClick={() => deleteCampaign(c.id)} className="text-xs font-bold flex-shrink-0" style={{ color: CORAL }}>삭제</button>
+                </div>
+              ))}
+            </div>
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>공지사항 작성</div>
             <form onSubmit={submitNotice} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
               <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
