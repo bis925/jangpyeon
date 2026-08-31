@@ -84,7 +84,7 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
   return (
     <div className="flex gap-4 rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
       <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }}>
-        {place.photo_url && <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover" />}
+              {place.photo_url && <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-125" />}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
