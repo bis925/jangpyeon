@@ -286,6 +286,7 @@ export default function Page() {
     const [allProfiles, setAllProfiles] = useState([]);
   const [memberSearch, setMemberSearch] = useState("");
   const [adjustDrafts, setAdjustDrafts] = useState({});
+    const [adjustLog, setAdjustLog] = useState([]);
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -383,6 +384,7 @@ export default function Page() {
       fetchAllInquiries();
       fetchCampaigns();
       fetchAllProfiles();
+      fetchAdjustLog();
     }
   }, [session]);
 
@@ -416,6 +418,11 @@ export default function Page() {
     if (session.user.email !== ADMIN_EMAIL) return;
     const { data } = await supabase.from("profiles").select("*").order("points", { ascending: false });
     setAllProfiles(data || []);
+  }
+    async function fetchAdjustLog() {
+    if (session.user.email !== ADMIN_EMAIL) return;
+    const { data } = await supabase.from("point_history").select("*, profiles(email, nickname)").eq("activity_type", "admin_adjust").order("created_at", { ascending: false }).limit(50);
+    setAdjustLog(data || []);
   }
     async function fetchCampaigns() {
     const { data } = await supabase.from("campaigns").select("*").order("sort_order", { ascending: true });
@@ -592,8 +599,9 @@ export default function Page() {
     if (isNaN(amount) || amount === 0) { showToast("올바른 숫자를 입력해주세요"); return; }
     const { error } = await supabase.rpc("admin_adjust_points", { p_user_id: userId, p_amount: amount, p_note: draft.note.trim() });
     if (error) { showToast("조정 실패: " + error.message); return; }
-    setAdjustDrafts({ ...adjustDrafts, [userId]: { amount: "", note: "" } });
+        setAdjustDrafts({ ...adjustDrafts, [userId]: { amount: "", note: "" } });
     fetchAllProfiles();
+    fetchAdjustLog();
     showToast("포인트가 조정됐어요");
   }
   function showToast(message) {
@@ -1167,9 +1175,26 @@ export default function Page() {
                     <button onClick={() => submitAdjustPoints(p.id)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>적용</button>
                   </div>
                 </div>
+                 ))}
+            </div>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 조정 기록</div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {adjustLog.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>조정 기록이 없어요</div>}
+              {adjustLog.map((h) => (
+                <div key={h.id} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div>
+                    <div className="text-sm font-bold" style={{ color: INK }}>{h.profiles?.email || "(알 수 없음)"}</div>
+                    <div className="text-xs" style={{ color: INK_SOFT }}>{h.note} · {new Date(h.created_at).toLocaleDateString("ko-KR")}</div>
+                  </div>
+                  <div style={{ fontFamily: MONO_FONT, color: h.points >= 0 ? TEAL : CORAL, fontWeight: 700, fontSize: 13 }}>
+                    {h.points >= 0 ? "+" : ""}{h.points}P
+                  </div>
+                </div>
               ))}
             </div>
-                      <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>캠페인 배너 관리</div>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>캠페인 배너 관리</div>
             <form onSubmit={submitCampaign} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                      <input value={campaignForm.title} onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })} placeholder="배너 제목 (선택)"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
