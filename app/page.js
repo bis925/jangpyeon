@@ -1000,15 +1000,15 @@ export default function Page() {
       </div>
       {/* ===== ADDRESS SEARCH POPUP ===== */}
       {showAddressSearch && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-          <div className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden" style={{ height: "80vh", maxHeight: 560, maxWidth: "100vw" }}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="bg-white rounded-t-2xl overflow-hidden" style={{ width: "100vw", height: "85vh", maxWidth: "100vw" }}>
             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
               <span className="font-extrabold text-sm" style={{ color: INK }}>주소 검색</span>
               <button onClick={() => setShowAddressSearch(false)} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
                 <X size={20} color={INK_SOFT} />
               </button>
             </div>
-     <div ref={addressSearchRef} style={{ width: "100%", height: "calc(100% - 49px)", overflowX: "hidden" }} />
+            <div ref={addressSearchRef} style={{ width: "100vw", height: "calc(85vh - 49px)" }} />
           </div>
         </div>
       )}
