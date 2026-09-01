@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset,
+  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2,
 } from "lucide-react";
 
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
@@ -51,6 +51,25 @@ function getBadges(place) {
   return Object.entries(BADGE_META)
     .filter(([, meta]) => place[meta.field])
     .map(([key]) => key);
+}
+
+function renderRichText(text) {
+  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|__(.+?)__|==(.+?)==|\[(.+?)\]\((.+?)\)/g;
+  const nodes = [];
+  let lastIndex = 0;
+  let match;
+  let key = 0;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
+    if (match[1] !== undefined) nodes.push(<strong key={key++}>{match[1]}</strong>);
+    else if (match[2] !== undefined) nodes.push(<em key={key++}>{match[2]}</em>);
+    else if (match[3] !== undefined) nodes.push(<u key={key++}>{match[3]}</u>);
+    else if (match[4] !== undefined) nodes.push(<mark key={key++} style={{ background: YELLOW, padding: "0 2px" }}>{match[4]}</mark>);
+    else if (match[5] !== undefined) nodes.push(<a key={key++} href={match[6]} target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>{match[5]}</a>);
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
 }
 
 const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설"];
@@ -284,6 +303,7 @@ export default function Page() {
   const [noticeImagePreview, setNoticeImagePreview] = useState(null);
   const [noticeAttachedFile, setNoticeAttachedFile] = useState(null);
   const noticeContentRef = useRef(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [editingNoticeId, setEditingNoticeId] = useState(null);
   const [replyDrafts, setReplyDrafts] = useState({});
     const [campaigns, setCampaigns] = useState([]);
@@ -477,15 +497,31 @@ export default function Page() {
     const file = e.target.files && e.target.files[0];
     if (file) setNoticeAttachedFile(file);
   }
-  function applyBoldToNoticeContent() {
+   function wrapSelection(before, after, placeholder) {
     const textarea = noticeContentRef.current;
     if (!textarea) return;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const text = noticeForm.content;
-    const selected = text.slice(start, end) || "굵은 글씨";
-    const newText = text.slice(0, start) + "**" + selected + "**" + text.slice(end);
+    const selected = text.slice(start, end) || placeholder;
+    const newText = text.slice(0, start) + before + selected + after + text.slice(end);
     setNoticeForm({ ...noticeForm, content: newText });
+  }
+  function insertLink() {
+    const textarea = noticeContentRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = noticeForm.content;
+    const selected = text.slice(start, end) || "링크 글자";
+    const url = window.prompt("연결할 주소를 입력해주세요 (예: https://...)");
+    if (!url) return;
+    const newText = text.slice(0, start) + `[${selected}](${url})` + text.slice(end);
+    setNoticeForm({ ...noticeForm, content: newText });
+  }
+  function insertEmoji(emoji) {
+    setNoticeForm({ ...noticeForm, content: noticeForm.content + emoji });
+    setShowEmojiPicker(false);
   }
     function startEditNotice(n) {
     setEditingNoticeId(n.id);
@@ -1069,10 +1105,8 @@ export default function Page() {
                   {n.image_url && (
                     <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
                   )}
-                  <div className="text-sm mb-2 whitespace-pre-wrap" style={{ color: INK }}>
-                    {n.content.split("**").map((part, i) =>
-                      i % 2 === 1 ? <strong key={i}>{part}</strong> : part
-                    )}
+                                    <div className="text-sm mb-2 whitespace-pre-wrap" style={{ color: INK }}>
+                    {renderRichText(n.content)}
                   </div>
                   {n.file_url && (
                     <a href={n.file_url} target="_blank" rel="noopener noreferrer" download className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 mb-2 text-xs font-bold" style={{ background: PAPER, color: INK }}>
@@ -1283,10 +1317,34 @@ export default function Page() {
                            <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
-              <button type="button" onClick={applyBoldToNoticeContent} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 mb-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
-                <Bold size={12} /> 굵게
-              </button>
-              <textarea ref={noticeContentRef} value={noticeForm.content} onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })} placeholder="공지 내용 (굵게 하고 싶은 글자를 선택하고 위 버튼을 눌러보세요)" rows={4}
+                            <div className="flex flex-wrap gap-1.5 mb-1.5 relative">
+                <button type="button" onClick={() => wrapSelection("**", "**", "굵은 글씨")} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                  <Bold size={12} /> 굵게
+                </button>
+                <button type="button" onClick={() => wrapSelection("*", "*", "기울임 글씨")} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                  <Italic size={12} /> 기울임
+                </button>
+                <button type="button" onClick={() => wrapSelection("__", "__", "밑줄 글씨")} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                  <Underline size={12} /> 밑줄
+                </button>
+                <button type="button" onClick={() => wrapSelection("==", "==", "강조 글씨")} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                  <Highlighter size={12} /> 강조색
+                </button>
+                <button type="button" onClick={insertLink} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                  <Link2 size={12} /> 링크
+                </button>
+                <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                  😀 이모티콘
+                </button>
+                {showEmojiPicker && (
+                  <div className="absolute top-full left-0 mt-1 z-10 rounded-xl p-2 grid grid-cols-8 gap-1" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                    {["😀","😊","👍","🎉","❤️","⭐","📢","✅","🎁","📌","🚨","💡","🙏","👏","🔥","😍"].map((e) => (
+                      <button type="button" key={e} onClick={() => insertEmoji(e)} className="text-lg hover:bg-black/5 rounded p-1">{e}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+                            <textarea ref={noticeContentRef} value={noticeForm.content} onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })} placeholder="공지 내용 (글자를 선택하고 위 버튼을 눌러서 꾸며보세요)" rows={4}
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
               <input value={noticeForm.link_url} onChange={(e) => setNoticeForm({ ...noticeForm, link_url: e.target.value })} placeholder="이벤트 링크 (선택, 예: https://...)"
