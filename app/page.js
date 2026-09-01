@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed,
 } from "lucide-react";
 
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
@@ -320,6 +320,9 @@ export default function Page() {
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
+    const [myLocation, setMyLocation] = useState(null);
+  const myMarkerRef = useRef(null);
+  const [locatingAddress, setLocatingAddress] = useState(false);
 
   useEffect(() => {
     if (window.kakao && window.kakao.maps) { setKakaoLoaded(true); return; }
@@ -351,8 +354,8 @@ export default function Page() {
   useEffect(() => {
     if (tab !== "map" || !kakaoLoaded || !mapContainerRef.current) return;
     const kakao = window.kakao;
-    const center = new kakao.maps.LatLng(37.5665, 126.9780);
-    const map = new kakao.maps.Map(mapContainerRef.current, { center, level: 6 });
+    const center = myLocation ? new kakao.maps.LatLng(myLocation.lat, myLocation.lng) : new kakao.maps.LatLng(37.5665, 126.9780);
+    const map = new kakao.maps.Map(mapContainerRef.current, { center, level: myLocation ? 4 : 6 });
     mapInstanceRef.current = map;
     markersRef.current = {};
     const geocoder = new kakao.maps.services.Geocoder();
@@ -406,6 +409,54 @@ export default function Page() {
         { title: "장편에서 보기", link: { mobileWebUrl: "https://jangpyeon.kr", webUrl: "https://jangpyeon.kr" } },
       ],
     });
+  }
+    function locateMe() {
+    if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setMyLocation(coords);
+        if (mapInstanceRef.current && window.kakao) {
+          const position = new window.kakao.maps.LatLng(coords.lat, coords.lng);
+          mapInstanceRef.current.setCenter(position);
+          mapInstanceRef.current.setLevel(4);
+          if (myMarkerRef.current) myMarkerRef.current.setMap(null);
+          myMarkerRef.current = new window.kakao.maps.Marker({
+            position,
+            map: mapInstanceRef.current,
+            image: new window.kakao.maps.MarkerImage(
+              "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#4285F4" stroke="white" stroke-width="3"/></svg>'),
+              new window.kakao.maps.Size(24, 24)
+            ),
+          });
+        }
+      },
+      () => { showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"); },
+      { enableHighAccuracy: true }
+    );
+  }
+  function locateMeForRegister() {
+    if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
+    setLocatingAddress(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        if (!window.kakao) { setLocatingAddress(false); return; }
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.coord2Address(longitude, latitude, (result, status) => {
+          setLocatingAddress(false);
+          if (status === window.kakao.maps.services.Status.OK && result[0]) {
+            const addr = result[0].road_address ? result[0].road_address.address_name : result[0].address.address_name;
+            setForm((prev) => ({ ...prev, address: addr }));
+            showToast("현재 위치로 주소를 찾았어요");
+          } else {
+            showToast("주소를 찾을 수 없어요");
+          }
+        });
+      },
+      () => { setLocatingAddress(false); showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"); },
+      { enableHighAccuracy: true }
+    );
   }
   function focusOnPlace(placeId) {
     const entry = markersRef.current[placeId];
@@ -992,7 +1043,12 @@ export default function Page() {
         {/* ===================== 지도·검색 ===================== */}
         {tab === "map" && (
           <div>
-            <div ref={mapContainerRef} className="w-full h-72 rounded-2xl mb-6 overflow-hidden" style={{ background: PAPER, border: `1px solid ${LINE}` }} />
+            <div className="relative mb-6">
+              <div ref={mapContainerRef} className="w-full h-72 rounded-2xl overflow-hidden" style={{ background: PAPER, border: `1px solid ${LINE}` }} />
+              <button onClick={locateMe} className="absolute bottom-3 right-3 rounded-full p-2.5 shadow-md transition-all duration-200 active:scale-90" style={{ background: "#fff", border: `1px solid ${LINE}` }} aria-label="내 위치 찾기">
+                <LocateFixed size={18} color={TEAL} />
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2 mb-5">
               {CATEGORIES.map((c) => {
                 const active = mapCategory === c;
@@ -1037,13 +1093,17 @@ export default function Page() {
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
                   <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
-                <div className="flex gap-2 mb-4">
+                               <div className="flex gap-2 mb-2">
                   <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
                     className="flex-1 rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: PAPER }} />
                   <button type="button" onClick={openAddressSearch} className="rounded-xl px-4 py-3 text-sm font-bold whitespace-nowrap transition-all duration-200 active:scale-95" style={{ background: TEAL, color: "#fff" }}>
                     주소 검색
                   </button>
                 </div>
+                <button type="button" onClick={locateMeForRegister} disabled={locatingAddress} className="flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 mb-4 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: TEAL, background: TEAL_TINT }}>
+                  <Locate size={14} />
+                  {locatingAddress ? "위치 확인 중..." : "현재 위치로 주소 찾기"}
+                </button>
 
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
                 <div className="flex flex-wrap gap-2 mb-5">
