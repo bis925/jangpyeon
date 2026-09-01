@@ -985,15 +985,16 @@ export default function Page() {
         </div>
       </div>
 
-      {/* ===== MOBILE TABS ===== */}
-      <div className="flex sm:hidden overflow-x-auto gap-2 px-5 py-3" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
+           {/* ===== MOBILE TABS ===== */}
+      <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
         {NAV.map((n) => {
           const Icon = n.icon;
           const active = tab === n.id;
           return (
-            <button key={n.id} onClick={() => setTab(n.id)} className="flex-shrink-0 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95"
-              style={{ background: active ? TEAL : PAPER, color: active ? "#fff" : INK_SOFT }}>
-              <Icon size={13} />{n.label}
+            <button key={n.id} onClick={() => setTab(n.id)} className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-all duration-200 active:scale-95"
+              style={{ color: active ? TEAL : INK_SOFT }}>
+              <Icon size={17} />
+              <span style={{ fontSize: 10, fontWeight: 700 }}>{n.label}</span>
             </button>
           );
         })}
