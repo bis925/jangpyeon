@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold,
+     Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, Share2,
 } from "lucide-react";
 
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
@@ -79,7 +79,7 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare }) {
   const badges = getBadges(place);
   return (
     <div className="flex gap-4 rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
@@ -102,8 +102,11 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
                 <Pencil size={15} color={INK_SOFT} />
               </button>
             )}
-            <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
+                       <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
               <Star size={16} color={isFavorite ? YELLOW : LINE} fill={isFavorite ? YELLOW : "none"} />
+            </button>
+            <button onClick={() => onShare(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="공유하기">
+              <Share2 size={16} color={INK_SOFT} />
             </button>
           </div>
         </div>
@@ -309,6 +312,17 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
+    const shareScript = document.createElement("script");
+    shareScript.src = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js";
+    shareScript.async = true;
+    shareScript.onload = () => {
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_MAP_KEY);
+      }
+    };
+    document.head.appendChild(shareScript);
+  }, []);
+  useEffect(() => {
     if (tab !== "map" || !kakaoLoaded || !mapContainerRef.current) return;
     const kakao = window.kakao;
     const center = new kakao.maps.LatLng(37.5665, 126.9780);
@@ -352,7 +366,21 @@ export default function Page() {
     }, 4000);
     return () => clearInterval(timer);
   }, [campaigns]);
-  
+    function shareToKakao(place) {
+    if (!window.Kakao) { showToast("공유 기능을 불러오는 중이에요"); return; }
+    window.Kakao.Share.sendDefault({
+      objectType: "feed",
+      content: {
+        title: place.name,
+        description: `${place.category} · ${place.address}`,
+        imageUrl: place.photo_url || "https://jangpyeon.kr/icon.png",
+        link: { mobileWebUrl: "https://jangpyeon.kr", webUrl: "https://jangpyeon.kr" },
+      },
+      buttons: [
+        { title: "장편에서 보기", link: { mobileWebUrl: "https://jangpyeon.kr", webUrl: "https://jangpyeon.kr" } },
+      ],
+    });
+  }
   function focusOnPlace(placeId) {
     const entry = markersRef.current[placeId];
     if (!entry || !mapInstanceRef.current) return;
@@ -907,7 +935,7 @@ export default function Page() {
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -937,7 +965,7 @@ export default function Page() {
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                              <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} />
+                              <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} />
                 </div>
               ))}
             </div>
