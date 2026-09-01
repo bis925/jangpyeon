@@ -514,25 +514,7 @@ export default function Page() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-   /* --- 앱에서 딥링크로 열렸을 때 로그인 링크 처리 --- */
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.Capacitor) return;
-    import("@capacitor/app").then(({ App }) => {
-      // 앱이 꺼진 상태에서 링크로 처음 열렸을 때
-      App.getLaunchUrl().then((result) => {
-        if (result && result.url && result.url.includes("#")) {
-          window.location.href = result.url;
-        }
-      });
-      // 앱이 이미 켜져있는 상태에서 링크를 또 눌렀을 때
-      const subPromise = App.addListener("appUrlOpen", (event) => {
-        if (event.url && event.url.includes("#")) {
-          window.location.href = event.url;
-        }
-      });
-      return () => { subPromise.then((s) => s.remove()); };
-    });
-  }, []);
+
 
   /* --- 로그인 후 데이터 불러오기 --- */
   useEffect(() => {
