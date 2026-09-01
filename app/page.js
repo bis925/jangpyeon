@@ -199,16 +199,16 @@ function LoginScreen({ onSent }) {
             <div className="rounded-2xl p-6" style={{ background: TEAL_TINT }}>
               <Mail size={22} color={TEAL} className="mx-auto mb-2" />
               <div className="font-bold text-sm mb-1" style={{ color: TEAL_DARK }}>메일함을 확인해주세요</div>
-              <div className="text-xs mb-4" style={{ color: INK_SOFT }}>{email}로 인증코드 6자리를 보냈어요</div>
+              <div className="text-xs mb-4" style={{ color: INK_SOFT }}>{email}로 인증코드 8자리를 보냈어요</div>
               <form onSubmit={handleVerify}>
                 <input
                   type="text"
                   inputMode="numeric"
-                  maxLength={6}
+                  maxLength={8}
                   required
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
-                  placeholder="인증코드 6자리"
+                  placeholder="인증코드 8자리"
                   className="w-full rounded-xl px-4 py-3 mb-3 text-sm text-center outline-none"
                   style={{ border: `1.4px solid ${LINE}`, color: INK, letterSpacing: 4, fontFamily: MONO_FONT }}
                 />
