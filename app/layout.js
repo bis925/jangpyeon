@@ -9,11 +9,11 @@ export const metadata = {
     description: "휠체어 출입, 장애인 화장실, 유모차 접근성 정보를 지도에서 확인하고 함께 기록하는 서비스, 장편입니다. 누구나 등록하고 포인트를 받아요.",
     url: "https://jangpyeon.kr",
     siteName: "장편",
-    images: [
+      images: [
       {
-        url: "https://jangpyeon.kr/logo.png",
-        width: 1600,
-        height: 1600,
+        url: "https://jangpyeon.kr/kakao-og-image.png",
+        width: 800,
+        height: 400,
         alt: "장편 로고",
       },
     ],
