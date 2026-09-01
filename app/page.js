@@ -477,6 +477,20 @@ export default function Page() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  /* --- 앱에서 딥링크로 열렸을 때 로그인 링크 처리 --- */
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.Capacitor) return;
+    import("@capacitor/app").then(({ App }) => {
+      const sub = App.addListener("appUrlOpen", (event) => {
+        const url = new URL(event.url);
+        if (url.hash) {
+          window.location.hash = url.hash;
+        }
+      });
+      return () => { sub.then((s) => s.remove()); };
+    });
+  }, []);
+
   /* --- 로그인 후 데이터 불러오기 --- */
   useEffect(() => {
     if (session) {
