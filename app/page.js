@@ -360,6 +360,8 @@ export default function Page() {
     const [myLocation, setMyLocation] = useState(null);
   const myMarkerRef = useRef(null);
   const [locatingAddress, setLocatingAddress] = useState(false);
+    const [showAddressSearch, setShowAddressSearch] = useState(false);
+  const addressSearchRef = useRef(null);
 
   useEffect(() => {
     if (window.kakao && window.kakao.maps) { setKakaoLoaded(true); return; }
@@ -811,13 +813,22 @@ export default function Page() {
       alert("주소 검색 기능을 불러오는 중이에요. 잠시 후 다시 시도해주세요.");
       return;
     }
+    setShowAddressSearch(true);
+  }
+
+  useEffect(() => {
+    if (!showAddressSearch || !window.daum || !window.daum.Postcode) return;
+    if (addressSearchRef.current) addressSearchRef.current.innerHTML = "";
     new window.daum.Postcode({
       oncomplete: function (data) {
         const addr = data.roadAddress || data.jibunAddress;
         setForm((prev) => ({ ...prev, address: addr }));
+        setShowAddressSearch(false);
       },
-    }).open();
-  }
+      width: "100%",
+      height: "100%",
+    }).embed(addressSearchRef.current);
+  }, [showAddressSearch]);
     function handlePhotoChange(e) {
     const file = e.target.files && e.target.files[0];
     if (file) {
@@ -978,6 +989,20 @@ export default function Page() {
           );
         })}
       </div>
+      {/* ===== ADDRESS SEARCH POPUP ===== */}
+      {showAddressSearch && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden" style={{ height: "80vh", maxHeight: 560 }}>
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+              <span className="font-extrabold text-sm" style={{ color: INK }}>주소 검색</span>
+              <button onClick={() => setShowAddressSearch(false)} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
+                <X size={20} color={INK_SOFT} />
+              </button>
+            </div>
+            <div ref={addressSearchRef} style={{ width: "100%", height: "calc(100% - 49px)" }} />
+          </div>
+        </div>
+      )}
       {/* ===== IMAGE PREVIEW ===== */}
       {previewImage && (
         <div onClick={() => setPreviewImage(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
