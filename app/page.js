@@ -1173,10 +1173,10 @@ export default function Page() {
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
                   <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
-                               <div className="flex gap-2 mb-2">
+                                <div className="flex flex-col gap-2 mb-2">
                   <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
-                    className="flex-1 rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: PAPER }} />
-                  <button type="button" onClick={openAddressSearch} className="rounded-xl px-4 py-3 text-sm font-bold whitespace-nowrap transition-all duration-200 active:scale-95" style={{ background: TEAL, color: "#fff" }}>
+                    className="w-full rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: PAPER }} />
+                  <button type="button" onClick={openAddressSearch} className="w-full rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL, color: "#fff" }}>
                     주소 검색
                   </button>
                 </div>
