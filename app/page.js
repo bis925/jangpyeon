@@ -363,6 +363,15 @@ export default function Page() {
     const [showAddressSearch, setShowAddressSearch] = useState(false);
   const addressSearchRef = useRef(null);
 
+    useEffect(() => {
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        () => {},
+        () => {},
+        { enableHighAccuracy: false, timeout: 5000 }
+      );
+    }
+  }, []);
   useEffect(() => {
     if (window.kakao && window.kakao.maps) { setKakaoLoaded(true); return; }
     const script = document.createElement("script");
