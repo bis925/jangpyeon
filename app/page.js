@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-     Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, Share2,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle,
 } from "lucide-react";
 
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
@@ -105,8 +105,8 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
                        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
               <Star size={16} color={isFavorite ? YELLOW : LINE} fill={isFavorite ? YELLOW : "none"} />
             </button>
-            <button onClick={() => onShare(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="공유하기">
-              <Share2 size={16} color={INK_SOFT} />
+                       <button onClick={() => onShare(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
+              <MessageCircle size={16} color="#3C1E1E" fill="#3C1E1E" />
             </button>
           </div>
         </div>
