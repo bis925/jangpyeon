@@ -923,9 +923,9 @@ export default function Page() {
             {notices.length > 0 && (
               <div className="rounded-2xl p-4 mb-4 flex items-start gap-3" style={{ background: TEAL_TINT }}>
                 <Megaphone size={18} color={TEAL_DARK} className="flex-shrink-0 mt-0.5" />
-                <div>
+                               <div>
                   <div className="font-extrabold text-sm mb-0.5" style={{ color: TEAL_DARK }}>{notices[0].title}</div>
-                  <div className="text-xs" style={{ color: INK_SOFT }}>{notices[0].content}</div>
+                  <div className="text-xs" style={{ color: INK_SOFT }}>{renderRichText(notices[0].content)}</div>
                 </div>
               </div>
             )}
