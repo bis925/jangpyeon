@@ -195,12 +195,12 @@ function LoginScreen({ onSent }) {
                   <p className="text-xs mt-6 mb-4" style={{ color: INK_SOFT }}>
             비밀번호 없이, 메일로 온 링크만 누르면 로그인돼요.
           </p>
-                   <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 rounded-full py-3 text-sm font-extrabold transition-all duration-200 active:scale-[0.98]"
-            style={{ background: "#FEE500", color: "#3C1E1E" }}>
-            <Headset size={16} />
-            카카오톡으로 문의하기
-          </a>
+                    <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded-full py-3.5 font-extrabold mt-8 mb-8 transition-all duration-200 active:scale-[0.98]"
+              style={{ background: "#FEE500", color: "#3C1E1E" }}>
+              <Headset size={18} />
+              카카오톡으로 상담하기
+            </a>
         </div>
       </div>
 
