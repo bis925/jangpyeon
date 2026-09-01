@@ -160,6 +160,8 @@ function LoginScreen({ onSent }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [otp, setOtp] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -170,6 +172,16 @@ function LoginScreen({ onSent }) {
     setLoading(false);
     if (error) { setErrorMsg(error.message); return; }
     setSent(true);
+  }
+
+  async function handleVerify(e) {
+    e.preventDefault();
+    if (!otp.trim()) return;
+    setVerifying(true);
+    setErrorMsg("");
+    const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: otp.trim(), type: "email" });
+    setVerifying(false);
+    if (error) { setErrorMsg("코드가 올바르지 않아요, 다시 확인해주세요"); return; }
   }
 
   return (
@@ -183,11 +195,36 @@ function LoginScreen({ onSent }) {
           <p className="text-sm mb-1" style={{ color: INK_SOFT }}>장애물 없는 편의, 함께 기록해요</p>
           <p className="text-xs mb-8" style={{ color: '#9A9484' }}>휠체어 접근성 · 장애인 화장실 · 유모차 정보를 지도에서 찾아보세요</p>
 
-          {sent ? (
+                {sent ? (
             <div className="rounded-2xl p-6" style={{ background: TEAL_TINT }}>
               <Mail size={22} color={TEAL} className="mx-auto mb-2" />
-              <div className="font-bold text-sm" style={{ color: TEAL_DARK }}>메일함을 확인해주세요</div>
-              <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{email}로 로그인 링크를 보냈어요</div>
+              <div className="font-bold text-sm mb-1" style={{ color: TEAL_DARK }}>메일함을 확인해주세요</div>
+              <div className="text-xs mb-4" style={{ color: INK_SOFT }}>{email}로 인증코드 6자리를 보냈어요</div>
+              <form onSubmit={handleVerify}>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  required
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
+                  placeholder="인증코드 6자리"
+                  className="w-full rounded-xl px-4 py-3 mb-3 text-sm text-center outline-none"
+                  style={{ border: `1.4px solid ${LINE}`, color: INK, letterSpacing: 4, fontFamily: MONO_FONT }}
+                />
+                <button
+                  type="submit"
+                  disabled={verifying}
+                  className="w-full rounded-full py-3.5 font-extrabold text-white transition-all duration-200 active:scale-[0.98] hover:opacity-90"
+                  style={{ background: TEAL }}
+                >
+                  {verifying ? "확인 중..." : "인증코드 확인하고 로그인"}
+                </button>
+                {errorMsg && <p className="text-xs mt-3" style={{ color: CORAL }}>{errorMsg}</p>}
+                <button type="button" onClick={() => { setSent(false); setOtp(""); setErrorMsg(""); }} className="text-xs mt-3" style={{ color: INK_SOFT }}>
+                  다른 이메일로 다시 시도
+                </button>
+              </form>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
