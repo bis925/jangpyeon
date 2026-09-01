@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   metadataBase: new URL("https://jangpyeon.kr"),
-  title: "장편 — 휠체어 접근성 지도 · 장애인 화장실 찾기",
+  title: "장편 — 휠체어 접근성 지도",
   description: "휠체어 출입, 장애인 화장실, 유모차 접근성 정보를 지도에서 확인하고 함께 기록하는 서비스, 장편입니다. 누구나 등록하고 포인트를 받아요.",
   openGraph: {
     title: "장편 — 휠체어 접근성 지도 · 장애인 화장실 찾기",
