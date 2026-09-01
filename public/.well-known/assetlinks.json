@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "kr.jangpyeon.app",
+      "sha256_cert_fingerprints": [
+        "24:B7:B7:A0:F4:15:31:6B:97:1C:C0:F9:6A:EA:7A:7B:53:4B:A9:6A:FB:FD:3B:B7:76:8B:3F:0B:90:9D:C8:06"
+      ]
+    }
+  }
+]
