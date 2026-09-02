@@ -448,8 +448,9 @@ export default function Page() {
   const [adjustDrafts, setAdjustDrafts] = useState({});
     const [adjustLog, setAdjustLog] = useState([]);
     const [allReports, setAllReports] = useState([]);
-    const [notifTitle, setNotifTitle] = useState("");
+  const [notifTitle, setNotifTitle] = useState("");
   const [notifBody, setNotifBody] = useState("");
+  const [individualNotifDrafts, setIndividualNotifDrafts] = useState({});
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -960,10 +961,10 @@ export default function Page() {
     await supabase.from("campaigns").delete().eq("id", id);
     fetchCampaigns();
   }
-    async function sendPushNotification(title, body) {
+  async function sendPushNotification(title, body, userId) {
     if (!title.trim() || !body.trim()) { showToast("제목과 내용을 입력해주세요"); return; }
     const { data, error } = await supabase.functions.invoke("swift-endpoint", {
-      body: { title: title.trim(), body: body.trim() },
+      body: { title: title.trim(), body: body.trim(), userId: userId || null },
     });
     if (error) { showToast("발송 실패: " + error.message); return; }
     showToast(data?.message || "발송 완료!");
@@ -1720,7 +1721,7 @@ export default function Page() {
                     </div>
                     <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 15 }}>{p.points.toLocaleString()}P</div>
                   </div>
-                                 <div className="flex gap-2 mt-2">
+                      <div className="flex gap-2 mt-2">
                     <input type="number" value={adjustDrafts[p.id]?.amount || ""} onChange={(e) => setAdjustDrafts({ ...adjustDrafts, [p.id]: { ...adjustDrafts[p.id], amount: e.target.value } })} placeholder="±숫자"
                       className="w-24 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                     <input value={adjustDrafts[p.id]?.note || ""} onChange={(e) => setAdjustDrafts({ ...adjustDrafts, [p.id]: { ...adjustDrafts[p.id], note: e.target.value } })} placeholder="사유 (예: 2월 이벤트 당첨)"
@@ -1728,6 +1729,22 @@ export default function Page() {
                     <button onClick={() => submitAdjustPoints(p.id)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>적용</button>
                     <button onClick={() => deleteUser(p.id, p.email)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold flex-shrink-0" style={{ background: CORAL_TINT, color: CORAL }} aria-label="회원 삭제">
                       <Trash2 size={14} />
+                    </button>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <input value={individualNotifDrafts[p.id]?.title || ""} onChange={(e) => setIndividualNotifDrafts({ ...individualNotifDrafts, [p.id]: { ...individualNotifDrafts[p.id], title: e.target.value } })} placeholder="알림 제목"
+                      className="w-24 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    <input value={individualNotifDrafts[p.id]?.body || ""} onChange={(e) => setIndividualNotifDrafts({ ...individualNotifDrafts, [p.id]: { ...individualNotifDrafts[p.id], body: e.target.value } })} placeholder="알림 내용"
+                      className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    <button
+                      onClick={async () => {
+                        const draft = individualNotifDrafts[p.id];
+                        if (!draft?.title || !draft?.body) { showToast("제목과 내용을 입력해주세요"); return; }
+                        await sendPushNotification(draft.title, draft.body, p.id);
+                        setIndividualNotifDrafts({ ...individualNotifDrafts, [p.id]: { title: "", body: "" } });
+                      }}
+                      className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: CORAL }}>
+                      <Bell size={14} />
                     </button>
                   </div>
                 </div>
