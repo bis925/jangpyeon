@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-      Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation,
+  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -135,7 +135,7 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport }) {
   const badges = getBadges(place);
   return (
     <div className="rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
@@ -148,9 +148,13 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           <div className="w-16 h-16 rounded-xl flex-shrink-0" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
         )}
         <div className="flex items-center gap-1 flex-1">
-          {isOwner && (
+          {isOwner ? (
             <button onClick={() => onEdit(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정">
               <Pencil size={15} color={INK_SOFT} />
+            </button>
+          ) : (
+            <button onClick={() => onReport(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="정보가 달라졌어요 신고">
+              <Flag size={15} color={INK_SOFT} />
             </button>
           )}
           <div className="flex-1" />
@@ -433,6 +437,7 @@ export default function Page() {
   const [memberSearch, setMemberSearch] = useState("");
   const [adjustDrafts, setAdjustDrafts] = useState({});
     const [adjustLog, setAdjustLog] = useState([]);
+    const [allReports, setAllReports] = useState([]);
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -542,6 +547,15 @@ export default function Page() {
     }, 4000);
     return () => clearInterval(timer);
   }, [campaigns]);
+
+  async function reportPlace(place) {
+    const reason = window.prompt(`"${place.name}"의 어떤 정보가 달라졌나요? (예: 지금은 휠체어 출입이 안돼요)`);
+    if (!reason || !reason.trim()) return;
+    const { error } = await supabase.from("reports").insert({ place_id: place.id, reporter_id: session.user.id, reason: reason.trim() });
+    if (error) { showToast("신고 접수 실패: " + error.message); return; }
+    showToast("신고가 접수됐어요, 확인 후 반영할게요");
+  }
+  
   function openDirections(place) {
     const query = `${place.name} ${place.address || ""}`.trim();
     const url = `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
@@ -675,6 +689,7 @@ export default function Page() {
       fetchCampaigns();
       fetchAllProfiles();
       fetchAdjustLog();
+      fetchReports();
     }
   }, [session]);
 
@@ -717,6 +732,17 @@ export default function Page() {
     if (session.user.email !== ADMIN_EMAIL) return;
     const { data } = await supabase.from("point_history").select("*, profiles(email, nickname)").eq("activity_type", "admin_adjust").order("created_at", { ascending: false }).limit(50);
     setAdjustLog(data || []);
+  }
+    async function fetchReports() {
+    if (session.user.email !== ADMIN_EMAIL) return;
+    const { data } = await supabase.from("reports").select("*, places(name, address)").order("created_at", { ascending: false }).limit(50);
+    setAllReports(data || []);
+  }
+  async function resolveReport(reportId) {
+    const { error } = await supabase.from("reports").update({ status: "resolved" }).eq("id", reportId);
+    if (error) { showToast("처리 실패: " + error.message); return; }
+    fetchReports();
+    showToast("처리 완료로 표시했어요");
   }
     async function fetchCampaigns() {
     const { data } = await supabase.from("campaigns").select("*").order("sort_order", { ascending: true });
@@ -1316,7 +1342,7 @@ export default function Page() {
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -1351,7 +1377,7 @@ export default function Page() {
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} />
                 </div>
               ))}
             </div>
@@ -1650,6 +1676,26 @@ export default function Page() {
                   </div>
                   <div style={{ fontFamily: MONO_FONT, color: h.points >= 0 ? TEAL : CORAL, fontWeight: 700, fontSize: 13 }}>
                     {h.points >= 0 ? "+" : ""}{h.points}P
+                  </div>
+                </div>
+              ))}
+            </div>
+
+                            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>장소 정보 신고 ({allReports.filter(r => r.status !== "resolved").length}건 대기중)</div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {allReports.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>신고 내역이 없어요</div>}
+              {allReports.map((r) => (
+                <div key={r.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}`, opacity: r.status === "resolved" ? 0.5 : 1 }}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-bold" style={{ color: INK }}>{r.places?.name || "(삭제된 장소)"}</div>
+                      <div className="text-xs mb-1" style={{ color: INK_SOFT }}>{r.places?.address}</div>
+                      <div className="text-xs" style={{ color: INK }}>{r.reason}</div>
+                      <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{new Date(r.created_at).toLocaleDateString("ko-KR")}</div>
+                    </div>
+                    {r.status !== "resolved" && (
+                      <button onClick={() => resolveReport(r.id)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>처리완료</button>
+                    )}
                   </div>
                 </div>
               ))}
