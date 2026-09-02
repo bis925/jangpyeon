@@ -139,9 +139,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
   const badges = getBadges(place);
   return (
     <div className="rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-       <div className="flex items-start gap-3 mb-3">
+           <div className="flex items-start gap-3 mb-3 min-w-0">
         {place.photo_urls && place.photo_urls.length > 0 ? (
-          <div className="flex gap-1.5 overflow-x-auto flex-1 max-w-full">
+          <div className="flex gap-1.5 overflow-x-auto flex-1 min-w-0">
             {place.photo_urls.map((url, i) => (
               <button key={i} type="button" onClick={(e) => { e.stopPropagation(); onImageClick(url); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden relative">
                 <img src={url} alt={`${place.name} ${i + 1}`} className="w-full h-full object-cover" />
