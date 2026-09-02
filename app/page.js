@@ -153,8 +153,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
               <Pencil size={15} color={INK_SOFT} />
             </button>
           ) : (
-            <button onClick={() => onReport(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="정보가 달라졌어요 신고">
-              <Flag size={15} color={INK_SOFT} />
+            <button onClick={() => onReport(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: CORAL_TINT }} aria-label="정보가 달라졌어요 신고">
+              <Flag size={14} color={CORAL} />
+              <span style={{ fontSize: 10, fontWeight: 700, color: CORAL }}>신고</span>
             </button>
           )}
           <div className="flex-1" />
