@@ -478,15 +478,22 @@ export default function Page() {
     if (typeof window === "undefined" || !window.Capacitor || !session) return;
     import("@capacitor/push-notifications").then(({ PushNotifications }) => {
       PushNotifications.requestPermissions().then((result) => {
+        showToast("권한 상태: " + result.receive);
         if (result.receive === "granted") {
           PushNotifications.register();
         }
       });
       PushNotifications.addListener("registration", async (token) => {
-        await supabase.from("push_tokens").upsert(
+        showToast("토큰 받음: " + token.value.slice(0, 15) + "...");
+        const { error } = await supabase.from("push_tokens").upsert(
           { user_id: session.user.id, token: token.value },
           { onConflict: "token" }
         );
+        if (error) showToast("저장 실패: " + error.message);
+        else showToast("토큰 저장 성공!");
+      });
+      PushNotifications.addListener("registrationError", (err) => {
+        showToast("등록 에러: " + JSON.stringify(err));
       });
       PushNotifications.addListener("pushNotificationActionPerformed", () => {
         setTab("notice");
