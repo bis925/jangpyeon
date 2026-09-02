@@ -390,6 +390,8 @@ function LoginScreen({ onSent }) {
 
 /* ===================== 메인 앱 ===================== */
 export default function Page() {
+    const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
   const [isDark, setIsDark] = useDarkMode();
   applyTheme(isDark);
   const [fontScale, setFontScale] = useFontScale();
@@ -774,6 +776,11 @@ export default function Page() {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data);
     setAvatarUrl(data?.avatar_url || null);
+    const seenOnboarding = localStorage.getItem("jangpyeon_onboarding_seen");
+    if (!seenOnboarding) {
+      setShowOnboarding(true);
+      localStorage.setItem("jangpyeon_onboarding_seen", "true");
+    }
   }
   async function fetchPlaces() {
     const { data } = await supabase.from("places").select("*, place_photos(photo_url)").eq("status", "approved").order("created_at", { ascending: false });
