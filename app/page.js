@@ -1240,17 +1240,21 @@ export default function Page() {
                   })}
                 </div>
                 <label className="block text-xs font-bold mb-2" style={{ color: INK_SOFT }}>사진 (선택)</label>
-                       <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" id="photo-upload" />
-                <label htmlFor="photo-upload" className="flex items-center justify-center rounded-xl mb-6 cursor-pointer transition-all duration-200 hover:opacity-80" style={{ border: `1.5px dashed ${LINE}`, height: photoPreview ? "auto" : 96 }}>
-                  {photoPreview ? (
-                    <img src={photoPreview} alt="미리보기" className="w-full h-40 object-cover rounded-xl" />
-                  ) : (
-                    <div className="text-center py-4">
-                      <Camera size={20} color={INK_SOFT} className="mx-auto mb-1" />
-                      <div className="text-xs font-bold" style={{ color: INK_SOFT }}>사진 추가하기</div>
-                    </div>
-                  )}
-                </label>
+                                    {photoPreview && (
+                  <img src={photoPreview} alt="미리보기" className="w-full h-40 object-cover rounded-xl mb-2" />
+                )}
+                <div className="flex gap-2 mb-6">
+                  <input type="file" accept="image/*" capture="environment" onChange={handlePhotoChange} className="hidden" id="photo-camera" />
+                  <label htmlFor="photo-camera" className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-3 cursor-pointer text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+                    <Camera size={16} />
+                    카메라로 촬영
+                  </label>
+                  <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" id="photo-gallery" />
+                  <label htmlFor="photo-gallery" className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-3 cursor-pointer text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+                    <Camera size={16} />
+                    갤러리에서 선택
+                  </label>
+                </div>
                 <button type="submit" disabled={!form.name.trim()}
                   className="w-full rounded-full py-3.5 font-extrabold text-white flex items-center justify-center gap-1 transition-all duration-200 active:scale-[0.98] hover:opacity-90"
                   style={{ background: form.name.trim() ? CORAL : LINE, cursor: form.name.trim() ? "pointer" : "not-allowed" }}>
