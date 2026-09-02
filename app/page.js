@@ -6,19 +6,39 @@ import {
   Search, MapPin, Plus, User, Check, ChevronRight,
   Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2,
 } from "lucide-react";
-
+/* ===================== 다크모드 훅 ===================== */
+function useDarkMode() {
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const saved = localStorage.getItem("jangpyeon_theme");
+    if (saved === "dark") setIsDark(true);
+  }, []);
+  useEffect(() => {
+    document.documentElement.style.colorScheme = isDark ? "dark" : "light";
+    localStorage.setItem("jangpyeon_theme", isDark ? "dark" : "light");
+  }, [isDark]);
+  return [isDark, setIsDark];
+}
 /* ===================== 디자인 토큰 (장편 브랜드) ===================== */
-const TEAL = "#0F6E62";
-const TEAL_DARK = "#0A4F46";
-const TEAL_TINT = "#E3F0EC";
-const CORAL = "#F0603D";
-const CORAL_TINT = "#FDE7E0";
-const YELLOW = "#FFC13B";
-const INK = "#1C2420";
-const INK_SOFT = "#66716A";
-const PAPER = "#FAF7F1";
-const CARD = "#FFFFFF";
-const LINE = "#E4DFD1";
+const LIGHT_THEME = {
+  TEAL: "#0F6E62", TEAL_DARK: "#0A4F46", TEAL_TINT: "#E3F0EC",
+  CORAL: "#F0603D", CORAL_TINT: "#FDE7E0", YELLOW: "#FFC13B",
+  INK: "#1C2420", INK_SOFT: "#66716A", PAPER: "#FAF7F1", CARD: "#FFFFFF", LINE: "#E4DFD1",
+};
+const DARK_THEME = {
+  TEAL: "#3DA394", TEAL_DARK: "#7CC4B8", TEAL_TINT: "#163832",
+  CORAL: "#F4805F", CORAL_TINT: "#3D2620", YELLOW: "#FFC13B",
+  INK: "#F0EDE4", INK_SOFT: "#A5ADA5", PAPER: "#15181A", CARD: "#1F2426", LINE: "#333937",
+};
+let TEAL = LIGHT_THEME.TEAL, TEAL_DARK = LIGHT_THEME.TEAL_DARK, TEAL_TINT = LIGHT_THEME.TEAL_TINT;
+let CORAL = LIGHT_THEME.CORAL, CORAL_TINT = LIGHT_THEME.CORAL_TINT, YELLOW = LIGHT_THEME.YELLOW;
+let INK = LIGHT_THEME.INK, INK_SOFT = LIGHT_THEME.INK_SOFT, PAPER = LIGHT_THEME.PAPER, CARD = LIGHT_THEME.CARD, LINE = LIGHT_THEME.LINE;
+function applyTheme(isDark) {
+  const t = isDark ? DARK_THEME : LIGHT_THEME;
+  TEAL = t.TEAL; TEAL_DARK = t.TEAL_DARK; TEAL_TINT = t.TEAL_TINT;
+  CORAL = t.CORAL; CORAL_TINT = t.CORAL_TINT; YELLOW = t.YELLOW;
+  INK = t.INK; INK_SOFT = t.INK_SOFT; PAPER = t.PAPER; CARD = t.CARD; LINE = t.LINE;
+}
 
 const DISPLAY_FONT = "'Black Han Sans', sans-serif";
 const BODY_FONT = "'Nanum Gothic', sans-serif";
@@ -312,6 +332,8 @@ function LoginScreen({ onSent }) {
 
 /* ===================== 메인 앱 ===================== */
 export default function Page() {
+  const [isDark, setIsDark] = useDarkMode();
+  applyTheme(isDark);
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -1023,7 +1045,7 @@ export default function Page() {
   return (
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
       {/* ===== NAVBAR ===== */}
-      <div className="sticky top-0 z-10 flex items-center justify-between px-5 sm:px-8 py-3.5" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
+<div className="sticky top-0 z-10 flex items-center justify-between px-5 sm:px-8 py-3.5" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
         <div className="flex items-center gap-2">
           <LogoMark size={30} />
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: 20, color: INK }}>장편</span>
@@ -1416,6 +1438,12 @@ export default function Page() {
                   <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 13 }}>+{h.points}P</div>
                 </div>
               ))}
+            </div>
+                            <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <span className="text-sm font-bold" style={{ color: INK }}>다크 모드</span>
+              <button onClick={() => setIsDark(!isDark)} className="relative rounded-full transition-all duration-200" style={{ width: 46, height: 26, background: isDark ? TEAL : LINE }}>
+                <div className="absolute rounded-full transition-all duration-200" style={{ width: 20, height: 20, top: 3, left: isDark ? 23 : 3, background: "#fff" }} />
+              </button>
             </div>
                       <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 rounded-full py-3.5 font-extrabold mt-8 mb-8 transition-all duration-200 active:scale-[0.98]"
