@@ -962,7 +962,7 @@ export default function Page() {
   }
     async function sendPushNotification(title, body) {
     if (!title.trim() || !body.trim()) { showToast("제목과 내용을 입력해주세요"); return; }
-    const { data, error } = await supabase.functions.invoke("send-notification", {
+    const { data, error } = await supabase.functions.invoke("swift-endpoint", {
       body: { title: title.trim(), body: body.trim() },
     });
     if (error) { showToast("발송 실패: " + error.message); return; }
