@@ -1114,12 +1114,12 @@ export default function Page() {
                 <Search size={16} color={INK_SOFT} />
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
               </div>
-              <div className="flex flex-wrap gap-2">
+                         <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 {Object.entries(BADGE_META).map(([key, meta]) => {
                   const Icon = meta.icon;
                   const active = activeFilters.includes(key);
                   return (
-                    <button key={key} onClick={() => toggleFilter(key)} className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold border transition-all duration-200 active:scale-95 hover:shadow-sm"
+                    <button key={key} onClick={() => toggleFilter(key)} className="flex items-center justify-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold border transition-all duration-200 active:scale-95 hover:shadow-sm"
                       style={{ borderColor: TEAL, background: active ? TEAL : "#fff", color: active ? "#fff" : TEAL }}>
                       <Icon size={13} />{meta.label}
                     </button>
