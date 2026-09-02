@@ -684,7 +684,18 @@ export default function Page() {
     const url = `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
     window.open(url, "_blank");
   }
-    function shareToKakao(place) {
+  async function shareToKakao(place) {
+    if (typeof window !== "undefined" && window.Capacitor) {
+      // 앱 환경: 카카오 웹 공유 링크를 외부 브라우저(카카오톡 연동 가능)로 열기
+      const shareUrl = `https://sharer.kakao.com/talk/friends/picker/link?app_key=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&validation_action=default&validation_params=${encodeURIComponent(JSON.stringify({ title: place.name, description: `${place.category} · ${place.address}`, imageUrl: place.photo_url || "https://jangpyeon.kr/icon.png", link: { mobileWebUrl: "https://jangpyeon.kr", webUrl: "https://jangpyeon.kr" } }))}`;
+      try {
+        const { Browser } = await import("@capacitor/browser");
+        await Browser.open({ url: shareUrl });
+      } catch (err) {
+        showToast("공유 창을 열 수 없어요");
+      }
+      return;
+    }
     if (!window.Kakao) { showToast("공유 기능을 불러오는 중이에요"); return; }
     window.Kakao.Share.sendDefault({
       objectType: "feed",
