@@ -139,11 +139,20 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
   const badges = getBadges(place);
   return (
     <div className="rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-      <div className="flex items-start gap-3 mb-3">
-        {place.photo_url ? (
-          <button type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_url); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden">
-            <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover" />
-          </button>
+       <div className="flex items-start gap-3 mb-3">
+        {place.photo_urls && place.photo_urls.length > 0 ? (
+          <div className="flex gap-1.5 overflow-x-auto flex-1 max-w-full">
+            {place.photo_urls.map((url, i) => (
+              <button key={i} type="button" onClick={(e) => { e.stopPropagation(); onImageClick(url); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden relative">
+                <img src={url} alt={`${place.name} ${i + 1}`} className="w-full h-full object-cover" />
+                {place.photo_urls.length > 1 && i === 0 && (
+                  <div className="absolute bottom-0.5 right-0.5 rounded-full px-1.5 py-0.5" style={{ background: "rgba(0,0,0,0.6)" }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: "#fff" }}>{place.photo_urls.length}</span>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
         ) : (
           <div className="w-16 h-16 rounded-xl flex-shrink-0" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
         )}
@@ -408,8 +417,8 @@ export default function Page() {
     name: "", address: "", addressDetail: "", category: "공공기관", keywords: "",
     badges: { ramp: false, door: false, stroller: false, lift: false },
   });
-    const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoFiles, setPhotoFiles] = useState([]);
+  const [photoPreviews, setPhotoPreviews] = useState([]);
     const [editingPlaceId, setEditingPlaceId] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
       const [selectedNoticeId, setSelectedNoticeId] = useState(null);
@@ -700,7 +709,7 @@ export default function Page() {
   }
   async function fetchPlaces() {
     const { data } = await supabase.from("places").select("*, place_photos(photo_url)").eq("status", "approved").order("created_at", { ascending: false });
-    const withPhoto = (data || []).map((p) => ({ ...p, photo_url: p.place_photos?.[0]?.photo_url || null }));
+    const withPhoto = (data || []).map((p) => ({ ...p, photo_urls: (p.place_photos || []).map((ph) => ph.photo_url), photo_url: p.place_photos?.[0]?.photo_url || null }));
     setPlaces(withPhoto);
   }
   async function fetchFavorites() {
@@ -1005,11 +1014,16 @@ export default function Page() {
     }).embed(addressSearchRef.current);
   }, [showAddressSearch]);
     function handlePhotoChange(e) {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      setPhotoFile(file);
-      setPhotoPreview(URL.createObjectURL(file));
-    }
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const combined = [...photoFiles, ...files].slice(0, 5);
+    setPhotoFiles(combined);
+    setPhotoPreviews(combined.map((f) => URL.createObjectURL(f)));
+  }
+  function removePhotoAt(index) {
+    const newFiles = photoFiles.filter((_, i) => i !== index);
+    setPhotoFiles(newFiles);
+    setPhotoPreviews(newFiles.map((f) => URL.createObjectURL(f)));
   }
   function startEdit(place) {
     setEditingPlaceId(place.id);
@@ -1044,22 +1058,20 @@ export default function Page() {
       })
       .eq("id", editingPlaceId);
     if (error) { showToast("수정 실패: " + error.message); return; }
-
-    if (photoFile) {
-      const fileExt = photoFile.name.split(".").pop();
-      const filePath = `${editingPlaceId}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from("place-photos").upload(filePath, photoFile);
+    for (const file of photoFiles) {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${editingPlaceId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("place-photos").upload(filePath, file);
       if (!uploadError) {
         const { data: urlData } = supabase.storage.from("place-photos").getPublicUrl(filePath);
         await supabase.from("place_photos").insert({ place_id: editingPlaceId, photo_url: urlData.publicUrl, uploaded_by: session.user.id });
       }
     }
-
     showToast("수정 완료!");
     setEditingPlaceId(null);
     setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
-    setPhotoFile(null);
-    setPhotoPreview(null);
+    setPhotoFiles([]);
+    setPhotoPreviews([]);
     setTab("home");
     fetchPlaces();
   }
@@ -1082,21 +1094,19 @@ export default function Page() {
       p_keywords: form.keywords.trim() || null,
     });
     if (error) { showToast("등록 실패: " + error.message); return; }
-
-    if (photoFile) {
-      const fileExt = photoFile.name.split(".").pop();
-      const filePath = `${data.id}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from("place-photos").upload(filePath, photoFile);
+    for (const file of photoFiles) {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${data.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("place-photos").upload(filePath, file);
       if (!uploadError) {
         const { data: urlData } = supabase.storage.from("place-photos").getPublicUrl(filePath);
         await supabase.from("place_photos").insert({ place_id: data.id, photo_url: urlData.publicUrl, uploaded_by: session.user.id });
       }
     }
-
     setJustRegistered(data);
     setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
-    setPhotoFile(null);
-    setPhotoPreview(null);
+    setPhotoFiles([]);
+    setPhotoPreviews([]);
     fetchPlaces();
     fetchProfile();
     fetchHistory();
@@ -1447,16 +1457,26 @@ export default function Page() {
                   })}
                 </div>
                 <label className="block text-xs font-bold mb-2" style={{ color: INK_SOFT }}>사진 (선택)</label>
-                                    {photoPreview && (
-                  <img src={photoPreview} alt="미리보기" className="w-full h-40 object-cover rounded-xl mb-2" />
+                                       {photoPreviews.length > 0 && (
+                  <div className="flex gap-2 mb-2 overflow-x-auto">
+                    {photoPreviews.map((src, i) => (
+                      <div key={i} className="relative flex-shrink-0">
+                        <img src={src} alt={`미리보기 ${i + 1}`} className="w-20 h-20 object-cover rounded-xl" />
+                        <button type="button" onClick={() => removePhotoAt(i)} className="absolute -top-1.5 -right-1.5 rounded-full p-1" style={{ background: CORAL }}>
+                          <X size={12} color="#fff" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
+                <div className="text-xs mb-2" style={{ color: INK_SOFT }}>사진 {photoPreviews.length}/5장</div>
                 <div className="flex gap-2 mb-6">
                   <input type="file" accept="image/*" capture="environment" onChange={handlePhotoChange} className="hidden" id="photo-camera" />
                   <label htmlFor="photo-camera" className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-3 cursor-pointer text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
                     <Camera size={16} />
                     카메라로 촬영
                   </label>
-                  <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" id="photo-gallery" />
+                  <input type="file" accept="image/*" multiple onChange={handlePhotoChange} className="hidden" id="photo-gallery" />
                   <label htmlFor="photo-gallery" className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-3 cursor-pointer text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
                     <Camera size={16} />
                     갤러리에서 선택
