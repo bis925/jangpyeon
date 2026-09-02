@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-     Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type,
+      Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -135,7 +135,7 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections }) {
   const badges = getBadges(place);
   return (
     <div className="flex gap-4 rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
@@ -161,9 +161,13 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
                        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
               <Star size={16} color={isFavorite ? YELLOW : LINE} fill={isFavorite ? YELLOW : "none"} />
             </button>
-                       <button onClick={() => onShare(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
+                                   <button onClick={() => onShare(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
               <MessageCircle size={16} color="#3C1E1E" fill="#3C1E1E" />
             </button>
+                      <button onClick={() => onDirections(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL }} aria-label="길찾기">
+              <Navigation size={16} color="#fff" />
+            </button>
+          </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 mb-2">
@@ -540,6 +544,14 @@ export default function Page() {
     }, 4000);
     return () => clearInterval(timer);
   }, [campaigns]);
+    function openDirections(place) {
+    if (!place.lat || !place.lng) {
+      showToast("이 장소는 좌표 정보가 없어서 길찾기를 열 수 없어요");
+      return;
+    }
+    const url = `https://map.kakao.com/link/to/${encodeURIComponent(place.name)},${place.lat},${place.lng}`;
+    window.open(url, "_blank");
+  }
     function shareToKakao(place) {
     if (!window.Kakao) { showToast("공유 기능을 불러오는 중이에요"); return; }
     window.Kakao.Share.sendDefault({
@@ -1306,7 +1318,7 @@ export default function Page() {
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -1341,7 +1353,7 @@ export default function Page() {
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                              <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections} />
                 </div>
               ))}
             </div>
