@@ -452,6 +452,7 @@ export default function Page() {
   const [notifBody, setNotifBody] = useState("");
   const [individualNotifDrafts, setIndividualNotifDrafts] = useState({});
   const [notifTarget, setNotifTarget] = useState("notice");
+  const [notifNoticeId, setNotifNoticeId] = useState("");
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -492,10 +493,20 @@ export default function Page() {
       });
       PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
         const target = action.notification?.data?.target;
+        const noticeId = action.notification?.data?.noticeId;
         if (target === "home") setTab("home");
         else if (target === "map") setTab("map");
         else if (target === "mypage") setTab("my");
-        else setTab("notice");
+        else {
+          setTab("notice");
+          if (noticeId) {
+            setSelectedNoticeId(noticeId);
+            setExpandedNoticeId(noticeId);
+            setTimeout(() => {
+              document.getElementById(`notice-${noticeId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+          }
+        }
       });
     });
   }, [session]);
@@ -966,10 +977,10 @@ export default function Page() {
     await supabase.from("campaigns").delete().eq("id", id);
     fetchCampaigns();
   }
-  async function sendPushNotification(title, body, userId, target) {
+  async function sendPushNotification(title, body, userId, target, noticeId) {
     if (!title.trim() || !body.trim()) { showToast("제목과 내용을 입력해주세요"); return; }
     const { data, error } = await supabase.functions.invoke("swift-endpoint", {
-      body: { title: title.trim(), body: body.trim(), userId: userId || null, target: target || "notice" },
+      body: { title: title.trim(), body: body.trim(), userId: userId || null, target: target || "notice", noticeId: noticeId || null },
     });
     if (error) { showToast("발송 실패: " + error.message); return; }
     showToast(data?.message || "발송 완료!");
