@@ -405,6 +405,7 @@ export default function Page() {
   const [locatingAddress, setLocatingAddress] = useState(false);
     const [showAddressSearch, setShowAddressSearch] = useState(false);
   const addressSearchRef = useRef(null);
+    const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const touchStartY = useRef(0);
@@ -423,13 +424,11 @@ export default function Page() {
     if (typeof window === "undefined" || !window.Capacitor) return;
     let subPromise;
     import("@capacitor/app").then(({ App }) => {
-      subPromise = App.addListener("backButton", () => {
+          subPromise = App.addListener("backButton", () => {
         if (tab !== "home") {
           setTab("home");
         } else {
-          if (window.confirm("장편 앱을 종료하시겠습니까?")) {
-            App.exitApp();
-          }
+          setShowExitConfirm(true);
         }
       });
     });
@@ -1112,6 +1111,27 @@ export default function Page() {
               </button>
             </div>
             <div ref={addressSearchRef} style={{ width: "100vw", height: "calc(85vh - 49px)" }} />
+          </div>
+        </div>
+      )}
+      {/* ===== EXIT CONFIRM POPUP ===== */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-xs rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="font-extrabold text-base mb-2" style={{ color: INK }}>장편 앱을 종료하시겠습니까?</div>
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => setShowExitConfirm(false)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                취소
+              </button>
+              <button
+                onClick={async () => {
+                  const { App } = await import("@capacitor/app");
+                  App.exitApp();
+                }}
+                className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: CORAL }}>
+                종료
+              </button>
+            </div>
           </div>
         </div>
       )}
