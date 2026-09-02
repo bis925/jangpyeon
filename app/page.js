@@ -169,9 +169,6 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
             </button>
           )}
         </div>
-        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 flex-shrink-0 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
-          <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
-        </button>
       </div>
       <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
       <div className="flex flex-wrap gap-1.5 mb-3">
