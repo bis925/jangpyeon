@@ -21,7 +21,7 @@ const CARD = "#FFFFFF";
 const LINE = "#E4DFD1";
 
 const DISPLAY_FONT = "'Black Han Sans', sans-serif";
-const BODY_FONT = "'Gothic A1', sans-serif";
+const BODY_FONT = "'Nanum Gothic', sans-serif";
 const MONO_FONT = "'JetBrains Mono', monospace";
 
 const BADGE_META = {
