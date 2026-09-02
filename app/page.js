@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag,
+   Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -448,6 +448,8 @@ export default function Page() {
   const [adjustDrafts, setAdjustDrafts] = useState({});
     const [adjustLog, setAdjustLog] = useState([]);
     const [allReports, setAllReports] = useState([]);
+    const [notifTitle, setNotifTitle] = useState("");
+  const [notifBody, setNotifBody] = useState("");
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -957,6 +959,14 @@ export default function Page() {
   async function deleteCampaign(id) {
     await supabase.from("campaigns").delete().eq("id", id);
     fetchCampaigns();
+  }
+    async function sendPushNotification(title, body) {
+    if (!title.trim() || !body.trim()) { showToast("제목과 내용을 입력해주세요"); return; }
+    const { data, error } = await supabase.functions.invoke("send-notification", {
+      body: { title: title.trim(), body: body.trim() },
+    });
+    if (error) { showToast("발송 실패: " + error.message); return; }
+    showToast(data?.message || "발송 완료!");
   }
     async function deleteUser(userId, userEmail) {
     if (!window.confirm(`정말 "${userEmail}" 회원을 삭제하시겠어요? 이 작업은 되돌릴 수 없어요.`)) return;
@@ -1676,6 +1686,24 @@ export default function Page() {
         {tab === "admin" && isAdmin && (
           <div className="max-w-2xl mx-auto">
             <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>관리자</h2>
+                      <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>알림 보내기</div>
+            <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <input value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} placeholder="알림 제목 (예: 12월 이벤트 시작!)"
+                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <textarea value={notifBody} onChange={(e) => setNotifBody(e.target.value)} placeholder="알림 내용" rows={2}
+                className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <button
+                onClick={async () => {
+                  await sendPushNotification(notifTitle, notifBody);
+                  setNotifTitle("");
+                  setNotifBody("");
+                }}
+                className="w-full flex items-center justify-center gap-1.5 rounded-full py-2.5 text-sm font-bold text-white"
+                style={{ background: TEAL }}>
+                <Bell size={15} />
+                모든 사용자에게 발송
+              </button>
+            </div>
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
             <input value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} placeholder="이메일 또는 닉네임으로 검색"
               className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
