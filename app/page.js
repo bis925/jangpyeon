@@ -1716,7 +1716,7 @@ export default function Page() {
                 ))}
               </div>
             </div>
-                      <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer"
+                               <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 rounded-full py-3.5 font-extrabold mt-8 mb-8 transition-all duration-200 active:scale-[0.98]"
               style={{ background: "#FEE500", color: "#3C1E1E" }}>
               <Headset size={18} />
