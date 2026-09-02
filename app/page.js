@@ -138,7 +138,10 @@ function Badge({ badgeKey }) {
 function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport }) {
   const badges = getBadges(place);
   return (
-    <div className="rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+        <div className="relative rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+      <button onClick={() => onToggleFavorite(place.id)} className="absolute top-3 right-3 rounded-full p-1.5 z-10 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
+        <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
+      </button>
       <div className="mb-3 min-w-0">
         {place.photo_urls && place.photo_urls.length > 0 ? (
           <div className="flex gap-1.5 overflow-x-auto min-w-0">
