@@ -322,7 +322,7 @@ export default function Page() {
   const [toast, setToast] = useState(null);
   const [justRegistered, setJustRegistered] = useState(null);
   const [form, setForm] = useState({
-    name: "", address: "", category: "공공기관",
+    name: "", address: "", addressDetail: "", category: "공공기관",
     badges: { ramp: false, door: false, stroller: false, lift: false },
   });
     const [photoFile, setPhotoFile] = useState(null);
@@ -873,6 +873,7 @@ export default function Page() {
     setForm({
       name: place.name,
       address: place.address,
+      addressDetail: "",
       category: place.category,
       badges: {
         ramp: place.has_ramp,
@@ -911,7 +912,7 @@ export default function Page() {
 
     showToast("수정 완료!");
     setEditingPlaceId(null);
-    setForm({ name: "", address: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });
+    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFile(null);
     setPhotoPreview(null);
     setTab("home");
@@ -922,9 +923,12 @@ export default function Page() {
     e.preventDefault();
     if (!form.name.trim()) return;
     if (editingPlaceId) { await submitEdit(); return; }
+    const fullAddress = form.addressDetail.trim()
+      ? `${form.address.trim() || "주소 정보 없음"} ${form.addressDetail.trim()}`
+      : (form.address.trim() || "주소 정보 없음");
     const { data, error } = await supabase.rpc("register_place", {
       p_name: form.name.trim(),
-      p_address: form.address.trim() || "주소 정보 없음",
+      p_address: fullAddress,
       p_category: form.category,
       p_has_ramp: form.badges.ramp,
       p_has_restroom: form.badges.door,
@@ -944,7 +948,7 @@ export default function Page() {
     }
 
     setJustRegistered(data);
-    setForm({ name: "", address: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });
+    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });;
     setPhotoFile(null);
     setPhotoPreview(null);
     fetchPlaces();
@@ -1206,10 +1210,12 @@ export default function Page() {
                     주소 검색
                   </button>
                 </div>
-                <button type="button" onClick={locateMeForRegister} disabled={locatingAddress} className="flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 mb-4 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: TEAL, background: TEAL_TINT }}>
+                               <button type="button" onClick={locateMeForRegister} disabled={locatingAddress} className="flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 mb-2 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: TEAL, background: TEAL_TINT }}>
                   <Locate size={14} />
                   {locatingAddress ? "위치 확인 중..." : "현재 위치로 주소 찾기"}
                 </button>
+                <input value={form.addressDetail} onChange={(e) => setForm({ ...form, addressDetail: e.target.value })} placeholder="상세주소 (동/호수, 층수 등, 선택)"
+                  className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
                 <div className="flex flex-wrap gap-2 mb-5">
