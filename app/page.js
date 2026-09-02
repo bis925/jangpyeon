@@ -387,32 +387,76 @@ function LoginScreen({ onSent }) {
     </div>
   );
 }
+/* ===================== 온보딩 마스코트 ===================== */
+function Mascot({ mood }) {
+  return (
+    <svg viewBox="0 0 200 200" width="150" height="150">
+      <g className="mascot-bounce">
+        {/* 그림자 */}
+        <ellipse cx="100" cy="178" rx="38" ry="7" fill={INK} opacity="0.08" />
+
+        {/* 팔 (흔들기) */}
+        <g className="mascot-arm">
+          <rect x="140" y="90" width="14" height="42" rx="7" fill={TEAL} transform="rotate(20 140 90)" />
+        </g>
+
+        {/* 몸통 (로고 모양) */}
+        <g className="mascot-nod">
+          <rect x="45" y="40" width="110" height="110" rx="34" fill={TEAL} />
+          {/* 경사로 곡선 */}
+          <path d="M 75 118 Q 75 95 105 85 L 120 78" stroke="#fff" strokeWidth="11" strokeLinecap="round" fill="none" />
+          <circle cx="124" cy="74" r="10" fill={CORAL} />
+
+          {/* 눈 */}
+          <g className="mascot-eye">
+            <circle cx="82" cy="105" r="5" fill="#fff" />
+            <circle cx="82" cy="105" r="2.6" fill={INK} />
+          </g>
+          <g className="mascot-eye">
+            <circle cx="100" cy="103" r="5" fill="#fff" />
+            <circle cx="100" cy="103" r="2.6" fill={INK} />
+          </g>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
 /* ===================== 온보딩 ===================== */
 const ONBOARDING_SLIDES = [
-  { icon: MapPin, color: TEAL, title: "지도에서 한눈에 확인", desc: "휠체어 출입, 장애인 화장실, 유모차 접근성 정보를 지도 위에서 바로 찾아보세요." },
-  { icon: Plus, color: CORAL, title: "함께 등록해요", desc: "직접 방문한 장소의 접근성 정보를 등록하면 포인트가 쌓여요. 사진도 여러 장 남길 수 있어요." },
-  { icon: Sparkles, color: YELLOW, title: "포인트로 등급 UP", desc: "등록하고, 응원받을 때마다 포인트가 쌓이고 등급이 올라가요." },
-  { icon: Megaphone, color: TEAL, title: "이벤트도 놓치지 마세요", desc: "공지사항과 이벤트 소식을 확인하고, 카카오톡으로 편하게 문의하세요." },
+  { color: TEAL, bubble: "안녕! 나는 장편이야 👋", title: "지도에서 한눈에 확인", desc: "휠체어 출입, 장애인 화장실, 유모차 접근성 정보를 지도 위에서 바로 찾아볼 수 있어." },
+  { color: CORAL, bubble: "같이 등록해볼까? ✍️", title: "함께 등록해요", desc: "직접 방문한 장소의 접근성 정보를 등록하면 포인트가 쌓여! 사진도 여러 장 남길 수 있어." },
+  { color: "#E8A800", bubble: "포인트 모으는 재미! 🎉", title: "포인트로 등급 UP", desc: "등록하고, 응원받을 때마다 포인트가 쌓이고 등급이 올라가." },
+  { color: TEAL_DARK, bubble: "이벤트도 알려줄게! 📢", title: "이벤트도 놓치지 마세요", desc: "공지사항과 이벤트 소식을 확인하고, 카카오톡으로 편하게 문의해." },
 ];
 
 function OnboardingScreen({ onFinish }) {
   const [step, setStep] = useState(0);
   const slide = ONBOARDING_SLIDES[step];
-  const Icon = slide.icon;
   const isLast = step === ONBOARDING_SLIDES.length - 1;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col" style={{ background: PAPER }}>
-      <div className="flex-1 flex flex-col items-center justify-center px-8">
-        <div className="relative flex items-center justify-center mb-10" style={{ width: 140, height: 140 }}>
-          <div className="absolute inset-0 rounded-full onboard-ring" style={{ background: slide.color, opacity: 0.25 }} />
-          <div className="relative rounded-full flex items-center justify-center onboard-float" style={{ width: 100, height: 100, background: slide.color }}>
-            <Icon size={44} color="#fff" />
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ background: PAPER }}>
+      <div className="flex-1 flex flex-col items-center justify-center px-8 relative">
+        {/* 떠다니는 배경 점들 */}
+        <div className="absolute onboard-dot" style={{ top: "18%", left: "15%", width: 10, height: 10, borderRadius: 999, background: slide.color }} />
+        <div className="absolute onboard-dot" style={{ top: "28%", right: "18%", width: 14, height: 14, borderRadius: 999, background: YELLOW, animationDelay: "0.6s" }} />
+        <div className="absolute onboard-dot" style={{ bottom: "26%", left: "20%", width: 8, height: 8, borderRadius: 999, background: CORAL, animationDelay: "1.2s" }} />
+
+        <div key={step} className="flex flex-col items-center">
+          <div className="mb-1">
+            <Mascot mood={step} />
           </div>
-        </div>
-        <div key={step} className="onboard-slide text-center">
-          <div className="font-extrabold text-xl mb-3" style={{ color: INK, fontFamily: DISPLAY_FONT }}>{slide.title}</div>
-          <div className="text-sm leading-relaxed max-w-xs" style={{ color: INK_SOFT }}>{slide.desc}</div>
+
+          <div className="onboard-bubble relative rounded-2xl px-4 py-2.5 mb-8" style={{ background: "#fff", border: `1.5px solid ${LINE}`, maxWidth: 240 }}>
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45" style={{ background: "#fff", borderLeft: `1.5px solid ${LINE}`, borderTop: `1.5px solid ${LINE}` }} />
+            <span className="text-sm font-bold" style={{ color: INK }}>{slide.bubble}</span>
+          </div>
+
+          <div className="onboard-slide text-center">
+            <div className="font-extrabold text-xl mb-3" style={{ color: INK, fontFamily: DISPLAY_FONT }}>{slide.title}</div>
+            <div className="text-sm leading-relaxed max-w-xs" style={{ color: INK_SOFT }}>{slide.desc}</div>
+          </div>
         </div>
       </div>
 
