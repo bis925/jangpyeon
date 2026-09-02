@@ -153,10 +153,10 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
               <Pencil size={15} color={INK_SOFT} />
             </button>
           )}
-          <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
-            <Star size={16} color={isFavorite ? YELLOW : LINE} fill={isFavorite ? YELLOW : "none"} />
-          </button>
           <div className="flex-1" />
+          <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
+            <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
+          </button>
           <button onClick={() => onShare(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
             <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
             <span style={{ fontSize: 10, fontWeight: 700, color: "#3C1E1E" }}>공유</span>
