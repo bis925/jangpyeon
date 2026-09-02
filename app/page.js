@@ -402,6 +402,8 @@ export default function Page() {
   const [authLoading, setAuthLoading] = useState(true);
 
   const [profile, setProfile] = useState(null);
+    const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState(null);
   const [places, setPlaces] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
   const [history, setHistory] = useState([]);
@@ -626,6 +628,20 @@ export default function Page() {
       ],
     });
   }
+    async function handleAvatarChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setAvatarFile(file);
+    const fileExt = file.name.split(".").pop();
+    const filePath = `${session.user.id}/avatar.${fileExt}`;
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, { upsert: true });
+    if (uploadError) { showToast("업로드 실패: " + uploadError.message); return; }
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    const newUrl = urlData.publicUrl + "?t=" + Date.now();
+    await supabase.from("profiles").update({ avatar_url: newUrl }).eq("id", session.user.id);
+    setAvatarUrl(newUrl);
+    showToast("프로필 사진이 변경됐어요!");
+  }
     function locateMe() {
     if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
     navigator.geolocation.getCurrentPosition(
@@ -746,6 +762,7 @@ export default function Page() {
   async function fetchProfile() {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data);
+    setAvatarUrl(data?.avatar_url || null);
   }
   async function fetchPlaces() {
     const { data } = await supabase.from("places").select("*, place_photos(photo_url)").eq("status", "approved").order("created_at", { ascending: false });
@@ -1595,10 +1612,18 @@ export default function Page() {
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
             <div className="rounded-2xl p-6 mb-5 text-white" style={{ background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})` }}>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-11 h-11 rounded-full flex items-center justify-center font-extrabold" style={{ background: "rgba(255,255,255,0.2)" }}>
-                  <User size={18} />
-                </div>
+                           <div className="flex items-center gap-3 mb-5">
+                <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
+                <label htmlFor="avatar-upload" className="w-11 h-11 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0" style={{ background: "rgba(255,255,255,0.2)" }}>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="프로필 사진" className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={18} />
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.35)", opacity: 0 }} onMouseEnter={(e) => e.currentTarget.style.opacity = 1} onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
+                    <Camera size={14} color="#fff" />
+                  </div>
+                </label>
                 <div>
                   <div className="font-extrabold text-sm">{session.user.email}</div>
                   <div className="inline-block text-[11px] rounded-full px-2 py-0.5 mt-0.5" style={{ background: "rgba(255,255,255,0.18)" }}>{tier.label}</div>
