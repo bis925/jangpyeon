@@ -1202,17 +1202,15 @@ export default function Page() {
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
-                                                <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
-                                <div className="flex flex-col gap-2 mb-2">
-                  <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
-                    className="w-full rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: PAPER }} />
-                  <button type="button" onClick={openAddressSearch} className="w-full rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL, color: "#fff" }}>
-                    주소 검색
-                  </button>
-                </div>
+                                                                                             <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
+                <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
+                  className="w-full rounded-xl px-4 py-3 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: PAPER }} />
                 <input value={form.addressDetail} onChange={(e) => setForm({ ...form, addressDetail: e.target.value })} placeholder="상세주소 (동/호수, 층수 등, 선택)"
                   className="w-full rounded-xl px-4 py-3 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-                               <button type="button" onClick={locateMeForRegister} disabled={locatingAddress} className="flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 mb-4 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: TEAL, background: TEAL_TINT }}>
+                <button type="button" onClick={openAddressSearch} className="w-full rounded-xl px-4 py-3 mb-2 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL, color: "#fff" }}>
+                  주소 검색
+                </button>
+                <button type="button" onClick={locateMeForRegister} disabled={locatingAddress} className="flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 mb-4 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: TEAL, background: TEAL_TINT }}>
                   <Locate size={14} />
                   {locatingAddress ? "위치 확인 중..." : "현재 위치로 주소 찾기"}
                 </button>
