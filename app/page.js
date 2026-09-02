@@ -387,7 +387,58 @@ function LoginScreen({ onSent }) {
     </div>
   );
 }
+/* ===================== 온보딩 ===================== */
+const ONBOARDING_SLIDES = [
+  { icon: MapPin, color: TEAL, title: "지도에서 한눈에 확인", desc: "휠체어 출입, 장애인 화장실, 유모차 접근성 정보를 지도 위에서 바로 찾아보세요." },
+  { icon: Plus, color: CORAL, title: "함께 등록해요", desc: "직접 방문한 장소의 접근성 정보를 등록하면 포인트가 쌓여요. 사진도 여러 장 남길 수 있어요." },
+  { icon: Sparkles, color: YELLOW, title: "포인트로 등급 UP", desc: "등록하고, 응원받을 때마다 포인트가 쌓이고 등급이 올라가요." },
+  { icon: Megaphone, color: TEAL, title: "이벤트도 놓치지 마세요", desc: "공지사항과 이벤트 소식을 확인하고, 카카오톡으로 편하게 문의하세요." },
+];
 
+function OnboardingScreen({ onFinish }) {
+  const [step, setStep] = useState(0);
+  const slide = ONBOARDING_SLIDES[step];
+  const Icon = slide.icon;
+  const isLast = step === ONBOARDING_SLIDES.length - 1;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex flex-col" style={{ background: PAPER }}>
+      <div className="flex-1 flex flex-col items-center justify-center px-8">
+        <div className="relative flex items-center justify-center mb-10" style={{ width: 140, height: 140 }}>
+          <div className="absolute inset-0 rounded-full onboard-ring" style={{ background: slide.color, opacity: 0.25 }} />
+          <div className="relative rounded-full flex items-center justify-center onboard-float" style={{ width: 100, height: 100, background: slide.color }}>
+            <Icon size={44} color="#fff" />
+          </div>
+        </div>
+        <div key={step} className="onboard-slide text-center">
+          <div className="font-extrabold text-xl mb-3" style={{ color: INK, fontFamily: DISPLAY_FONT }}>{slide.title}</div>
+          <div className="text-sm leading-relaxed max-w-xs" style={{ color: INK_SOFT }}>{slide.desc}</div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 mb-6">
+        {ONBOARDING_SLIDES.map((_, i) => (
+          <div key={i} className="rounded-full transition-all duration-300" style={{ width: i === step ? 20 : 6, height: 6, background: i === step ? TEAL : LINE }} />
+        ))}
+      </div>
+
+      <div className="px-8 pb-10">
+        <button
+          onClick={() => { if (isLast) onFinish(); else setStep(step + 1); }}
+          className="w-full rounded-full py-3.5 font-extrabold text-white transition-all duration-200 active:scale-[0.98]"
+          style={{ background: TEAL }}
+        >
+          {isLast ? "시작하기" : "다음"}
+        </button>
+        {!isLast && (
+          <button onClick={onFinish} className="w-full text-center text-xs mt-3" style={{ color: INK_SOFT }}>
+            건너뛰기
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 /* ===================== 메인 앱 ===================== */
 export default function Page() {
     const [showOnboarding, setShowOnboarding] = useState(false);
@@ -1207,6 +1258,9 @@ export default function Page() {
   }
   if (!session) {
     return <LoginScreen />;
+  }
+  if (showOnboarding) {
+    return <OnboardingScreen onFinish={() => setShowOnboarding(false)} />;
   }
 
   const points = profile?.points ?? 0;
