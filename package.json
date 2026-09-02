@@ -14,7 +14,8 @@
     "@supabase/supabase-js": "2.45.4",
     "lucide-react": "0.383.0",
     "@capacitor/app": "^6.0.0",
-    "@capacitor/clipboard": "^6.0.0"
+    "@capacitor/clipboard": "^6.0.0",
+    "@capacitor/push-notifications": "^6.0.0"
   },
   "devDependencies": {
     "tailwindcss": "3.4.7",
