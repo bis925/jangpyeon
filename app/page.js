@@ -485,12 +485,12 @@ export default function Page() {
       });
       PushNotifications.addListener("registration", async (token) => {
         showToast("토큰 받음: " + token.value.slice(0, 15) + "...");
-        const { error } = await supabase.from("push_tokens").upsert(
+         const { error } = await supabase.from("push_tokens").upsert(
           { user_id: session.user.id, token: token.value },
           { onConflict: "token" }
         );
-        if (error) showToast("저장 실패: " + error.message);
-        else showToast("토큰 저장 성공!");
+        if (error) window.alert("저장 실패: " + error.message);
+        else window.alert("토큰 저장 성공!");
       });
       PushNotifications.addListener("registrationError", (err) => {
         showToast("등록 에러: " + JSON.stringify(err));
