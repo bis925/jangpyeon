@@ -543,12 +543,9 @@ export default function Page() {
     }, 4000);
     return () => clearInterval(timer);
   }, [campaigns]);
-    function openDirections(place) {
-    if (!place.lat || !place.lng) {
-      showToast("이 장소는 좌표 정보가 없어서 길찾기를 열 수 없어요");
-      return;
-    }
-    const url = `https://map.kakao.com/link/to/${encodeURIComponent(place.name)},${place.lat},${place.lng}`;
+  function openDirections(place) {
+    const query = `${place.name} ${place.address || ""}`.trim();
+    const url = `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
     window.open(url, "_blank");
   }
     function shareToKakao(place) {
