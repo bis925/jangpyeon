@@ -1439,7 +1439,7 @@ export default function Page() {
                 </div>
               ))}
             </div>
-                            <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+                                        <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 mt-8 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <span className="text-sm font-bold" style={{ color: INK }}>다크 모드</span>
               <button onClick={() => setIsDark(!isDark)} className="relative rounded-full transition-all duration-200" style={{ width: 46, height: 26, background: isDark ? TEAL : LINE }}>
                 <div className="absolute rounded-full transition-all duration-200" style={{ width: 20, height: 20, top: 3, left: isDark ? 23 : 3, background: "#fff" }} />
