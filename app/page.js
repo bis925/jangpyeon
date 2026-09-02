@@ -332,6 +332,7 @@ export default function Page() {
       const [selectedNoticeId, setSelectedNoticeId] = useState(null);
       const [expandedNoticeId, setExpandedNoticeId] = useState(null);
     const [notices, setNotices] = useState([]);
+  const noticesInitialized = useRef(false);
   const [inquiries, setInquiries] = useState([]);
   const [allInquiries, setAllInquiries] = useState([]);
   const [inquiryForm, setInquiryForm] = useState({ title: "", content: "" });
@@ -577,6 +578,10 @@ export default function Page() {
     async function fetchNotices() {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
     setNotices(data || []);
+    if (!noticesInitialized.current && data && data.length > 0) {
+      setExpandedNoticeId(data[0].id);
+      noticesInitialized.current = true;
+    }
   }
   async function fetchInquiries() {
     const { data } = await supabase.from("inquiries").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
