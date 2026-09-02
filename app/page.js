@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-   Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell,
+     Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Check,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -402,8 +402,10 @@ export default function Page() {
   const [authLoading, setAuthLoading] = useState(true);
 
   const [profile, setProfile] = useState(null);
-    const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
+  const [editingNickname, setEditingNickname] = useState(false);
+  const [nicknameDraft, setNicknameDraft] = useState("");
   const [places, setPlaces] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
   const [history, setHistory] = useState([]);
@@ -627,6 +629,14 @@ export default function Page() {
         { title: "장편에서 보기", link: { mobileWebUrl: "https://jangpyeon.kr", webUrl: "https://jangpyeon.kr" } },
       ],
     });
+  }
+    async function saveNickname() {
+    if (!nicknameDraft.trim()) { showToast("닉네임을 입력해주세요"); return; }
+    const { error } = await supabase.from("profiles").update({ nickname: nicknameDraft.trim() }).eq("id", session.user.id);
+    if (error) { showToast("저장 실패: " + error.message); return; }
+    setProfile((prev) => ({ ...prev, nickname: nicknameDraft.trim() }));
+    setEditingNickname(false);
+    showToast("닉네임이 변경됐어요!");
   }
     async function handleAvatarChange(e) {
     const file = e.target.files && e.target.files[0];
@@ -1612,22 +1622,43 @@ export default function Page() {
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
             <div className="rounded-2xl p-6 mb-5 text-white" style={{ background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})` }}>
-                           <div className="flex items-center gap-3 mb-5">
+                        <div className="flex flex-col items-center text-center mb-5">
                 <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
-                <label htmlFor="avatar-upload" className="w-11 h-11 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0" style={{ background: "rgba(255,255,255,0.2)" }}>
+                <label htmlFor="avatar-upload" className="w-24 h-24 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-3" style={{ background: "rgba(255,255,255,0.2)", border: "3px solid rgba(255,255,255,0.3)" }}>
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="프로필 사진" className="w-full h-full object-cover" />
                   ) : (
-                    <User size={18} />
+                    <User size={32} />
                   )}
                   <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.35)", opacity: 0 }} onMouseEnter={(e) => e.currentTarget.style.opacity = 1} onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
-                    <Camera size={14} color="#fff" />
+                    <Camera size={20} color="#fff" />
                   </div>
                 </label>
-                <div>
-                  <div className="font-extrabold text-sm">{session.user.email}</div>
-                  <div className="inline-block text-[11px] rounded-full px-2 py-0.5 mt-0.5" style={{ background: "rgba(255,255,255,0.18)" }}>{tier.label}</div>
-                </div>
+                {editingNickname ? (
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <input
+                      value={nicknameDraft}
+                      onChange={(e) => setNicknameDraft(e.target.value)}
+                      autoFocus
+                      maxLength={12}
+                      className="rounded-lg px-2.5 py-1 text-sm font-extrabold text-center outline-none"
+                      style={{ background: "rgba(255,255,255,0.2)", color: "#fff", width: 140 }}
+                    />
+                    <button onClick={saveNickname} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.25)" }} aria-label="닉네임 저장">
+                      <Check size={14} color="#fff" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setNicknameDraft(profile?.nickname || ""); setEditingNickname(true); }}
+                    className="flex items-center gap-1.5 mb-1.5"
+                  >
+                    <span className="font-extrabold text-base">{profile?.nickname || "닉네임 설정하기"}</span>
+                    <Pencil size={13} color="rgba(255,255,255,0.7)" />
+                  </button>
+                )}
+                <div className="text-xs opacity-70 mb-2">{session.user.email}</div>
+                <div className="inline-block text-[11px] rounded-full px-2.5 py-1" style={{ background: "rgba(255,255,255,0.18)" }}>{tier.label}</div>
               </div>
               <div style={{ fontFamily: MONO_FONT, fontSize: 34, fontWeight: 700 }}>{points.toLocaleString()}P</div>
               <div className="text-xs opacity-80 mb-4">{next ? `다음 등급(${next.label})까지 ${next.min - points}P 남았어요` : "최고 등급 달성!"}</div>
