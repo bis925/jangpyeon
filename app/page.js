@@ -400,7 +400,7 @@ export default function Page() {
   const [toast, setToast] = useState(null);
   const [justRegistered, setJustRegistered] = useState(null);
   const [form, setForm] = useState({
-    name: "", address: "", addressDetail: "", category: "공공기관",
+    name: "", address: "", addressDetail: "", category: "공공기관", keywords: "",
     badges: { ramp: false, door: false, stroller: false, lift: false },
   });
     const [photoFile, setPhotoFile] = useState(null);
@@ -932,7 +932,7 @@ export default function Page() {
 
   const filteredPlaces = useMemo(() => {
     return places.filter((p) => {
-      const matchesQuery = query.trim() === "" || p.name.includes(query) || p.address.includes(query);
+      const matchesQuery = query.trim() === "" || p.name.includes(query) || p.address.includes(query) || (p.keywords && p.keywords.includes(query));
       const matchesFilter = activeFilters.length === 0 || activeFilters.every((f) => p[BADGE_META[f].field]);
       return matchesQuery && matchesFilter;
     });
@@ -984,13 +984,14 @@ export default function Page() {
       setPhotoPreview(URL.createObjectURL(file));
     }
   }
-    function startEdit(place) {
+  function startEdit(place) {
     setEditingPlaceId(place.id);
     setForm({
       name: place.name,
       address: place.address,
       addressDetail: "",
       category: place.category,
+      keywords: place.keywords || "",
       badges: {
         ramp: place.has_ramp,
         door: place.has_restroom,
@@ -1004,7 +1005,7 @@ export default function Page() {
     if (!form.name.trim()) return;
     const { error } = await supabase
       .from("places")
-      .update({
+           .update({
         name: form.name.trim(),
         address: form.address.trim() || "주소 정보 없음",
         category: form.category,
@@ -1012,6 +1013,7 @@ export default function Page() {
         has_restroom: form.badges.door,
         has_stroller_access: form.badges.stroller,
         has_elevator: form.badges.lift,
+        keywords: form.keywords.trim() || null,
       })
       .eq("id", editingPlaceId);
     if (error) { showToast("수정 실패: " + error.message); return; }
@@ -1028,7 +1030,7 @@ export default function Page() {
 
     showToast("수정 완료!");
     setEditingPlaceId(null);
-    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });
+    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFile(null);
     setPhotoPreview(null);
     setTab("home");
@@ -1050,6 +1052,7 @@ export default function Page() {
       p_has_restroom: form.badges.door,
       p_has_stroller_access: form.badges.stroller,
       p_has_elevator: form.badges.lift,
+      p_keywords: form.keywords.trim() || null,
     });
     if (error) { showToast("등록 실패: " + error.message); return; }
 
@@ -1064,7 +1067,7 @@ export default function Page() {
     }
 
     setJustRegistered(data);
-    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", badges: { ramp: false, door: false, stroller: false, lift: false } });;
+    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFile(null);
     setPhotoPreview(null);
     fetchPlaces();
@@ -1389,7 +1392,9 @@ export default function Page() {
                   <Locate size={14} />
                   {locatingAddress ? "위치 확인 중..." : "현재 위치로 주소 찾기"}
                 </button>
-
+                <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>검색 키워드 (선택)</label>
+                <input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="예: 족발, 갈비, 한식 (쉼표로 구분)"
+                  className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
                 <div className="flex flex-wrap gap-2 mb-5">
                   {CATEGORIES.map((c) => (
