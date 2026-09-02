@@ -157,26 +157,39 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           <div className="w-16 h-16 rounded-xl" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
         )}
       </div>
-      <div className="font-extrabold" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <div className="flex items-center gap-1.5">
+          <div className="font-extrabold" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
+          {isOwner && (
+            <button onClick={() => onEdit(place)} className="rounded-full p-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정">
+              <Pencil size={13} color={INK_SOFT} />
+            </button>
+          )}
+        </div>
+        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 flex-shrink-0 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
+          <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
+        </button>
+      </div>
       <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
       <div className="flex items-center gap-1 mb-3">
-        {isOwner ? (
-          <button onClick={() => onEdit(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정">
-            <Pencil size={15} color={INK_SOFT} />
-          </button>
-        ) : (
+        <button onClick={() => onShare(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
+          <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#3C1E1E" }}>공유</span>
+        </button>
+        <button onClick={() => onDirections(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL }} aria-label="길찾기">
+          <Navigation size={14} color="#fff" />
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>길찾기</span>
+        </button>
+        {!isOwner && (
           <button onClick={() => onReport(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: CORAL_TINT }} aria-label="정보가 달라졌어요 신고">
             <Flag size={14} color={CORAL} />
             <span style={{ fontSize: 10, fontWeight: 700, color: CORAL }}>신고</span>
           </button>
         )}
-        <div className="flex-1" />
-        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
-          <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
-        </button>
+      </div>
         <button onClick={() => onShare(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
           <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
           <span style={{ fontSize: 10, fontWeight: 700, color: "#3C1E1E" }}>공유</span>
