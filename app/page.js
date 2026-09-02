@@ -1814,10 +1814,10 @@ export default function Page() {
                 .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
                 .map((p) => (
                 <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
-                                    <div className="flex items-center justify-between mb-1">
+                                                    <div className="flex items-center justify-between mb-1">
                     <div>
-                      <div className="text-sm font-bold" style={{ color: INK }}>{p.admin_note || p.email || "(이메일 없음)"}</div>
-                      <div className="text-xs" style={{ color: INK_SOFT }}>{p.email} · {p.nickname} · {currentTier(p.points).label}</div>
+                      <div className="text-sm font-bold" style={{ color: INK }}>{p.email || "(이메일 없음)"}</div>
+                      <div className="text-xs" style={{ color: INK_SOFT }}>{p.admin_note ? `📌 ${p.admin_note} · ` : ""}{p.nickname} · {currentTier(p.points).label}</div>
                     </div>
                     <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 15 }}>{p.points.toLocaleString()}P</div>
                   </div>
