@@ -1709,17 +1709,26 @@ export default function Page() {
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                           <textarea value={notifBody} onChange={(e) => setNotifBody(e.target.value)} placeholder="알림 내용" rows={2}
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-              <select value={notifTarget} onChange={(e) => setNotifTarget(e.target.value)} className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
+                          <select value={notifTarget} onChange={(e) => setNotifTarget(e.target.value)} className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
                 <option value="notice">누르면 → 공지사항으로 이동</option>
                 <option value="home">누르면 → 홈으로 이동</option>
                 <option value="map">누르면 → 지도로 이동</option>
                 <option value="mypage">누르면 → 마이페이지로 이동</option>
               </select>
+              {notifTarget === "notice" && (
+                <select value={notifNoticeId} onChange={(e) => setNotifNoticeId(e.target.value)} className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
+                  <option value="">특정 글 지정 안함 (목록만 보여줌)</option>
+                  {notices.map((n) => (
+                    <option key={n.id} value={n.id}>{n.title}</option>
+                  ))}
+                </select>
+              )}
               <button
                 onClick={async () => {
-                  await sendPushNotification(notifTitle, notifBody, null, notifTarget);
+                  await sendPushNotification(notifTitle, notifBody, null, notifTarget, notifNoticeId);
                   setNotifTitle("");
                   setNotifBody("");
+                  setNotifNoticeId("");
                 }}
                 className="w-full flex items-center justify-center gap-1.5 rounded-full py-2.5 text-sm font-bold text-white"
                 style={{ background: TEAL }}>
