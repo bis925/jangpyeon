@@ -387,40 +387,7 @@ function LoginScreen({ onSent }) {
     </div>
   );
 }
-/* ===================== 온보딩 마스코트 ===================== */
-function Mascot({ mood }) {
-  return (
-    <svg viewBox="0 0 200 200" width="150" height="150">
-      <g className="mascot-bounce">
-        {/* 그림자 */}
-        <ellipse cx="100" cy="178" rx="38" ry="7" fill={INK} opacity="0.08" />
 
-        {/* 팔 (흔들기) */}
-        <g className="mascot-arm">
-          <rect x="140" y="90" width="14" height="42" rx="7" fill={TEAL} transform="rotate(20 140 90)" />
-        </g>
-
-        {/* 몸통 (로고 모양) */}
-        <g className="mascot-nod">
-          <rect x="45" y="40" width="110" height="110" rx="34" fill={TEAL} />
-          {/* 경사로 곡선 */}
-          <path d="M 75 118 Q 75 95 105 85 L 120 78" stroke="#fff" strokeWidth="11" strokeLinecap="round" fill="none" />
-          <circle cx="124" cy="74" r="10" fill={CORAL} />
-
-          {/* 눈 */}
-          <g className="mascot-eye">
-            <circle cx="82" cy="105" r="5" fill="#fff" />
-            <circle cx="82" cy="105" r="2.6" fill={INK} />
-          </g>
-          <g className="mascot-eye">
-            <circle cx="100" cy="103" r="5" fill="#fff" />
-            <circle cx="100" cy="103" r="2.6" fill={INK} />
-          </g>
-        </g>
-      </g>
-    </svg>
-  );
-}
 
 /* ===================== 온보딩 ===================== */
 const ONBOARDING_SLIDES = [
@@ -871,11 +838,7 @@ export default function Page() {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data);
     setAvatarUrl(data?.avatar_url || null);
-    const seenOnboarding = localStorage.getItem("jangpyeon_onboarding_seen");
-    if (!seenOnboarding) {
-      setShowOnboarding(true);
-      localStorage.setItem("jangpyeon_onboarding_seen", "true");
-    }
+
   }
   async function fetchPlaces() {
     const { data } = await supabase.from("places").select("*, place_photos(photo_url)").eq("status", "approved").order("created_at", { ascending: false });
@@ -1302,9 +1265,6 @@ export default function Page() {
   }
   if (!session) {
     return <LoginScreen />;
-  }
-  if (showOnboarding) {
-    return <OnboardingScreen onFinish={() => setShowOnboarding(false)} />;
   }
 
   const points = profile?.points ?? 0;
