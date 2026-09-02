@@ -138,46 +138,42 @@ function Badge({ badgeKey }) {
 function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections }) {
   const badges = getBadges(place);
   return (
-    <div className="flex gap-4 rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-      {place.photo_url ? (
-        <button type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_url); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden">
-          <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover" />
-        </button>
-      ) : (
-        <div className="w-16 h-16 rounded-xl flex-shrink-0" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <div className="font-extrabold" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
-            <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
-          </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-            {isOwner && (
-              <button onClick={() => onEdit(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정">
-                <Pencil size={15} color={INK_SOFT} />
-              </button>
-            )}
-                       <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
-              <Star size={16} color={isFavorite ? YELLOW : LINE} fill={isFavorite ? YELLOW : "none"} />
+    <div className="rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+      <div className="flex items-start gap-3 mb-3">
+        {place.photo_url ? (
+          <button type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_url); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden">
+            <img src={place.photo_url} alt={place.name} className="w-full h-full object-cover" />
+          </button>
+        ) : (
+          <div className="w-16 h-16 rounded-xl flex-shrink-0" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
+        )}
+        <div className="flex items-center gap-1 flex-wrap flex-1">
+          {isOwner && (
+            <button onClick={() => onEdit(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정">
+              <Pencil size={15} color={INK_SOFT} />
             </button>
-                                             <button onClick={() => onShare(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
-              <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
-              <span style={{ fontSize: 10, fontWeight: 700, color: "#3C1E1E" }}>공유</span>
-            </button>
-            <button onClick={() => onDirections(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL }} aria-label="길찾기">
-              <Navigation size={14} color="#fff" />
-              <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>길찾기</span>
-            </button>
-          </div>
+          )}
+          <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="즐겨찾기">
+            <Star size={16} color={isFavorite ? YELLOW : LINE} fill={isFavorite ? YELLOW : "none"} />
+          </button>
+          <button onClick={() => onShare(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
+            <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#3C1E1E" }}>공유</span>
+          </button>
+          <button onClick={() => onDirections(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL }} aria-label="길찾기">
+            <Navigation size={14} color="#fff" />
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>길찾기</span>
+          </button>
         </div>
-        <div className="flex flex-wrap gap-1.5 mb-2">
-          {badges.map((b) => <Badge key={b} badgeKey={b} />)}
-        </div>
-        <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75" style={{ color: CORAL }}>
-          도움이 됐어요 {place.helpful_count} · 눌러서 응원하기
-        </button>
       </div>
+      <div className="font-extrabold" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
+      <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {badges.map((b) => <Badge key={b} badgeKey={b} />)}
+      </div>
+      <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75" style={{ color: CORAL }}>
+        도움이 됐어요 {place.helpful_count} · 눌러서 응원하기
+      </button>
     </div>
   );
 }
