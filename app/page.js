@@ -615,12 +615,12 @@ export default function Page() {
     const { data } = await supabase.from("favorites").select("place_id").eq("user_id", session.user.id);
     setFavorites(new Set((data || []).map((f) => f.place_id)));
   }
-    async function fetchNotices() {
+     async function fetchNotices() {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
     setNotices(data || []);
     if (!noticesInitialized.current && data && data.length > 0) {
-      setExpandedNoticeId(data[0].id);
       noticesInitialized.current = true;
+      setExpandedNoticeId((prev) => prev !== null ? prev : data[0].id);
     }
   }
   async function fetchInquiries() {
