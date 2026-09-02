@@ -1624,7 +1624,7 @@ export default function Page() {
             <div className="rounded-2xl p-6 mb-5 text-white" style={{ background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})` }}>
                         <div className="flex flex-col items-center text-center mb-5">
                 <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
-                <label htmlFor="avatar-upload" className="w-24 h-24 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-3" style={{ background: "rgba(255,255,255,0.2)", border: "3px solid rgba(255,255,255,0.3)" }}>
+                              <label htmlFor="avatar-upload" className="w-24 h-24 rounded-3xl flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-3" style={{ background: "rgba(255,255,255,0.2)", border: "3px solid rgba(255,255,255,0.3)" }}>
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="프로필 사진" className="w-full h-full object-cover" />
                   ) : (
