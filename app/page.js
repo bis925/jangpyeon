@@ -372,6 +372,23 @@ export default function Page() {
       );
     }
   }, []);
+  
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.Capacitor) return;
+    let subPromise;
+    import("@capacitor/app").then(({ App }) => {
+      subPromise = App.addListener("backButton", () => {
+        if (tab !== "home") {
+          setTab("home");
+        } else {
+          if (window.confirm("장편 앱을 종료하시겠습니까?")) {
+            App.exitApp();
+          }
+        }
+      });
+    });
+    return () => { if (subPromise) subPromise.then((s) => s.remove()); };
+  }, [tab]);
   useEffect(() => {
     if (window.kakao && window.kakao.maps) { setKakaoLoaded(true); return; }
     const script = document.createElement("script");
