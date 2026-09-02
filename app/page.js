@@ -1760,6 +1760,11 @@ export default function Page() {
                 </div>
               ))}
             </div>
+    <div className="text-center mt-6 mb-8">
+              <a href="/privacy" className="text-xs" style={{ color: INK_SOFT, textDecoration: "underline" }}>
+                개인정보처리방침
+              </a>
+            </div>
           </div>
         )}
           
