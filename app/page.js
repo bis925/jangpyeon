@@ -1267,7 +1267,7 @@ export default function Page() {
                                                      {notices.map((n) => {
                 const isExpanded = expandedNoticeId === n.id;
                 return (
-                <div key={n.id} id={`notice-${n.id}`} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}`, background: n.id === selectedNoticeId ? TEAL_TINT : "transparent" }}>
+                               <div key={n.id} id={`notice-${n.id}`} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}`, background: n.id === selectedNoticeId ? TEAL_TINT : (isExpanded ? "#F5F5F3" : "transparent") }}>
                   <button onClick={() => setExpandedNoticeId(isExpanded ? null : n.id)} className="w-full flex items-center justify-between text-left">
                     <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>{n.title}</div>
                     <ChevronRight size={16} color={INK_SOFT} style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
