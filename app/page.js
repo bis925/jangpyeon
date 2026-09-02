@@ -330,6 +330,7 @@ export default function Page() {
     const [editingPlaceId, setEditingPlaceId] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
       const [selectedNoticeId, setSelectedNoticeId] = useState(null);
+      const [expandedNoticeId, setExpandedNoticeId] = useState(null);
     const [notices, setNotices] = useState([]);
   const [inquiries, setInquiries] = useState([]);
   const [allInquiries, setAllInquiries] = useState([]);
@@ -1072,9 +1073,11 @@ export default function Page() {
             {notices.length > 0 && (
               <div className="rounded-2xl p-4 mb-4 flex items-start gap-3" style={{ background: TEAL_TINT }}>
                 <Megaphone size={18} color={TEAL_DARK} className="flex-shrink-0 mt-0.5" />
-                               <div>
+                                              <div>
                   <div className="font-extrabold text-sm mb-0.5" style={{ color: TEAL_DARK }}>{notices[0].title}</div>
-                  <div className="text-xs" style={{ color: INK_SOFT }}>{renderRichText(notices[0].content)}</div>
+                  <div className="text-xs" style={{ color: INK_SOFT }}>
+                    {renderRichText(notices[0].content.length > 40 ? notices[0].content.slice(0, 40) + "..." : notices[0].content)}
+                  </div>
                 </div>
               </div>
             )}
@@ -1256,30 +1259,40 @@ export default function Page() {
               {notices.length === 0 && (
                 <div className="text-center py-14 text-sm" style={{ color: INK_SOFT }}>등록된 공지사항이 없어요</div>
               )}
-                           {notices.map((n) => (
-                             <div key={n.id} id={`notice-${n.id}`} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}`, background: n.id === selectedNoticeId ? TEAL_TINT : "transparent" }}>
-                  <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>{n.title}</div>
+                                                     {notices.map((n) => {
+                const isExpanded = expandedNoticeId === n.id;
+                return (
+                <div key={n.id} id={`notice-${n.id}`} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}`, background: n.id === selectedNoticeId ? TEAL_TINT : "transparent" }}>
+                  <button onClick={() => setExpandedNoticeId(isExpanded ? null : n.id)} className="w-full flex items-center justify-between text-left">
+                    <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>{n.title}</div>
+                    <ChevronRight size={16} color={INK_SOFT} style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
                   <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
-                  {n.image_url && (
-                    <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
-                  )}
-                                    <div className="text-sm mb-2 whitespace-pre-wrap" style={{ color: INK }}>
-                    {renderRichText(n.content)}
-                  </div>
-                  {n.file_url && (
-                    <a href={n.file_url} target="_blank" rel="noopener noreferrer" download className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 mb-2 text-xs font-bold" style={{ background: PAPER, color: INK }}>
-                      <Paperclip size={13} /> {n.file_name || "첨부파일"}
-                    </a>
-                  )}
-                  {n.link_url && (
-                    <div>
-                      <a href={n.link_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: TEAL }}>
-                        자세히 보기 <ChevronRight size={13} />
-                      </a>
-                    </div>
+                  {isExpanded && (
+                    <>
+                      {n.image_url && (
+                        <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
+                      )}
+                      <div className="text-sm mb-2 whitespace-pre-wrap" style={{ color: INK }}>
+                        {renderRichText(n.content)}
+                      </div>
+                      {n.file_url && (
+                        <a href={n.file_url} target="_blank" rel="noopener noreferrer" download className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 mb-2 text-xs font-bold" style={{ background: PAPER, color: INK }}>
+                          <Paperclip size={13} /> {n.file_name || "첨부파일"}
+                        </a>
+                      )}
+                      {n.link_url && (
+                        <div>
+                          <a href={n.link_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: TEAL }}>
+                            자세히 보기 <ChevronRight size={13} />
+                          </a>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
-              ))}
+                      );
+              })}
             </div>
           </div>
         )}
