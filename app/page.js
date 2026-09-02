@@ -1129,13 +1129,18 @@ export default function Page() {
             </div>
                        {notices.length > 0 && (
               <button
-                onClick={() => {
-                  setExpandedNoticeId(notices[0].id);
-                  setSelectedNoticeId(notices[0].id);
-                  setTab("notice");
-                  setTimeout(() => {
-                    document.getElementById(`notice-${notices[0].id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  }, 100);
+                             onClick={() => {
+                  const c = campaigns[campaignIndex];
+                  if (c.notice_id) {
+                    setSelectedNoticeId(c.notice_id);
+                    setExpandedNoticeId(c.notice_id);
+                    setTab("notice");
+                    setTimeout(() => {
+                      document.getElementById(`notice-${c.notice_id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 100);
+                  } else if (c.link_url) {
+                    window.open(c.link_url, "_blank");
+                  }
                 }}
                 className="w-full text-left rounded-2xl p-4 mb-4 flex items-start gap-3 transition-all duration-200 active:scale-[0.98]"
                 style={{ background: TEAL_TINT }}
