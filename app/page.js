@@ -364,6 +364,9 @@ export default function Page() {
   const [locatingAddress, setLocatingAddress] = useState(false);
     const [showAddressSearch, setShowAddressSearch] = useState(false);
   const addressSearchRef = useRef(null);
+    const [pullDistance, setPullDistance] = useState(0);
+  const [isPulling, setIsPulling] = useState(false);
+  const touchStartY = useRef(0);
 
     useEffect(() => {
     if (typeof navigator !== "undefined" && navigator.geolocation) {
@@ -532,6 +535,37 @@ export default function Page() {
     mapInstanceRef.current.setLevel(3);
     entry.infowindow.open(mapInstanceRef.current, entry.marker);
   }
+    useEffect(() => {
+    function handleTouchStart(e) {
+      if (window.scrollY === 0) touchStartY.current = e.touches[0].clientY;
+    }
+    function handleTouchMove(e) {
+      if (window.scrollY === 0 && touchStartY.current > 0) {
+        const distance = e.touches[0].clientY - touchStartY.current;
+        if (distance > 0) {
+          setIsPulling(true);
+          setPullDistance(Math.min(distance, 80));
+        }
+      }
+    }
+    function handleTouchEnd() {
+      if (pullDistance > 60) {
+        window.location.reload();
+      } else {
+        setPullDistance(0);
+        setIsPulling(false);
+      }
+      touchStartY.current = 0;
+    }
+    document.addEventListener("touchstart", handleTouchStart);
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [pullDistance]);
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -1037,6 +1071,14 @@ export default function Page() {
               </button>
             </div>
             <div ref={addressSearchRef} style={{ width: "100vw", height: "calc(85vh - 49px)" }} />
+          </div>
+        </div>
+      )}
+      {/* ===== PULL TO REFRESH ===== */}
+      {isPulling && (
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center transition-all duration-100" style={{ height: pullDistance, background: PAPER, overflow: "hidden" }}>
+          <div className="rounded-full p-2" style={{ background: "#fff", border: `1px solid ${LINE}`, transform: `rotate(${pullDistance * 4}deg)`, transition: "transform 0.1s" }}>
+            <LogoMark size={20} />
           </div>
         </div>
       )}
