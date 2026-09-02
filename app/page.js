@@ -453,6 +453,7 @@ export default function Page() {
   const [individualNotifDrafts, setIndividualNotifDrafts] = useState({});
   const [notifTarget, setNotifTarget] = useState("notice");
   const [notifNoticeId, setNotifNoticeId] = useState("");
+  const [adminNoteDrafts, setAdminNoteDrafts] = useState({});
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -984,6 +985,13 @@ export default function Page() {
     });
     if (error) { showToast("발송 실패: " + error.message); return; }
     showToast(data?.message || "발송 완료!");
+  }
+    async function saveAdminNote(userId) {
+    const note = adminNoteDrafts[userId];
+    const { error } = await supabase.from("profiles").update({ admin_note: note }).eq("id", userId);
+    if (error) { showToast("저장 실패: " + error.message); return; }
+    fetchAllProfiles();
+    showToast("별명이 저장됐어요");
   }
     async function deleteUser(userId, userEmail) {
     if (!window.confirm(`정말 "${userEmail}" 회원을 삭제하시겠어요? 이 작업은 되돌릴 수 없어요.`)) return;
@@ -1745,12 +1753,17 @@ export default function Page() {
                 .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
                 .map((p) => (
                 <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
-                  <div className="flex items-center justify-between mb-1">
+                                    <div className="flex items-center justify-between mb-1">
                     <div>
-                      <div className="text-sm font-bold" style={{ color: INK }}>{p.email || "(이메일 없음)"}</div>
-                      <div className="text-xs" style={{ color: INK_SOFT }}>{p.nickname} · {currentTier(p.points).label}</div>
+                      <div className="text-sm font-bold" style={{ color: INK }}>{p.admin_note || p.email || "(이메일 없음)"}</div>
+                      <div className="text-xs" style={{ color: INK_SOFT }}>{p.email} · {p.nickname} · {currentTier(p.points).label}</div>
                     </div>
                     <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 15 }}>{p.points.toLocaleString()}P</div>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <input value={adminNoteDrafts[p.id] !== undefined ? adminNoteDrafts[p.id] : (p.admin_note || "")} onChange={(e) => setAdminNoteDrafts({ ...adminNoteDrafts, [p.id]: e.target.value })} placeholder="별명/메모 (예: 카페 사장님, 아파트 경비아저씨)"
+                      className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    <button onClick={() => saveAdminNote(p.id)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: INK_SOFT }}>저장</button>
                   </div>
                       <div className="flex gap-2 mt-2">
                     <input type="number" value={adjustDrafts[p.id]?.amount || ""} onChange={(e) => setAdjustDrafts({ ...adjustDrafts, [p.id]: { ...adjustDrafts[p.id], amount: e.target.value } })} placeholder="±숫자"
