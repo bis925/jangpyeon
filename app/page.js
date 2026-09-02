@@ -164,10 +164,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
                                    <button onClick={() => onShare(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
               <MessageCircle size={16} color="#3C1E1E" fill="#3C1E1E" />
             </button>
-                      <button onClick={() => onDirections(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL }} aria-label="길찾기">
+                               <button onClick={() => onDirections(place)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL }} aria-label="길찾기">
               <Navigation size={16} color="#fff" />
             </button>
-          </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 mb-2">
