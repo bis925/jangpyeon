@@ -1240,7 +1240,7 @@ export default function Page() {
                   })}
                 </div>
                 <label className="block text-xs font-bold mb-2" style={{ color: INK_SOFT }}>사진 (선택)</label>
-                                <input type="file" accept="image/*" capture="environment" onChange={handlePhotoChange} className="hidden" id="photo-upload" />
+                       <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" id="photo-upload" />
                 <label htmlFor="photo-upload" className="flex items-center justify-center rounded-xl mb-6 cursor-pointer transition-all duration-200 hover:opacity-80" style={{ border: `1.5px dashed ${LINE}`, height: photoPreview ? "auto" : 96 }}>
                   {photoPreview ? (
                     <img src={photoPreview} alt="미리보기" className="w-full h-40 object-cover rounded-xl" />
