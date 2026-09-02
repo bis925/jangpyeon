@@ -157,6 +157,11 @@ function TierBar({ points }) {
 /* ===================== 로그인 화면 ===================== */
 function LoginScreen({ onSent }) {
   const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("jangpyeon_email");
+    if (savedEmail) setEmail(savedEmail);
+  }, []);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -168,9 +173,10 @@ function LoginScreen({ onSent }) {
     if (!email.trim()) return;
     setLoading(true);
     setErrorMsg("");
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
+      const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
     setLoading(false);
     if (error) { setErrorMsg(error.message); return; }
+    localStorage.setItem("jangpyeon_email", email.trim());
     setSent(true);
   }
 
