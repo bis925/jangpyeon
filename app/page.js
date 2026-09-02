@@ -201,11 +201,22 @@ function LoginScreen({ onSent }) {
   }
   async function pasteOtp() {
     try {
-      const text = await navigator.clipboard.readText();
+      let text = "";
+      if (typeof window !== "undefined" && window.Capacitor) {
+        const { Clipboard } = await import("@capacitor/clipboard");
+        const result = await Clipboard.read();
+        text = result.value || "";
+      } else {
+        text = await navigator.clipboard.readText();
+      }
       const digits = text.replace(/[^0-9]/g, "").slice(0, 8);
-      if (digits) setOtp(digits);
+      if (digits) {
+        setOtp(digits);
+      } else {
+        showToast("클립보드에 숫자가 없어요");
+      }
     } catch (err) {
-      // 클립보드 접근 실패 시 조용히 무시
+      showToast("붙여넣기에 실패했어요, 클립보드 권한을 확인해주세요");
     }
   }
   async function handleVerify(e) {
