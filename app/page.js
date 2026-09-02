@@ -291,8 +291,9 @@ function LoginScreen({ onSent }) {
                     className="flex-1 rounded-xl px-4 py-3 text-sm text-center outline-none"
                     style={{ border: `1.4px solid ${LINE}`, color: INK, letterSpacing: 4, fontFamily: MONO_FONT }}
                   />
-                  <button type="button" onClick={pasteOtp} className="rounded-xl px-3.5 flex-shrink-0 flex items-center justify-center transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }} aria-label="붙여넣기">
+                          <button type="button" onClick={pasteOtp} className="flex items-center gap-1.5 rounded-xl px-3.5 flex-shrink-0 transition-all duration-200 active:scale-95" style={{ background: TEAL_TINT, color: TEAL_DARK }} aria-label="붙여넣기">
                     <Clipboard size={16} />
+                    <span className="text-xs font-bold">붙여넣기</span>
                   </button>
                 </div>
                 <button
