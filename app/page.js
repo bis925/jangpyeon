@@ -680,7 +680,7 @@ export default function Page() {
   }
   
   function openDirections(place) {
-    const query = `${place.name} ${place.address || ""}`.trim();
+    const query = (place.address || place.name).trim();
     const url = `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
     window.open(url, "_blank");
   }
