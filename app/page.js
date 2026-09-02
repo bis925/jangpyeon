@@ -451,6 +451,7 @@ export default function Page() {
   const [notifTitle, setNotifTitle] = useState("");
   const [notifBody, setNotifBody] = useState("");
   const [individualNotifDrafts, setIndividualNotifDrafts] = useState({});
+  const [notifTarget, setNotifTarget] = useState("notice");
   const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
@@ -489,8 +490,12 @@ export default function Page() {
           { onConflict: "token" }
         );
       });
-      PushNotifications.addListener("pushNotificationActionPerformed", () => {
-        setTab("notice");
+      PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
+        const target = action.notification?.data?.target;
+        if (target === "home") setTab("home");
+        else if (target === "map") setTab("map");
+        else if (target === "mypage") setTab("my");
+        else setTab("notice");
       });
     });
   }, [session]);
@@ -961,10 +966,10 @@ export default function Page() {
     await supabase.from("campaigns").delete().eq("id", id);
     fetchCampaigns();
   }
-  async function sendPushNotification(title, body, userId) {
+  async function sendPushNotification(title, body, userId, target) {
     if (!title.trim() || !body.trim()) { showToast("제목과 내용을 입력해주세요"); return; }
     const { data, error } = await supabase.functions.invoke("swift-endpoint", {
-      body: { title: title.trim(), body: body.trim(), userId: userId || null },
+      body: { title: title.trim(), body: body.trim(), userId: userId || null, target: target || "notice" },
     });
     if (error) { showToast("발송 실패: " + error.message); return; }
     showToast(data?.message || "발송 완료!");
@@ -1691,11 +1696,17 @@ export default function Page() {
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <input value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} placeholder="알림 제목 (예: 12월 이벤트 시작!)"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-              <textarea value={notifBody} onChange={(e) => setNotifBody(e.target.value)} placeholder="알림 내용" rows={2}
-                className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                          <textarea value={notifBody} onChange={(e) => setNotifBody(e.target.value)} placeholder="알림 내용" rows={2}
+                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <select value={notifTarget} onChange={(e) => setNotifTarget(e.target.value)} className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
+                <option value="notice">누르면 → 공지사항으로 이동</option>
+                <option value="home">누르면 → 홈으로 이동</option>
+                <option value="map">누르면 → 지도로 이동</option>
+                <option value="mypage">누르면 → 마이페이지로 이동</option>
+              </select>
               <button
                 onClick={async () => {
-                  await sendPushNotification(notifTitle, notifBody);
+                  await sendPushNotification(notifTitle, notifBody, null, notifTarget);
                   setNotifTitle("");
                   setNotifBody("");
                 }}
@@ -1736,11 +1747,11 @@ export default function Page() {
                       className="w-24 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                     <input value={individualNotifDrafts[p.id]?.body || ""} onChange={(e) => setIndividualNotifDrafts({ ...individualNotifDrafts, [p.id]: { ...individualNotifDrafts[p.id], body: e.target.value } })} placeholder="알림 내용"
                       className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-                    <button
+                                      <button
                       onClick={async () => {
                         const draft = individualNotifDrafts[p.id];
                         if (!draft?.title || !draft?.body) { showToast("제목과 내용을 입력해주세요"); return; }
-                        await sendPushNotification(draft.title, draft.body, p.id);
+                        await sendPushNotification(draft.title, draft.body, p.id, "notice");
                         setIndividualNotifDrafts({ ...individualNotifDrafts, [p.id]: { title: "", body: "" } });
                       }}
                       className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: CORAL }}>
