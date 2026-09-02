@@ -471,6 +471,26 @@ export default function Page() {
       );
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.Capacitor || !session) return;
+    import("@capacitor/push-notifications").then(({ PushNotifications }) => {
+      PushNotifications.requestPermissions().then((result) => {
+        if (result.receive === "granted") {
+          PushNotifications.register();
+        }
+      });
+      PushNotifications.addListener("registration", async (token) => {
+        await supabase.from("push_tokens").upsert(
+          { user_id: session.user.id, token: token.value },
+          { onConflict: "token" }
+        );
+      });
+      PushNotifications.addListener("pushNotificationActionPerformed", () => {
+        setTab("notice");
+      });
+    });
+  }, [session]);
   
   useEffect(() => {
     if (typeof window === "undefined" || !window.Capacitor) return;
