@@ -1097,7 +1097,8 @@ export default function Page() {
           <LogoMark size={30} />
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: 20, color: INK }}>장편</span>
         </div>
-               <div className="flex sm:hidden items-center gap-1 rounded-full p-1 mr-2" style={{ background: PAPER }}>
+                      <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1 mr-2" style={{ background: PAPER }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
           <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
             <ZoomOut size={15} color={INK_SOFT} />
           </button>
@@ -1118,7 +1119,8 @@ export default function Page() {
           })}
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1 rounded-full p-1" style={{ background: PAPER }}>
+                   <div className="hidden sm:flex items-center gap-0.5 rounded-full pl-3 pr-1 py-1" style={{ background: PAPER }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: INK_SOFT }} className="mr-1">글자크기</span>
             <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
               <ZoomOut size={15} color={INK_SOFT} />
             </button>
