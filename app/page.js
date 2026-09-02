@@ -1013,9 +1013,9 @@ export default function Page() {
     if (error) { showToast("발송 실패: " + error.message); return; }
     showToast(data?.message || "발송 완료!");
   }
-    async function saveAdminNote(userId) {
+     async function saveAdminNote(userId) {
     const note = adminNoteDrafts[userId];
-    const { error } = await supabase.from("profiles").update({ admin_note: note }).eq("id", userId);
+    const { error } = await supabase.rpc("admin_set_note", { p_user_id: userId, p_note: note });
     if (error) { showToast("저장 실패: " + error.message); return; }
     fetchAllProfiles();
     showToast("별명이 저장됐어요");
