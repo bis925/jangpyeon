@@ -4,8 +4,25 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-   Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard,
+     Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type,
 } from "lucide-react";
+
+/* ===================== 글자 크기 훅 ===================== */
+const FONT_SCALES = { small: 0.9, normal: 1, large: 1.15, xlarge: 1.3 };
+const FONT_SCALE_LABELS = { small: "작게", normal: "보통", large: "크게", xlarge: "매우 크게" };
+function useFontScale() {
+  const [scale, setScale] = useState("normal");
+  useEffect(() => {
+    const saved = localStorage.getItem("jangpyeon_font_scale");
+    if (saved && FONT_SCALES[saved]) setScale(saved);
+  }, []);
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${16 * FONT_SCALES[scale]}px`;
+    localStorage.setItem("jangpyeon_font_scale", scale);
+  }, [scale]);
+  return [scale, setScale];
+}
+
 /* ===================== 다크모드 훅 ===================== */
 function useDarkMode() {
   const [isDark, setIsDark] = useState(false);
@@ -358,6 +375,13 @@ function LoginScreen({ onSent }) {
 export default function Page() {
   const [isDark, setIsDark] = useDarkMode();
   applyTheme(isDark);
+  const [fontScale, setFontScale] = useFontScale();
+  const scaleKeys = Object.keys(FONT_SCALES);
+  function stepFontScale(dir) {
+    const idx = scaleKeys.indexOf(fontScale);
+    const next = dir === "up" ? Math.min(idx + 1, scaleKeys.length - 1) : Math.max(idx - 1, 0);
+    setFontScale(scaleKeys[next]);
+  }
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -1069,9 +1093,17 @@ export default function Page() {
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
       {/* ===== NAVBAR ===== */}
 <div className="sticky top-0 z-10 flex items-center justify-between px-5 sm:px-8 py-3.5" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
-        <div className="flex items-center gap-2">
+               <div className="flex items-center gap-2">
           <LogoMark size={30} />
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: 20, color: INK }}>장편</span>
+        </div>
+        <div className="flex items-center gap-1 rounded-full p-1 mr-2" style={{ background: PAPER }}>
+          <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
+            <ZoomOut size={15} color={INK_SOFT} />
+          </button>
+          <button onClick={() => stepFontScale("up")} disabled={fontScale === "xlarge"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xlarge" ? 0.35 : 1 }} aria-label="글자 크게">
+            <ZoomIn size={15} color={INK_SOFT} />
+          </button>
         </div>
         <div className="hidden sm:flex items-center gap-1 rounded-full p-1" style={{ background: PAPER }}>
           {NAV.map((n) => {
@@ -1483,11 +1515,26 @@ export default function Page() {
                 </div>
               ))}
             </div>
-                                        <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 mt-8 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+                                                <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 mt-8 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <span className="text-sm font-bold" style={{ color: INK }}>다크 모드</span>
               <button onClick={() => setIsDark(!isDark)} className="relative rounded-full transition-all duration-200" style={{ width: 46, height: 26, background: isDark ? TEAL : LINE }}>
                 <div className="absolute rounded-full transition-all duration-200" style={{ width: 20, height: 20, top: 3, left: isDark ? 23 : 3, background: "#fff" }} />
               </button>
+            </div>
+
+            <div className="rounded-2xl px-4 py-3.5 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="flex items-center gap-2 mb-3">
+                <Type size={15} color={INK} />
+                <span className="text-sm font-bold" style={{ color: INK }}>글자 크기</span>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                {Object.keys(FONT_SCALES).map((key) => (
+                  <button key={key} onClick={() => setFontScale(key)} className="rounded-xl py-2 text-xs font-bold transition-all duration-200 active:scale-95"
+                    style={{ background: fontScale === key ? TEAL : PAPER, color: fontScale === key ? "#fff" : INK_SOFT }}>
+                    {FONT_SCALE_LABELS[key]}
+                  </button>
+                ))}
+              </div>
             </div>
                       <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 rounded-full py-3.5 font-extrabold mt-8 mb-8 transition-all duration-200 active:scale-[0.98]"
