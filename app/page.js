@@ -1127,16 +1127,27 @@ export default function Page() {
                 })}
               </div>
             </div>
-            {notices.length > 0 && (
-              <div className="rounded-2xl p-4 mb-4 flex items-start gap-3" style={{ background: TEAL_TINT }}>
+                       {notices.length > 0 && (
+              <button
+                onClick={() => {
+                  setExpandedNoticeId(notices[0].id);
+                  setSelectedNoticeId(notices[0].id);
+                  setTab("notice");
+                  setTimeout(() => {
+                    document.getElementById(`notice-${notices[0].id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }, 100);
+                }}
+                className="w-full text-left rounded-2xl p-4 mb-4 flex items-start gap-3 transition-all duration-200 active:scale-[0.98]"
+                style={{ background: TEAL_TINT }}
+              >
                 <Megaphone size={18} color={TEAL_DARK} className="flex-shrink-0 mt-0.5" />
-                                              <div>
+                <div>
                   <div className="font-extrabold text-sm mb-0.5" style={{ color: TEAL_DARK }}>{notices[0].title}</div>
                   <div className="text-xs" style={{ color: INK_SOFT }}>
                     {renderRichText(notices[0].content.length > 40 ? notices[0].content.slice(0, 40) + "..." : notices[0].content)}
                   </div>
                 </div>
-              </div>
+              </button>
             )}
                  {campaigns.length > 0 ? (
                              <div
