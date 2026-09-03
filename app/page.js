@@ -1313,9 +1313,9 @@ export default function Page() {
           {/* ===== NAVBAR ===== */}
       <div className="sticky top-0 z-10" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
         <div className="flex items-center justify-between px-5 sm:px-8 py-3.5">
-                <div className="flex items-center gap-2">
-            <LogoMark size={36} />
-            <span style={{ fontFamily: DISPLAY_FONT, fontSize: 22, color: INK }}>장편</span>
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            <LogoMark size={40} />
+            <span style={{ fontFamily: DISPLAY_FONT, fontSize: 24, color: INK, lineHeight: 1 }}>장편</span>
           </div>
           <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1" style={{ background: PAPER }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
