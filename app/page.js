@@ -478,6 +478,7 @@ export default function Page() {
   const [history, setHistory] = useState([]);
 
   const [tab, setTab] = useState("home");
+    const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [query, setQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
   const [mapCategory, setMapCategory] = useState(null);
@@ -1346,11 +1347,14 @@ export default function Page() {
               <ZoomIn size={15} color={INK_SOFT} />
             </button>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ background: CORAL_TINT }}>
-            <Sparkles size={14} color={CORAL} />
-            <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 13 }}>{points.toLocaleString()}P</span>
+          <div className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0" style={{ background: CORAL_TINT }}>
+            <span style={{ fontSize: 14 }}>🪙</span>
+            <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
           </div>
-                  <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+                      <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
+            <Star size={16} color={INK_SOFT} />
+          </button>
+          <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
             <LogOut size={14} />
             로그아웃
           </button>
@@ -1411,6 +1415,35 @@ export default function Page() {
                 신고하기
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* ===== FAVORITES POPUP ===== */}
+      {showFavoritesOnly && (
+        <div className="fixed inset-0 z-50 flex flex-col" style={{ background: PAPER }}>
+          <div className="sticky top-0 flex items-center justify-between px-5 py-4" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
+            <div className="flex items-center gap-2">
+              <Star size={18} color={"#E8A800"} fill={"#E8A800"} />
+              <span className="font-extrabold text-base" style={{ color: INK }}>즐겨찾기</span>
+            </div>
+            <button onClick={() => setShowFavoritesOnly(false)} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
+              <X size={20} color={INK_SOFT} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-5 py-5">
+            {places.filter((p) => favorites.has(p.id)).length === 0 ? (
+              <div className="text-center py-16 text-sm" style={{ color: INK_SOFT }}>
+                아직 즐겨찾기한 장소가 없어요.<br />장소 카드의 별 아이콘을 눌러 저장해보세요!
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {places.filter((p) => favorites.has(p.id)).map((p) => (
+                  <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
+                    <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
