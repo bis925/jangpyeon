@@ -1515,7 +1515,7 @@ export default function Page() {
   return (
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
           {/* ===== NAVBAR ===== */}
-                    <div className="fixed top-0 left-0 right-0 z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
+<div className="sticky top-0 z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
         <div className="flex items-center pl-5 sm:pl-8 flex-shrink-0">
           <LogoMark size={40} />
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: 24, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
@@ -1847,7 +1847,7 @@ export default function Page() {
         {toast && <div className="rounded-full px-5 py-3 text-sm font-bold text-white shadow-lg" style={{ background: INK }}>{toast}</div>}
       </div>
 
-      <main className="max-w-5xl mx-auto px-5 sm:px-8 py-8 pt-32 sm:pt-20" key={tab} style={{ animation: "fadeIn 0.25s ease" }}>
+           <main className="max-w-5xl mx-auto px-5 sm:px-8 py-8" key={tab} style={{ animation: "fadeIn 0.25s ease" }}>
         <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }`}</style>
 
         {/* ===================== 홈 ===================== */}
