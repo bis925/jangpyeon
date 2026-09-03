@@ -889,10 +889,15 @@ export default function Page() {
       if (!pendingCouponAnnounce.current) return;
       // 쿠폰함/쿠폰 관련 버튼을 눌렀을 때는 소리 안 냄
       if (e.target.closest('[aria-label="쿠폰함"]') || e.target.closest("#coupon-section")) return;
-      const count = pendingCouponAnnounce.current;
+          const count = pendingCouponAnnounce.current;
       pendingCouponAnnounce.current = false;
-      if (typeof window !== "undefined" && window.speechSynthesis) {
-        const utter = new SpeechSynthesisUtterance(`사용하실 수 있는 쿠폰이 ${count}개 있습니다. 쿠폰함을 확인해보세요.`);
+      const text = `사용하실 수 있는 쿠폰이 ${count}개 있습니다. 쿠폰함을 확인해보세요.`;
+      if (typeof window !== "undefined" && window.Capacitor) {
+        import("@capacitor-community/text-to-speech").then(({ TextToSpeech }) => {
+          TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.95, pitch: 1.15, volume: 1.0, category: "ambient" });
+        });
+      } else if (typeof window !== "undefined" && window.speechSynthesis) {
+        const utter = new SpeechSynthesisUtterance(text);
         utter.lang = "ko-KR";
         utter.rate = 0.95;
         utter.pitch = 1.15;
