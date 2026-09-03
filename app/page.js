@@ -109,7 +109,7 @@ function renderRichText(text) {
   return nodes;
 }
 
-const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설"];
+const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑"];
 const ADMIN_EMAIL = "bis925@naver.com";
 
 /* ===================== 작은 컴포넌트 ===================== */
