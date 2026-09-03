@@ -534,7 +534,9 @@ export default function Page() {
   const [locatingAddress, setLocatingAddress] = useState(false);
     const [showAddressSearch, setShowAddressSearch] = useState(false);
   const addressSearchRef = useRef(null);
-    const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [reportingPlace, setReportingPlace] = useState(null);
+  const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const touchStartY = useRef(0);
@@ -669,11 +671,15 @@ export default function Page() {
     return () => clearInterval(timer);
   }, [campaigns]);
 
-  async function reportPlace(place) {
-    const reason = window.prompt(`"${place.name}"의 어떤 정보가 달라졌나요? (예: 지금은 휠체어 출입이 안돼요)`);
-    if (!reason || !reason.trim()) return;
-    const { error } = await supabase.from("reports").insert({ place_id: place.id, reporter_id: session.user.id, reason: reason.trim() });
+  function reportPlace(place) {
+    setReportingPlace(place);
+    setReportReason("");
+  }
+  async function submitReport() {
+    if (!reportReason.trim()) { showToast("어떤 정보가 달라졌는지 입력해주세요"); return; }
+    const { error } = await supabase.from("reports").insert({ place_id: reportingPlace.id, reporter_id: session.user.id, reason: reportReason.trim() });
     if (error) { showToast("신고 접수 실패: " + error.message); return; }
+    setReportingPlace(null);
     showToast("신고가 접수됐어요, 확인 후 반영할게요");
   }
   
@@ -1376,6 +1382,35 @@ export default function Page() {
               </button>
             </div>
             <div ref={addressSearchRef} style={{ width: "100vw", height: "calc(85vh - 49px)" }} />
+          </div>
+        </div>
+      )}
+      {/* ===== REPORT POPUP ===== */}
+      {reportingPlace && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6" style={{ background: CARD }}>
+            <div className="flex items-center gap-2 mb-1">
+              <Flag size={18} color={CORAL} />
+              <div className="font-extrabold text-base" style={{ color: INK }}>정보 신고하기</div>
+            </div>
+            <div className="text-xs mb-4" style={{ color: INK_SOFT }}>"{reportingPlace.name}"의 어떤 정보가 달라졌나요?</div>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="예: 지금은 휠체어 출입이 안돼요"
+              rows={3}
+              autoFocus
+              className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none resize-none"
+              style={{ border: `1.4px solid ${LINE}`, color: INK }}
+            />
+            <div className="flex gap-2">
+              <button onClick={() => setReportingPlace(null)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                취소
+              </button>
+              <button onClick={submitReport} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: CORAL }}>
+                신고하기
+              </button>
+            </div>
           </div>
         </div>
       )}
