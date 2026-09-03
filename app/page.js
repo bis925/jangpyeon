@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-     Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell,
+  Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Check, Gift,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -240,6 +240,14 @@ function LoginScreen({ onSent }) {
     if (error) { setErrorMsg(error.message); return; }
     localStorage.setItem("jangpyeon_email", email.trim());
     setSent(true);
+  }
+    async function useCoupon(couponId) {
+    if (!window.confirm("이 쿠폰을 사용 처리하시겠어요? 되돌릴 수 없어요.")) return;
+    const { error } = await supabase.rpc("use_coupon", { p_coupon_id: couponId });
+    if (error) { showToast("처리 실패: " + error.message); return; }
+    fetchMyCoupons();
+    setViewingCoupon(null);
+    showToast("쿠폰을 사용 처리했어요");
   }
   async function pasteOtp() {
     try {
@@ -547,6 +555,11 @@ export default function Page() {
   const [showLimitReached, setShowLimitReached] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
   const [previewIndex, setPreviewIndex] = useState(0);
+  const [myCoupons, setMyCoupons] = useState([]);
+  const [viewingCoupon, setViewingCoupon] = useState(null);
+  const [couponDrafts, setCouponDrafts] = useState({});
+  const [couponImageFile, setCouponImageFile] = useState(null);
+  const [couponImagePreview, setCouponImagePreview] = useState(null);
   const swipeStartX = useRef(0);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
@@ -879,6 +892,7 @@ export default function Page() {
       fetchAllProfiles();
       fetchAdjustLog();
       fetchReports();
+      fetchMyCoupons();
     }
   }, [session]);
 
@@ -892,6 +906,10 @@ export default function Page() {
     const { data } = await supabase.from("places").select("*, place_photos(photo_url)").eq("status", "approved").order("created_at", { ascending: false });
     const withPhoto = (data || []).map((p) => ({ ...p, photo_urls: (p.place_photos || []).map((ph) => ph.photo_url), photo_url: p.place_photos?.[0]?.photo_url || null }));
     setPlaces(withPhoto);
+  }
+    async function fetchMyCoupons() {
+    const { data } = await supabase.from("coupons").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
+    setMyCoupons(data || []);
   }
   async function fetchFavorites() {
     const { data } = await supabase.from("favorites").select("place_id").eq("user_id", session.user.id);
@@ -1133,6 +1151,46 @@ export default function Page() {
     if (error) { showToast("저장 실패: " + error.message); return; }
     fetchAllProfiles();
     showToast("별명이 저장됐어요");
+  }
+    function handleCouponImageChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      setCouponImageFile(file);
+      setCouponImagePreview(URL.createObjectURL(file));
+    }
+  }
+  async function issueCoupon(userId) {
+    const draft = couponDrafts[userId];
+    if (!draft?.title?.trim()) { showToast("쿠폰 제목을 입력해주세요"); return; }
+
+    let imageUrl = null;
+    if (couponImageFile) {
+      const fileExt = couponImageFile.name.split(".").pop();
+      const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("coupon-images").upload(filePath, couponImageFile);
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from("coupon-images").getPublicUrl(filePath);
+        imageUrl = urlData.publicUrl;
+      }
+    }
+
+    const { error } = await supabase.rpc("admin_issue_coupon", {
+      p_user_id: userId,
+      p_title: draft.title.trim(),
+      p_description: draft.description?.trim() || null,
+      p_expires_at: draft.expiresAt ? new Date(draft.expiresAt).toISOString() : null,
+    });
+    if (error) { showToast("발급 실패: " + error.message); return; }
+
+    if (imageUrl) {
+      const { data: latestCoupon } = await supabase.from("coupons").select("id").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).single();
+      if (latestCoupon) await supabase.from("coupons").update({ image_url: imageUrl }).eq("id", latestCoupon.id);
+    }
+
+    setCouponDrafts({ ...couponDrafts, [userId]: { title: "", description: "", expiresAt: "" } });
+    setCouponImageFile(null);
+    setCouponImagePreview(null);
+    showToast("쿠폰이 발급됐어요!");
   }
     async function deleteUser(userId, userEmail) {
     if (!window.confirm(`정말 "${userEmail}" 회원을 삭제하시겠어요? 이 작업은 되돌릴 수 없어요.`)) return;
@@ -1503,6 +1561,42 @@ export default function Page() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* ===== COUPON DETAIL POPUP ===== */}
+      {viewingCoupon && (
+        <div onClick={() => setViewingCoupon(null)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: CARD }}>
+            <div className="flex items-center justify-center" style={{ background: PAPER, height: 180 }}>
+              {viewingCoupon.image_url ? (
+                <img src={viewingCoupon.image_url} alt={viewingCoupon.title} className="w-full h-full object-cover" />
+              ) : (
+                <Gift size={48} color={TEAL} />
+              )}
+            </div>
+            <div className="p-6">
+              <div className="inline-block text-[11px] font-bold rounded-full px-2.5 py-1 mb-2" style={{ background: viewingCoupon.status === "used" ? PAPER : TEAL_TINT, color: viewingCoupon.status === "used" ? INK_SOFT : TEAL_DARK }}>
+                {viewingCoupon.status === "used" ? "사용완료" : "사용가능"}
+              </div>
+              <div className="font-extrabold text-lg mb-2" style={{ color: INK }}>{viewingCoupon.title}</div>
+              {viewingCoupon.description && (
+                <div className="text-sm mb-3 whitespace-pre-wrap" style={{ color: INK_SOFT }}>{viewingCoupon.description}</div>
+              )}
+              {viewingCoupon.expires_at && (
+                <div className="text-xs mb-4" style={{ color: INK_SOFT }}>유효기간: {new Date(viewingCoupon.expires_at).toLocaleDateString("ko-KR")}까지</div>
+              )}
+              <div className="flex gap-2">
+                <button onClick={() => setViewingCoupon(null)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                  닫기
+                </button>
+                {viewingCoupon.status === "unused" && (
+                  <button onClick={() => useCoupon(viewingCoupon.id)} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                    사용하기
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1975,7 +2069,23 @@ export default function Page() {
                 <div className="absolute rounded-full transition-all duration-200" style={{ width: 20, height: 20, top: 3, left: isDark ? 23 : 3, background: "#fff" }} />
               </button>
             </div>
-
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-extrabold text-sm" style={{ color: INK }}>내 쿠폰함 ({myCoupons.filter(c => c.status === "unused").length}개 사용가능)</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              {myCoupons.length === 0 && (
+                <div className="col-span-2 text-center py-8 text-sm rounded-2xl" style={{ color: INK_SOFT, border: `1px dashed ${LINE}` }}>아직 받은 쿠폰이 없어요</div>
+              )}
+              {myCoupons.map((c) => (
+                <button key={c.id} onClick={() => setViewingCoupon(c)} className="rounded-2xl p-3 text-left transition-all duration-200 active:scale-95" style={{ background: c.status === "used" ? PAPER : TEAL_TINT, border: `1px solid ${c.status === "used" ? LINE : TEAL}`, opacity: c.status === "used" ? 0.55 : 1 }}>
+                  <div className="flex items-center justify-center rounded-xl mb-2 overflow-hidden" style={{ background: "#fff", height: 60 }}>
+                    {c.image_url ? <img src={c.image_url} alt={c.title} className="w-full h-full object-cover" /> : <Gift size={24} color={TEAL} />}
+                  </div>
+                  <div className="text-xs font-bold truncate" style={{ color: INK }}>{c.title}</div>
+                  <div className="text-[10px] mt-0.5" style={{ color: c.status === "used" ? INK_SOFT : TEAL_DARK }}>{c.status === "used" ? "사용완료" : "사용가능"}</div>
+                </button>
+              ))}
+            </div>
             <div className="rounded-2xl px-4 py-3.5 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <div className="flex items-center gap-2 mb-3">
                 <Type size={15} color={INK} />
@@ -2132,6 +2242,28 @@ export default function Page() {
                       }}
                       className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: CORAL }}>
                       <Bell size={14} />
+                    </button>
+                  </div>
+                                          <div className="mt-2 pt-2" style={{ borderTop: `1px dashed ${LINE}` }}>
+                    <div className="flex items-center gap-1 mb-1.5">
+                      <Gift size={12} color={TEAL} />
+                      <span className="text-[10px] font-bold" style={{ color: TEAL }}>쿠폰 발급</span>
+                    </div>
+                    <input value={couponDrafts[p.id]?.title || ""} onChange={(e) => setCouponDrafts({ ...couponDrafts, [p.id]: { ...couponDrafts[p.id], title: e.target.value } })} placeholder="쿠폰 제목 (예: 치킨 쿠폰)"
+                      className="w-full rounded-lg px-2 py-1.5 mb-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    <input value={couponDrafts[p.id]?.description || ""} onChange={(e) => setCouponDrafts({ ...couponDrafts, [p.id]: { ...couponDrafts[p.id], description: e.target.value } })} placeholder="설명 (예: ○○치킨 후라이드 1마리 무료)"
+                      className="w-full rounded-lg px-2 py-1.5 mb-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    <div className="flex gap-2 mb-1.5">
+                      <input type="date" value={couponDrafts[p.id]?.expiresAt || ""} onChange={(e) => setCouponDrafts({ ...couponDrafts, [p.id]: { ...couponDrafts[p.id], expiresAt: e.target.value } })}
+                        className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                      <input type="file" accept="image/*" onChange={handleCouponImageChange} className="hidden" id={`coupon-image-${p.id}`} />
+                      <label htmlFor={`coupon-image-${p.id}`} className="rounded-lg px-2.5 py-1.5 text-xs font-bold flex items-center gap-1 cursor-pointer" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+                        <Camera size={12} /> 사진
+                      </label>
+                    </div>
+                    {couponImagePreview && <img src={couponImagePreview} alt="미리보기" className="w-16 h-16 object-cover rounded-lg mb-1.5" />}
+                    <button onClick={() => issueCoupon(p.id)} className="w-full rounded-lg py-1.5 text-xs font-bold text-white flex items-center justify-center gap-1" style={{ background: TEAL }}>
+                      <Gift size={13} /> 쿠폰 발급하기
                     </button>
                   </div>
                 </div>
