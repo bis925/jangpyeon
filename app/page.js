@@ -562,6 +562,7 @@ export default function Page() {
   const [couponImagePreview, setCouponImagePreview] = useState(null);
   const [showCouponList, setShowCouponList] = useState(false);
   const swipeStartX = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
@@ -702,6 +703,21 @@ export default function Page() {
   }
   function handleSwipeEnd(e) {
     const diff = e.changedTouches[0].clientX - swipeStartX.current;
+    if (Math.abs(diff) < 50) return;
+    if (diff < 0 && previewIndex < previewImages.length - 1) {
+      setPreviewIndex(previewIndex + 1);
+    } else if (diff > 0 && previewIndex > 0) {
+      setPreviewIndex(previewIndex - 1);
+    }
+  }
+  function handleMouseDown(e) {
+    swipeStartX.current = e.clientX;
+    setIsDragging(true);
+  }
+  function handleMouseUp(e) {
+    if (!isDragging) return;
+    setIsDragging(false);
+    const diff = e.clientX - swipeStartX.current;
     if (Math.abs(diff) < 50) return;
     if (diff < 0 && previewIndex < previewImages.length - 1) {
       setPreviewIndex(previewIndex + 1);
@@ -1680,8 +1696,10 @@ export default function Page() {
           onClick={() => setPreviewImages([])}
           onTouchStart={handleSwipeStart}
           onTouchEnd={handleSwipeEnd}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.85)" }}
+          style={{ background: "rgba(0,0,0,0.85)", cursor: "grab" }}
         >
           <img src={previewImages[previewIndex]} alt="확대 이미지" className="max-w-full max-h-full rounded-2xl" />
           {previewImages.length > 1 && (
