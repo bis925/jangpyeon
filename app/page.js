@@ -1478,11 +1478,11 @@ export default function Page() {
                 <ZoomIn size={15} color={INK_SOFT} />
               </button>
             </div>
-            <div className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0" style={{ background: CORAL_TINT }}>
+            <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("point-history-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: CORAL_TINT }}>
               <span style={{ fontSize: 14 }}>🪙</span>
               <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
-            </div>
-   <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("coupon-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className={`relative flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
+            </button>
+            <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("coupon-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className={`relative flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
             <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
             <span style={{ fontSize: 11, fontWeight: 700, color: myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT }}>쿠폰</span>
           </button>
@@ -1500,10 +1500,10 @@ export default function Page() {
             <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
             <span style={{ fontSize: 11, fontWeight: 700, color: myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT }}>쿠폰</span>
           </button>
-          <div className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0" style={{ background: CORAL_TINT }}>
+                   <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("point-history-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: CORAL_TINT }}>
             <span style={{ fontSize: 14 }}>🪙</span>
             <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
-          </div>
+          </button>
           <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
             <LogOut size={14} />
             로그아웃
@@ -2095,7 +2095,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 내역</div>
+           <div id="point-history-section" className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 내역</div>
             <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {history.length === 0 && (
                 <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>아직 내역이 없어요</div>
