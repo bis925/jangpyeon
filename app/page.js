@@ -543,6 +543,7 @@ export default function Page() {
   const addressSearchRef = useRef(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [reportingPlace, setReportingPlace] = useState(null);
+    const [deletingPlace, setDeletingPlace] = useState(null);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
@@ -1203,10 +1204,13 @@ export default function Page() {
     setPhotoFiles(newFiles);
     setPhotoPreviews(newFiles.map((f) => URL.createObjectURL(f)));
   }
-    async function deletePlace(place) {
-    if (!window.confirm(`"${place.name}"을(를) 정말 삭제하시겠어요? 이 작업은 되돌릴 수 없어요.`)) return;
-    const { error } = await supabase.from("places").delete().eq("id", place.id).eq("created_by", session.user.id);
+  function deletePlace(place) {
+    setDeletingPlace(place);
+  }
+  async function confirmDeletePlace() {
+    const { error } = await supabase.from("places").delete().eq("id", deletingPlace.id).eq("created_by", session.user.id);
     if (error) { showToast("삭제 실패: " + error.message); return; }
+    setDeletingPlace(null);
     fetchPlaces();
     showToast("장소가 삭제됐어요");
   }
@@ -1472,6 +1476,26 @@ export default function Page() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* ===== DELETE PLACE CONFIRM POPUP ===== */}
+      {deletingPlace && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: CORAL_TINT }}>
+              <Trash2 size={22} color={CORAL} />
+            </div>
+            <div className="font-extrabold text-base mb-1" style={{ color: INK }}>장소를 삭제하시겠어요?</div>
+            <div className="text-sm mb-6" style={{ color: INK_SOFT }}>"{deletingPlace.name}"이(가) 삭제돼요.<br />이 작업은 되돌릴 수 없어요.</div>
+            <div className="flex gap-2">
+              <button onClick={() => setDeletingPlace(null)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                취소
+              </button>
+              <button onClick={confirmDeletePlace} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: CORAL }}>
+                삭제하기
+              </button>
+            </div>
           </div>
         </div>
       )}
