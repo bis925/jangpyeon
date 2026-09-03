@@ -921,9 +921,16 @@ export default function Page() {
     return () => document.removeEventListener("click", handleGlobalClick);
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
+    let ticking = false;
     function handleScroll() {
-      setNavbarOffset(window.scrollY || document.documentElement.scrollTop || 0);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setNavbarOffset(window.scrollY || document.documentElement.scrollTop || 0);
+          ticking = false;
+        });
+        ticking = true;
+      }
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
     document.addEventListener("scroll", handleScroll, { passive: true });
