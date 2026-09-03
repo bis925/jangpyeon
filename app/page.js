@@ -1860,7 +1860,7 @@ export default function Page() {
         {toast && <div className="rounded-full px-5 py-3 text-sm font-bold text-white shadow-lg" style={{ background: INK }}>{toast}</div>}
       </div>
 
-           <main className="max-w-5xl mx-auto px-5 sm:px-8 py-8" key={tab} style={{ animation: "fadeIn 0.25s ease" }}>
+       <main className="max-w-5xl mx-auto px-5 sm:px-8 py-8 pt-32 sm:pt-20" key={tab} style={{ animation: "fadeIn 0.25s ease" }}>
         <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }`}</style>
 
         {/* ===================== 홈 ===================== */}
