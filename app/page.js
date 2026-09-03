@@ -245,10 +245,12 @@ function LoginScreen({ onSent }) {
     setConfirmingUseCoupon(couponId);
   }
   async function confirmUseCoupon() {
+    window.alert("버튼 눌림, confirmingUseCoupon: " + confirmingUseCoupon);
     const couponId = confirmingUseCoupon;
     setConfirmingUseCoupon(null);
     const { error } = await supabase.rpc("use_coupon", { p_coupon_id: couponId });
-    if (error) { showToast("처리 실패: " + error.message); return; }
+    if (error) { window.alert("처리 실패: " + JSON.stringify(error)); return; }
+    window.alert("성공!");
     await fetchMyCoupons();
     setViewingCoupon(null);
     showToast("쿠폰을 사용 처리했어요");
