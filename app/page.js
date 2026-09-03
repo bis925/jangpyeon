@@ -2377,7 +2377,7 @@ export default function Page() {
                           <div key={c.id} className="flex items-center justify-between rounded-lg px-2 py-1.5" style={{ background: PAPER }}>
                             <div className="min-w-0">
                               <div className="text-xs font-bold truncate" style={{ color: INK }}>{c.title}</div>
-                              <div className="text-[10px]" style={{ color: c.status === "used" ? INK_SOFT : TEAL }}>{c.status === "used" ? "사용완료" : "사용가능"}</div>
+                                                          <div className="text-[10px]" style={{ color: c.status === "used" ? INK_SOFT : TEAL }}>{c.status === "used" ? "사용완료" : "사용가능"}</div>
                             </div>
                             <button onClick={() => deleteCoupon(c.id)} className="rounded-full p-1 flex-shrink-0" aria-label="쿠폰 삭제">
                               <Trash2 size={12} color={CORAL} />
@@ -2386,6 +2386,7 @@ export default function Page() {
                         ))}
                       </div>
                     )}
+                  </div>
                   </div>
                   )}
                 </div>
