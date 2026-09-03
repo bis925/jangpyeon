@@ -892,9 +892,16 @@ export default function Page() {
           const count = pendingCouponAnnounce.current;
       pendingCouponAnnounce.current = false;
       const text = `사용하실 수 있는 쿠폰이 ${count}개 있습니다. 쿠폰함을 확인해보세요.`;
-      if (typeof window !== "undefined" && window.Capacitor) {
+           if (typeof window !== "undefined" && window.Capacitor) {
+        window.alert("앱 환경 감지됨, 음성 재생 시도: " + text);
         import("@capacitor-community/text-to-speech").then(({ TextToSpeech }) => {
-          TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.95, pitch: 1.15, volume: 1.0, category: "ambient" });
+          TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.95, pitch: 1.15, volume: 1.0, category: "ambient" }).then(() => {
+            window.alert("음성 재생 성공!");
+          }).catch((err) => {
+            window.alert("음성 재생 실패: " + JSON.stringify(err));
+          });
+        }).catch((err) => {
+          window.alert("플러그인 로드 실패: " + err.message);
         });
       } else if (typeof window !== "undefined" && window.speechSynthesis) {
         const utter = new SpeechSynthesisUtterance(text);
