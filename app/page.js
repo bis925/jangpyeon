@@ -1707,12 +1707,24 @@ export default function Page() {
           style={{ background: "rgba(0,0,0,0.85)", cursor: "grab" }}
         >
           <img src={previewImages[previewIndex]} alt="확대 이미지" className="max-w-full max-h-full rounded-2xl" />
-          {previewImages.length > 1 && (
-            <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-1.5">
-              {previewImages.map((_, i) => (
-                <div key={i} className="rounded-full transition-all duration-200" style={{ width: i === previewIndex ? 16 : 6, height: 6, background: i === previewIndex ? "#fff" : "rgba(255,255,255,0.4)" }} />
-              ))}
-            </div>
+               {previewImages.length > 1 && (
+            <>
+              {previewIndex > 0 && (
+                <button onClick={(e) => { e.stopPropagation(); setPreviewIndex(previewIndex - 1); }} className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 rounded-full p-3 items-center justify-center transition-all duration-200 hover:opacity-100" style={{ background: "rgba(255,255,255,0.15)", opacity: 0.8 }} aria-label="이전 사진">
+                  <ChevronRight size={24} color="#fff" style={{ transform: "rotate(180deg)" }} />
+                </button>
+              )}
+              {previewIndex < previewImages.length - 1 && (
+                <button onClick={(e) => { e.stopPropagation(); setPreviewIndex(previewIndex + 1); }} className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-3 items-center justify-center transition-all duration-200 hover:opacity-100" style={{ background: "rgba(255,255,255,0.15)", opacity: 0.8 }} aria-label="다음 사진">
+                  <ChevronRight size={24} color="#fff" />
+                </button>
+              )}
+              <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-1.5">
+                {previewImages.map((_, i) => (
+                  <div key={i} className="rounded-full transition-all duration-200" style={{ width: i === previewIndex ? 16 : 6, height: 6, background: i === previewIndex ? "#fff" : "rgba(255,255,255,0.4)" }} />
+                ))}
+              </div>
+            </>
           )}
           <button onClick={() => setPreviewImages([])} className="absolute top-5 right-5 rounded-full p-3" style={{ background: "rgba(255,255,255,0.15)" }} aria-label="닫기">
             <X size={22} color="#fff" />
