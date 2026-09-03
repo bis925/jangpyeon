@@ -1697,7 +1697,15 @@ export default function Page() {
         {/* ===================== 공지사항 ===================== */}
         {tab === "notice" && (
           <div className="max-w-2xl mx-auto">
-            <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>공지사항</h2>
+              <div className="flex items-center gap-3 mb-6">
+              <div className="rounded-2xl p-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+                <Megaphone size={22} color={TEAL} />
+              </div>
+              <div>
+                <h2 className="font-extrabold text-xl" style={{ color: INK }}>공지사항</h2>
+                <div className="text-xs" style={{ color: INK_SOFT }}>서비스 소식과 이벤트를 확인하세요</div>
+              </div>
+            </div>
             <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {notices.length === 0 && (
                 <div className="text-center py-14 text-sm" style={{ color: INK_SOFT }}>등록된 공지사항이 없어요</div>
