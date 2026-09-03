@@ -1615,7 +1615,7 @@ export default function Page() {
         </div>
       </div>
            {/* ===== MOBILE TABS ===== */}
-      <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
+         <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}`, position: "absolute", top: navbarOffset + 88, left: 0, right: 0, zIndex: 9 }}>
         {NAV.map((n) => {
           const Icon = n.icon;
           const active = tab === n.id;
