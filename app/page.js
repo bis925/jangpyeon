@@ -1310,36 +1310,15 @@ export default function Page() {
 
   return (
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
-      {/* ===== NAVBAR ===== */}
-<div className="sticky top-0 z-10 flex items-center justify-between px-5 sm:px-8 py-3.5" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
-               <div className="flex items-center gap-2">
-          <LogoMark size={30} />
-          <span style={{ fontFamily: DISPLAY_FONT, fontSize: 20, color: INK }}>장편</span>
-        </div>
-                      <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1 mr-2" style={{ background: PAPER }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
-          <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
-            <ZoomOut size={15} color={INK_SOFT} />
-          </button>
-          <button onClick={() => stepFontScale("up")} disabled={fontScale === "xlarge"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xlarge" ? 0.35 : 1 }} aria-label="글자 크게">
-            <ZoomIn size={15} color={INK_SOFT} />
-          </button>
-        </div>
-        <div className="hidden sm:flex items-center gap-1 rounded-full p-1" style={{ background: PAPER }}>
-          {NAV.map((n) => {
-            const Icon = n.icon;
-            const active = tab === n.id;
-            return (
-              <button key={n.id} onClick={() => setTab(n.id)} className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-bold transition-all duration-200 active:scale-95 hover:opacity-90"
-                style={{ background: active ? TEAL : "transparent", color: active ? "#fff" : INK_SOFT }}>
-                <Icon size={15} />{n.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex items-center gap-2">
-                   <div className="hidden sm:flex items-center gap-0.5 rounded-full pl-3 pr-1 py-1" style={{ background: PAPER }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: INK_SOFT }} className="mr-1">글자크기</span>
+          {/* ===== NAVBAR ===== */}
+      <div className="sticky top-0 z-10" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
+        <div className="flex items-center justify-between px-5 sm:px-8 py-3.5">
+          <div className="flex items-center gap-2">
+            <LogoMark size={30} />
+            <span style={{ fontFamily: DISPLAY_FONT, fontSize: 20, color: INK }}>장편</span>
+          </div>
+          <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1" style={{ background: PAPER }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
             <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
               <ZoomOut size={15} color={INK_SOFT} />
             </button>
@@ -1347,11 +1326,47 @@ export default function Page() {
               <ZoomIn size={15} color={INK_SOFT} />
             </button>
           </div>
+          <div className="hidden sm:flex items-center gap-1 rounded-full p-1" style={{ background: PAPER }}>
+            {NAV.map((n) => {
+              const Icon = n.icon;
+              const active = tab === n.id;
+              return (
+                <button key={n.id} onClick={() => setTab(n.id)} className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-bold transition-all duration-200 active:scale-95 hover:opacity-90"
+                  style={{ background: active ? TEAL : "transparent", color: active ? "#fff" : INK_SOFT }}>
+                  <Icon size={15} />{n.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="hidden sm:flex items-center gap-2">
+            <div className="flex items-center gap-0.5 rounded-full pl-3 pr-1 py-1" style={{ background: PAPER }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: INK_SOFT }} className="mr-1">글자크기</span>
+              <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
+                <ZoomOut size={15} color={INK_SOFT} />
+              </button>
+              <button onClick={() => stepFontScale("up")} disabled={fontScale === "xlarge"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xlarge" ? 0.35 : 1 }} aria-label="글자 크게">
+                <ZoomIn size={15} color={INK_SOFT} />
+              </button>
+            </div>
+            <div className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0" style={{ background: CORAL_TINT }}>
+              <span style={{ fontSize: 14 }}>🪙</span>
+              <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
+            </div>
+            <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
+              <Star size={16} color={INK_SOFT} />
+            </button>
+            <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+              <LogOut size={14} />
+              로그아웃
+            </button>
+          </div>
+        </div>
+        <div className="flex sm:hidden items-center justify-center gap-2 px-5 pb-3">
           <div className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0" style={{ background: CORAL_TINT }}>
             <span style={{ fontSize: 14 }}>🪙</span>
             <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
           </div>
-                      <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
+          <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
             <Star size={16} color={INK_SOFT} />
           </button>
           <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
@@ -1360,7 +1375,6 @@ export default function Page() {
           </button>
         </div>
       </div>
-
            {/* ===== MOBILE TABS ===== */}
       <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
         {NAV.map((n) => {
