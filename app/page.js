@@ -1018,7 +1018,7 @@ export default function Page() {
     setInquiries(data || []);
   }
   async function fetchAllInquiries() {
-    if (session.user.email !== ADMIN_EMAIL) return;
+    if (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff") return;
     const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
     setAllInquiries(data || []);
   }
@@ -1032,8 +1032,8 @@ export default function Page() {
     const { data } = await supabase.from("point_history").select("*, profiles(email, nickname)").eq("activity_type", "admin_adjust").order("created_at", { ascending: false }).limit(50);
     setAdjustLog(data || []);
   }
-    async function fetchReports() {
-    if (session.user.email !== ADMIN_EMAIL) return;
+  async function fetchReports() {
+    if (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff") return;
     const { data } = await supabase.from("reports").select("*, places(name, address)").order("created_at", { ascending: false }).limit(50);
     setAllReports(data || []);
   }
@@ -1282,6 +1282,12 @@ export default function Page() {
     setCouponImagePreview(null);
     showToast("쿠폰이 발급됐어요!");
   }
+    async function toggleStaff(userId, isCurrentlyStaff) {
+    const { error } = await supabase.rpc("admin_set_staff", { p_user_id: userId, p_is_staff: !isCurrentlyStaff });
+    if (error) { showToast("변경 실패: " + error.message); return; }
+    fetchAllProfiles();
+    showToast(isCurrentlyStaff ? "직원 권한이 해제됐어요" : "직원으로 지정했어요");
+  }
     async function deleteUser(userId, userEmail) {
     if (!window.confirm(`정말 "${userEmail}" 회원을 삭제하시겠어요? 이 작업은 되돌릴 수 없어요.`)) return;
     const { error } = await supabase.rpc("admin_delete_user", { p_user_id: userId });
@@ -1507,9 +1513,9 @@ export default function Page() {
   const next = nextTier(points);
   const registerCount = history.filter((h) => h.activity_type === "register_place").length;
   const helpfulCount = history.filter((h) => h.activity_type === "helpful_received").length;
-  const isAdmin = session.user.email === ADMIN_EMAIL;
+   const isAdmin = session.user.email === ADMIN_EMAIL;
+  const isStaff = profile?.role === "staff";
   const favoriteCount = favorites.size;
-
   const NAV = [
     { id: "home", label: "홈", icon: Search },
     { id: "map", label: "지도·검색", icon: MapPin },
@@ -1517,6 +1523,7 @@ export default function Page() {
     { id: "notice", label: "공지사항", icon: Megaphone },
     { id: "my", label: "마이페이지", icon: User },
     ...(isAdmin ? [{ id: "admin", label: "관리자", icon: ShieldCheck }] : []),
+    ...(isStaff && !isAdmin ? [{ id: "staff", label: "업무", icon: ShieldCheck }] : []),
   ];
 
   return (
@@ -1783,6 +1790,87 @@ export default function Page() {
           </div>
         </div>
       )}
+        {/* ===================== 직원 업무 ===================== */}
+        {tab === "staff" && (
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="rounded-2xl p-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+                <ShieldCheck size={22} color={TEAL} />
+              </div>
+              <div>
+                <h2 className="font-extrabold text-xl" style={{ color: INK }}>업무</h2>
+                <div className="text-xs" style={{ color: INK_SOFT }}>신고 확인, 1:1 문의 답변을 할 수 있어요</div>
+              </div>
+            </div>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>장소 정보 신고 ({allReports.filter(r => r.status !== "resolved").length}건 대기중)</div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {allReports.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>신고 내역이 없어요</div>}
+              {allReports.map((r) => (
+                <div key={r.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}`, opacity: r.status === "resolved" ? 0.5 : 1 }}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-bold" style={{ color: INK }}>{r.places?.name || "(삭제된 장소)"}</div>
+                      <div className="text-xs mb-1" style={{ color: INK_SOFT }}>{r.places?.address}</div>
+                      <div className="text-xs" style={{ color: INK }}>{r.reason}</div>
+                      <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{new Date(r.created_at).toLocaleDateString("ko-KR")}</div>
+                    </div>
+                    <div className="flex flex-col gap-1.5 flex-shrink-0">
+                      {r.status !== "resolved" ? (
+                        <button onClick={() => resolveReport(r.id)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white" style={{ background: TEAL }}>처리 완료로 표시</button>
+                      ) : (
+                        <span className="text-[10px] font-bold rounded-full px-2 py-1 text-center" style={{ background: PAPER, color: INK_SOFT }}>처리완료됨</span>
+                      )}
+                      {r.place_id && (
+                        <button
+                          onClick={() => {
+                            const place = places.find((pl) => pl.id === r.place_id);
+                            if (!place) { showToast("장소를 찾을 수 없어요 (삭제됐을 수 있어요)"); return; }
+                            setIsAdminEditingPlace(true);
+                            startEdit(place);
+                            setTab("register");
+                          }}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-bold"
+                          style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}
+                        >
+                          수정하기
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {allInquiries.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>문의가 없어요</div>}
+              {allInquiries.map((q) => (
+                <div key={q.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-bold" style={{ color: INK }}>{q.title}</div>
+                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: q.status === "answered" ? TEAL_TINT : CORAL_TINT, color: q.status === "answered" ? TEAL_DARK : CORAL }}>
+                      {q.status === "answered" ? "답변완료" : "답변대기"}
+                    </span>
+                  </div>
+                  <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{q.content}</div>
+                  {q.answer ? (
+                    <div className="mt-2 rounded-xl p-3 text-xs" style={{ background: PAPER, color: INK }}>
+                      <span className="font-bold" style={{ color: TEAL }}>답변: </span>{q.answer}
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 mt-2">
+                      <input value={replyDrafts[q.id] || ""} onChange={(e) => setReplyDrafts({ ...replyDrafts, [q.id]: e.target.value })} placeholder="답변 입력"
+                        className="flex-1 rounded-xl px-3 py-2 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                      <button onClick={() => submitReply(q.id)} className="rounded-xl px-3 py-2 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>답변</button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -2392,7 +2480,10 @@ export default function Page() {
                       className="w-20 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
                     <input value={adjustDrafts[p.id]?.note || ""} onChange={(e) => setAdjustDrafts({ ...adjustDrafts, [p.id]: { ...adjustDrafts[p.id], note: e.target.value } })} placeholder="사유 (예: 2월 이벤트 당첨)"
                       className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 100 }} />
-                    <button onClick={() => submitAdjustPoints(p.id)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>적용</button>
+                                       <button onClick={() => submitAdjustPoints(p.id)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>적용</button>
+                    <button onClick={() => toggleStaff(p.id, p.role === "staff")} className="rounded-lg px-2.5 py-1.5 text-xs font-bold flex-shrink-0" style={{ background: p.role === "staff" ? TEAL_TINT : PAPER, color: p.role === "staff" ? TEAL_DARK : INK_SOFT }}>
+                      {p.role === "staff" ? "직원 해제" : "직원 지정"}
+                    </button>
                     <button onClick={() => deleteUser(p.id, p.email)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold flex-shrink-0" style={{ background: CORAL_TINT, color: CORAL }} aria-label="회원 삭제">
                       <Trash2 size={14} />
                     </button>
