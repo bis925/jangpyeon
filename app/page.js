@@ -555,7 +555,8 @@ export default function Page() {
    const [confirmingUseCoupon, setConfirmingUseCoupon] = useState(null);
   const [allCoupons, setAllCoupons] = useState([]);
   const [expandedMemberId, setExpandedMemberId] = useState(null);
-  const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
+   const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
+  const [navbarOffset, setNavbarOffset] = useState(0);
   const pendingCouponAnnounce = useRef(false);
   const [couponDrafts, setCouponDrafts] = useState({});
   const [couponImageFile, setCouponImageFile] = useState(null);
@@ -914,6 +915,18 @@ export default function Page() {
     }
     document.addEventListener("click", handleGlobalClick);
     return () => document.removeEventListener("click", handleGlobalClick);
+  }, []);
+
+    useEffect(() => {
+    function handleScroll() {
+      setNavbarOffset(window.scrollY || document.documentElement.scrollTop || 0);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+    };
   }, []);
   
   /* --- 인증 상태 감지 --- */
@@ -1515,7 +1528,7 @@ export default function Page() {
   return (
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
           {/* ===== NAVBAR ===== */}
-<div className="sticky top-0 z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
+<div className="sticky top-0 z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, transform: `translateY(${navbarOffset}px)` }}>
         <div className="flex items-center pl-5 sm:pl-8 flex-shrink-0">
           <LogoMark size={40} />
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: 24, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
