@@ -1482,7 +1482,7 @@ export default function Page() {
               <span style={{ fontSize: 14 }}>🪙</span>
               <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
             </div>
-   <button onClick={() => setShowCouponList(true)} className={`relative flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
+   <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("coupon-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className={`relative flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
             <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
             <span style={{ fontSize: 11, fontWeight: 700, color: myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT }}>쿠폰</span>
           </button>
@@ -1496,7 +1496,7 @@ export default function Page() {
           </div>
         </div>
              <div className="flex sm:hidden items-center justify-end gap-2 px-5 pb-3">
-                           <button onClick={() => setShowCouponList(true)} className={`relative flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
+                           <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("coupon-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className={`relative flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
             <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
             <span style={{ fontSize: 11, fontWeight: 700, color: myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT }}>쿠폰</span>
           </button>
@@ -2116,7 +2116,7 @@ export default function Page() {
                 <div className="absolute rounded-full transition-all duration-200" style={{ width: 20, height: 20, top: 3, left: isDark ? 23 : 3, background: "#fff" }} />
               </button>
             </div>
-            <div className="flex items-center justify-between mb-3">
+                        <div id="coupon-section" className="flex items-center justify-between mb-3">
               <span className="font-extrabold text-sm" style={{ color: INK }}>내 쿠폰함 ({myCoupons.filter(c => c.status === "unused").length}개 사용가능)</span>
             </div>
             <div className="grid grid-cols-2 gap-3 mb-5">
