@@ -1900,7 +1900,15 @@ export default function Page() {
         {/* ===================== 관리자 ===================== */}
         {tab === "admin" && isAdmin && (
           <div className="max-w-2xl mx-auto">
-            <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>관리자</h2>
+     <div className="flex items-center gap-3 mb-6">
+              <div className="rounded-2xl p-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+                <ShieldCheck size={22} color={TEAL} />
+              </div>
+              <div>
+                <h2 className="font-extrabold text-xl" style={{ color: INK }}>관리자</h2>
+                <div className="text-xs" style={{ color: INK_SOFT }}>회원, 알림, 공지사항을 관리하세요</div>
+              </div>
+            </div>
                       <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>알림 보내기</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <input value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} placeholder="알림 제목 (예: 12월 이벤트 시작!)"
