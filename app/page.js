@@ -489,6 +489,7 @@ export default function Page() {
     name: "", address: "", addressDetail: "", category: "공공기관", keywords: "",
     badges: { ramp: false, door: false, stroller: false, lift: false },
   });
+    const [isSubmittingPlace, setIsSubmittingPlace] = useState(false);
   const [photoFiles, setPhotoFiles] = useState([]);
   const [photoPreviews, setPhotoPreviews] = useState([]);
     const [editingPlaceId, setEditingPlaceId] = useState(null);
@@ -1250,8 +1251,9 @@ export default function Page() {
 
   async function submitRegister(e) {
     e.preventDefault();
-    if (!form.name.trim()) return;
-    if (editingPlaceId) { await submitEdit(); return; }
+    if (!form.name.trim() || isSubmittingPlace) return;
+    setIsSubmittingPlace(true);
+    if (editingPlaceId) { await submitEdit(); setIsSubmittingPlace(false); return; }
     const fullAddress = form.addressDetail.trim()
       ? `${form.address.trim() || "주소 정보 없음"} ${form.addressDetail.trim()}`
       : (form.address.trim() || "주소 정보 없음");
@@ -1265,7 +1267,7 @@ export default function Page() {
       p_has_elevator: form.badges.lift,
       p_keywords: form.keywords.trim() || null,
     });
-    if (error) { showToast("등록 실패: " + error.message); return; }
+    if (error) { showToast("등록 실패: " + error.message); setIsSubmittingPlace(false); return; }
     for (const file of photoFiles) {
       const fileExt = file.name.split(".").pop();
       const filePath = `${data.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
@@ -1282,6 +1284,7 @@ export default function Page() {
     fetchPlaces();
     fetchProfile();
     fetchHistory();
+    setIsSubmittingPlace(false);
   }
 
   if (authLoading) {
@@ -1733,8 +1736,15 @@ export default function Page() {
                 </div>
                 <button type="submit" disabled={!form.name.trim()}
                   className="w-full rounded-full py-3.5 font-extrabold text-white flex items-center justify-center gap-1 transition-all duration-200 active:scale-[0.98] hover:opacity-90"
-                  style={{ background: form.name.trim() ? CORAL : LINE, cursor: form.name.trim() ? "pointer" : "not-allowed" }}>
-                                    {editingPlaceId ? "수정 완료" : "등록하고 2P 받기"} <ChevronRight size={16} />
+                                style={{ background: (form.name.trim() && !isSubmittingPlace) ? CORAL : LINE, cursor: (form.name.trim() && !isSubmittingPlace) ? "pointer" : "not-allowed" }}
+                  disabled={!form.name.trim() || isSubmittingPlace}>
+                  {isSubmittingPlace ? (
+                    <>
+                      <span className="inline-block animate-spin">⏳</span> 등록 중...
+                    </>
+                  ) : (
+                    <>{editingPlaceId ? "수정 완료" : "등록하고 2P 받기"} <ChevronRight size={16} /></>
+                  )}
                 </button>
               </form>
             )}
