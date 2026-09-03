@@ -1605,12 +1605,22 @@ export default function Page() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={submitRegister}>
-                              <h2 className="font-extrabold text-xl mb-5" style={{ color: INK, fontFamily: DISPLAY_FONT }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
+<form onSubmit={submitRegister}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="rounded-2xl p-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+                    <Plus size={22} color={TEAL} />
+                  </div>
+                  <div>
+                    <h2 className="font-extrabold text-xl" style={{ color: INK, fontFamily: DISPLAY_FONT }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
+                    <div className="text-xs" style={{ color: INK_SOFT }}>{editingPlaceId ? "정보를 최신으로 업데이트해주세요" : "접근성 정보를 등록하고 포인트를 받으세요"}</div>
+                  </div>
+                </div>
 
-                <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>장소명</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
-                  className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                <div className="rounded-2xl p-4 mb-4" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+                  <div className="text-xs font-bold mb-3" style={{ color: TEAL }}>📍 기본 정보</div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>장소명</label>
+                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
+                    className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
                                                                                              <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
                 <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
