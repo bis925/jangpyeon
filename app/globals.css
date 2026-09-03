@@ -28,3 +28,10 @@ body {
 .onboard-slide {
   animation: slide-up 0.4s ease;
 }
+@keyframes coupon-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 59, 0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 193, 59, 0); }
+}
+.coupon-badge-glow {
+  animation: coupon-glow 1.8s ease-in-out infinite;
+}
