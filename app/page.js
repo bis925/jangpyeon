@@ -552,6 +552,7 @@ export default function Page() {
   const [viewingCoupon, setViewingCoupon] = useState(null);
    const [confirmingUseCoupon, setConfirmingUseCoupon] = useState(null);
   const [allCoupons, setAllCoupons] = useState([]);
+  const [expandedMemberId, setExpandedMemberId] = useState(null);
   const [couponDrafts, setCouponDrafts] = useState({});
   const [couponImageFile, setCouponImageFile] = useState(null);
   const [couponImagePreview, setCouponImagePreview] = useState(null);
@@ -2305,14 +2306,19 @@ export default function Page() {
               {allProfiles
                 .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
                 .map((p) => (
-                <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
-                                                    <div className="flex items-center justify-between mb-1">
-                    <div>
-                      <div className="text-sm font-bold" style={{ color: INK }}>{p.email || "(이메일 없음)"}</div>
-                      <div className="text-xs" style={{ color: INK_SOFT }}>{p.admin_note ? `📌 ${p.admin_note} · ` : ""}{p.nickname} · {currentTier(p.points).label}</div>
+                               <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <button onClick={() => setExpandedMemberId(expandedMemberId === p.id ? null : p.id)} className="w-full flex items-center justify-between">
+                    <div className="text-left min-w-0">
+                      <div className="text-sm font-bold truncate" style={{ color: INK }}>{p.email || "(이메일 없음)"}</div>
+                      <div className="text-xs truncate" style={{ color: INK_SOFT }}>{p.admin_note ? `📌 ${p.admin_note} · ` : ""}{p.nickname} · {currentTier(p.points).label}</div>
                     </div>
-                    <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 15 }}>{p.points.toLocaleString()}P</div>
-                  </div>
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                      <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 15 }}>{p.points.toLocaleString()}P</div>
+                      <ChevronRight size={16} color={INK_SOFT} style={{ transform: expandedMemberId === p.id ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                    </div>
+                  </button>
+                  {expandedMemberId === p.id && (
+                  <div className="mt-3">
                   <div className="flex gap-2 mt-2">
                     <input value={adminNoteDrafts[p.id] !== undefined ? adminNoteDrafts[p.id] : (p.admin_note || "")} onChange={(e) => setAdminNoteDrafts({ ...adminNoteDrafts, [p.id]: e.target.value })} placeholder="별명/메모 (예: 카페 사장님, 아파트 경비아저씨)"
                       className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
@@ -2376,11 +2382,12 @@ export default function Page() {
                             <button onClick={() => deleteCoupon(c.id)} className="rounded-full p-1 flex-shrink-0" aria-label="쿠폰 삭제">
                               <Trash2 size={12} color={CORAL} />
                             </button>
-                          </div>
+                                       </div>
                         ))}
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
                  ))}
             </div>
