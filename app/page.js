@@ -563,6 +563,7 @@ export default function Page() {
   const [showCouponList, setShowCouponList] = useState(false);
   const swipeStartX = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
+  const didSwipe = useRef(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
@@ -698,12 +699,14 @@ export default function Page() {
     return () => clearInterval(timer);
   }, [campaigns]);
 
-    function handleSwipeStart(e) {
+   function handleSwipeStart(e) {
     swipeStartX.current = e.touches[0].clientX;
+    didSwipe.current = false;
   }
   function handleSwipeEnd(e) {
     const diff = e.changedTouches[0].clientX - swipeStartX.current;
     if (Math.abs(diff) < 50) return;
+    didSwipe.current = true;
     if (diff < 0 && previewIndex < previewImages.length - 1) {
       setPreviewIndex(previewIndex + 1);
     } else if (diff > 0 && previewIndex > 0) {
@@ -713,12 +716,14 @@ export default function Page() {
   function handleMouseDown(e) {
     swipeStartX.current = e.clientX;
     setIsDragging(true);
+    didSwipe.current = false;
   }
   function handleMouseUp(e) {
     if (!isDragging) return;
     setIsDragging(false);
     const diff = e.clientX - swipeStartX.current;
     if (Math.abs(diff) < 50) return;
+    didSwipe.current = true;
     if (diff < 0 && previewIndex < previewImages.length - 1) {
       setPreviewIndex(previewIndex + 1);
     } else if (diff > 0 && previewIndex > 0) {
@@ -1693,7 +1698,7 @@ export default function Page() {
         {/* ===== IMAGE PREVIEW ===== */}
       {previewImages.length > 0 && (
         <div
-          onClick={() => setPreviewImages([])}
+          onClick={() => { if (!didSwipe.current) setPreviewImages([]); }}
           onTouchStart={handleSwipeStart}
           onTouchEnd={handleSwipeEnd}
           onMouseDown={handleMouseDown}
