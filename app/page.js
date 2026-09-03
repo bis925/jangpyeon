@@ -1498,8 +1498,8 @@ export default function Page() {
                 <Megaphone size={18} color={TEAL_DARK} className="flex-shrink-0 mt-0.5" />
                 <div>
                   <div className="font-extrabold text-sm mb-0.5" style={{ color: TEAL_DARK }}>{notices[0].title}</div>
-                  <div className="text-xs" style={{ color: INK_SOFT }}>
-                    {renderRichText(notices[0].content.length > 40 ? notices[0].content.slice(0, 40) + "..." : notices[0].content)}
+                              <div className="text-xs" style={{ color: INK_SOFT }}>
+                    {renderRichText(notices[0].content.length > 20 ? notices[0].content.slice(0, 20) + "..." : notices[0].content)}
                   </div>
                 </div>
               </button>
