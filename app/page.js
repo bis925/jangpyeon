@@ -2275,11 +2275,11 @@ export default function Page() {
                       <Trash2 size={14} />
                     </button>
                   </div>
-                  <div className="flex gap-2 mt-2">
+                <div className="flex flex-col sm:flex-row gap-2 mt-2">
                     <input value={individualNotifDrafts[p.id]?.title || ""} onChange={(e) => setIndividualNotifDrafts({ ...individualNotifDrafts, [p.id]: { ...individualNotifDrafts[p.id], title: e.target.value } })} placeholder="알림 제목"
-                      className="w-24 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                      className="w-full sm:w-24 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                     <input value={individualNotifDrafts[p.id]?.body || ""} onChange={(e) => setIndividualNotifDrafts({ ...individualNotifDrafts, [p.id]: { ...individualNotifDrafts[p.id], body: e.target.value } })} placeholder="알림 내용"
-                      className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                      className="w-full sm:flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                                       <button
                       onClick={async () => {
                         const draft = individualNotifDrafts[p.id];
@@ -2287,8 +2287,8 @@ export default function Page() {
                         await sendPushNotification(draft.title, draft.body, p.id, "notice");
                         setIndividualNotifDrafts({ ...individualNotifDrafts, [p.id]: { title: "", body: "" } });
                       }}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: CORAL }}>
-                      <Bell size={14} />
+                      className="w-full sm:w-auto rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex items-center justify-center gap-1 flex-shrink-0" style={{ background: CORAL }}>
+                      <Bell size={14} /> <span className="sm:hidden">알림 발송</span>
                     </button>
                   </div>
                                           <div className="mt-2 pt-2" style={{ borderTop: `1px dashed ${LINE}` }}>
@@ -2300,12 +2300,12 @@ export default function Page() {
                       className="w-full rounded-lg px-2 py-1.5 mb-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                     <input value={couponDrafts[p.id]?.description || ""} onChange={(e) => setCouponDrafts({ ...couponDrafts, [p.id]: { ...couponDrafts[p.id], description: e.target.value } })} placeholder="설명 (예: ○○치킨 후라이드 1마리 무료)"
                       className="w-full rounded-lg px-2 py-1.5 mb-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-                    <div className="flex gap-2 mb-1.5">
+                                        <div className="flex flex-col sm:flex-row gap-2 mb-1.5">
                       <input type="date" value={couponDrafts[p.id]?.expiresAt || ""} onChange={(e) => setCouponDrafts({ ...couponDrafts, [p.id]: { ...couponDrafts[p.id], expiresAt: e.target.value } })}
-                        className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                        className="w-full sm:flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
                       <input type="file" accept="image/*" onChange={handleCouponImageChange} className="hidden" id={`coupon-image-${p.id}`} />
-                      <label htmlFor={`coupon-image-${p.id}`} className="rounded-lg px-2.5 py-1.5 text-xs font-bold flex items-center gap-1 cursor-pointer" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
-                        <Camera size={12} /> 사진
+                      <label htmlFor={`coupon-image-${p.id}`} className="w-full sm:w-auto rounded-lg px-2.5 py-1.5 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer flex-shrink-0" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+                        <Camera size={12} /> 사진 첨부
                       </label>
                     </div>
                     {couponImagePreview && <img src={couponImagePreview} alt="미리보기" className="w-16 h-16 object-cover rounded-lg mb-1.5" />}
