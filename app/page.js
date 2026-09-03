@@ -146,7 +146,7 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
         {place.photo_urls && place.photo_urls.length > 0 ? (
           <div className="flex gap-1.5 overflow-x-auto min-w-0">
             {place.photo_urls.map((url, i) => (
-              <button key={i} type="button" onClick={(e) => { e.stopPropagation(); onImageClick(url); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden relative">
+ <button key={i} type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_urls, i); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden relative">
                 <img src={url} alt={`${place.name} ${i + 1}`} className="w-full h-full object-cover" />
                 {place.photo_urls.length > 1 && i === 0 && (
                   <div className="absolute bottom-0.5 right-0.5 rounded-full px-1.5 py-0.5" style={{ background: "rgba(0,0,0,0.6)" }}>
@@ -544,7 +544,10 @@ export default function Page() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [reportingPlace, setReportingPlace] = useState(null);
     const [deletingPlace, setDeletingPlace] = useState(null);
-    const [showLimitReached, setShowLimitReached] = useState(false);
+  const [showLimitReached, setShowLimitReached] = useState(false);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const swipeStartX = useRef(0);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
@@ -680,6 +683,19 @@ export default function Page() {
     return () => clearInterval(timer);
   }, [campaigns]);
 
+    function handleSwipeStart(e) {
+    swipeStartX.current = e.touches[0].clientX;
+  }
+  function handleSwipeEnd(e) {
+    const diff = e.changedTouches[0].clientX - swipeStartX.current;
+    if (Math.abs(diff) < 50) return;
+    if (diff < 0 && previewIndex < previewImages.length - 1) {
+      setPreviewIndex(previewIndex + 1);
+    } else if (diff > 0 && previewIndex > 0) {
+      setPreviewIndex(previewIndex - 1);
+    }
+  }
+  
   function reportPlace(place) {
     setReportingPlace(place);
     setReportReason("");
@@ -1482,7 +1498,7 @@ export default function Page() {
               <div className="grid sm:grid-cols-2 gap-3">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                    <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} />
+                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} />
                   </div>
                 ))}
               </div>
@@ -1552,11 +1568,24 @@ export default function Page() {
           </div>
         </div>
       )}
-      {/* ===== IMAGE PREVIEW ===== */}
-      {previewImage && (
-        <div onClick={() => setPreviewImage(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
-          <img src={previewImage} alt="확대 이미지" className="max-w-full max-h-full rounded-2xl" />
-          <button onClick={() => setPreviewImage(null)} className="absolute top-5 right-5 rounded-full p-3" style={{ background: "rgba(255,255,255,0.15)" }} aria-label="닫기">
+        {/* ===== IMAGE PREVIEW ===== */}
+      {previewImages.length > 0 && (
+        <div
+          onClick={() => setPreviewImages([])}
+          onTouchStart={handleSwipeStart}
+          onTouchEnd={handleSwipeEnd}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.85)" }}
+        >
+          <img src={previewImages[previewIndex]} alt="확대 이미지" className="max-w-full max-h-full rounded-2xl" />
+          {previewImages.length > 1 && (
+            <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-1.5">
+              {previewImages.map((_, i) => (
+                <div key={i} className="rounded-full transition-all duration-200" style={{ width: i === previewIndex ? 16 : 6, height: 6, background: i === previewIndex ? "#fff" : "rgba(255,255,255,0.4)" }} />
+              ))}
+            </div>
+          )}
+          <button onClick={() => setPreviewImages([])} className="absolute top-5 right-5 rounded-full p-3" style={{ background: "rgba(255,255,255,0.15)" }} aria-label="닫기">
             <X size={22} color="#fff" />
           </button>
         </div>
@@ -1662,7 +1691,7 @@ export default function Page() {
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -1692,7 +1721,7 @@ export default function Page() {
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} />
                 </div>
               ))}
             </div>
