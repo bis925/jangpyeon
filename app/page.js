@@ -550,7 +550,8 @@ export default function Page() {
   const [previewIndex, setPreviewIndex] = useState(0);
   const [myCoupons, setMyCoupons] = useState([]);
   const [viewingCoupon, setViewingCoupon] = useState(null);
-  const [confirmingUseCoupon, setConfirmingUseCoupon] = useState(null);
+   const [confirmingUseCoupon, setConfirmingUseCoupon] = useState(null);
+  const [allCoupons, setAllCoupons] = useState([]);
   const [couponDrafts, setCouponDrafts] = useState({});
   const [couponImageFile, setCouponImageFile] = useState(null);
   const [couponImagePreview, setCouponImagePreview] = useState(null);
@@ -906,9 +907,10 @@ export default function Page() {
       fetchAllInquiries();
       fetchCampaigns();
       fetchAllProfiles();
-      fetchAdjustLog();
+          fetchAdjustLog();
       fetchReports();
       fetchMyCoupons();
+      fetchAllCoupons();
     }
   }, [session]);
 
@@ -926,6 +928,18 @@ export default function Page() {
     async function fetchMyCoupons() {
     const { data } = await supabase.from("coupons").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
     setMyCoupons(data || []);
+  }
+    async function fetchAllCoupons() {
+    if (session.user.email !== ADMIN_EMAIL) return;
+    const { data } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+    setAllCoupons(data || []);
+  }
+  async function deleteCoupon(couponId) {
+    if (!window.confirm("이 쿠폰을 삭제하시겠어요?")) return;
+    const { error } = await supabase.rpc("admin_delete_coupon", { p_coupon_id: couponId });
+    if (error) { showToast("삭제 실패: " + error.message); return; }
+    fetchAllCoupons();
+    showToast("쿠폰이 삭제됐어요");
   }
     function openUseCouponConfirm(couponId) {
     setViewingCoupon(null);
@@ -2347,10 +2361,25 @@ export default function Page() {
                         <Camera size={12} /> 사진 첨부
                       </label>
                     </div>
-                    {couponImagePreview && <img src={couponImagePreview} alt="미리보기" className="w-16 h-16 object-cover rounded-lg mb-1.5" />}
+                           {couponImagePreview && <img src={couponImagePreview} alt="미리보기" className="w-16 h-16 object-cover rounded-lg mb-1.5" />}
                     <button onClick={() => issueCoupon(p.id)} className="w-full rounded-lg py-1.5 text-xs font-bold text-white flex items-center justify-center gap-1" style={{ background: TEAL }}>
                       <Gift size={13} /> 쿠폰 발급하기
                     </button>
+                    {allCoupons.filter((c) => c.user_id === p.id).length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {allCoupons.filter((c) => c.user_id === p.id).map((c) => (
+                          <div key={c.id} className="flex items-center justify-between rounded-lg px-2 py-1.5" style={{ background: PAPER }}>
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold truncate" style={{ color: INK }}>{c.title}</div>
+                              <div className="text-[10px]" style={{ color: c.status === "used" ? INK_SOFT : TEAL }}>{c.status === "used" ? "사용완료" : "사용가능"}</div>
+                            </div>
+                            <button onClick={() => deleteCoupon(c.id)} className="rounded-full p-1 flex-shrink-0" aria-label="쿠폰 삭제">
+                              <Trash2 size={12} color={CORAL} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                  ))}
