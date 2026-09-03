@@ -553,6 +553,7 @@ export default function Page() {
    const [confirmingUseCoupon, setConfirmingUseCoupon] = useState(null);
   const [allCoupons, setAllCoupons] = useState([]);
   const [expandedMemberId, setExpandedMemberId] = useState(null);
+  const pendingCouponAnnounce = useRef(false);
   const [couponDrafts, setCouponDrafts] = useState({});
   const [couponImageFile, setCouponImageFile] = useState(null);
   const [couponImagePreview, setCouponImagePreview] = useState(null);
@@ -882,6 +883,25 @@ export default function Page() {
       document.removeEventListener("touchend", handleTouchEnd);
     };
   }, [pullDistance]);
+
+    useEffect(() => {
+    function handleGlobalClick(e) {
+      if (!pendingCouponAnnounce.current) return;
+      // 쿠폰함/쿠폰 관련 버튼을 눌렀을 때는 소리 안 냄
+      if (e.target.closest('[aria-label="쿠폰함"]') || e.target.closest("#coupon-section")) return;
+      const count = pendingCouponAnnounce.current;
+      pendingCouponAnnounce.current = false;
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        const utter = new SpeechSynthesisUtterance(`사용하실 수 있는 쿠폰이 ${count}개 있습니다. 쿠폰함을 확인해보세요.`);
+        utter.lang = "ko-KR";
+        utter.rate = 1.0;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+    document.addEventListener("click", handleGlobalClick);
+    return () => document.removeEventListener("click", handleGlobalClick);
+  }, []);
+  
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -926,16 +946,13 @@ export default function Page() {
     const withPhoto = (data || []).map((p) => ({ ...p, photo_urls: (p.place_photos || []).map((ph) => ph.photo_url), photo_url: p.place_photos?.[0]?.photo_url || null }));
     setPlaces(withPhoto);
   }
-      async function fetchMyCoupons() {
+  async function fetchMyCoupons() {
     const { data } = await supabase.from("coupons").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
     const unusedCount = (data || []).filter((c) => c.status === "unused").length;
     const hadUnusedBefore = myCoupons.some((c) => c.status === "unused");
     setMyCoupons(data || []);
-    if (unusedCount > 0 && !hadUnusedBefore && typeof window !== "undefined" && window.speechSynthesis) {
-      const utter = new SpeechSynthesisUtterance(`사용하실 수 있는 쿠폰이 ${unusedCount}개 있습니다. 쿠폰함을 확인해보세요.`);
-      utter.lang = "ko-KR";
-      utter.rate = 1.0;
-      window.speechSynthesis.speak(utter);
+    if (unusedCount > 0 && !hadUnusedBefore) {
+      pendingCouponAnnounce.current = unusedCount;
     }
   }
     async function fetchAllCoupons() {
