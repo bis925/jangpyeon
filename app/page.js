@@ -1359,14 +1359,14 @@ export default function Page() {
           </button>
         </div>
         </div>
-        <div className="flex sm:hidden items-center justify-end gap-2 px-5 pb-3">
+             <div className="flex sm:hidden items-center justify-end gap-2 px-5 pb-3">
+          <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
+            <Star size={16} color={INK_SOFT} />
+          </button>
           <div className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0" style={{ background: CORAL_TINT }}>
             <span style={{ fontSize: 14 }}>🪙</span>
             <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
           </div>
-          <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
-            <Star size={16} color={INK_SOFT} />
-          </button>
           <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
             <LogOut size={14} />
             로그아웃
