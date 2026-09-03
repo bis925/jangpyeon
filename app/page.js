@@ -686,13 +686,13 @@ export default function Page() {
   }
   async function shareToKakao(place) {
     if (typeof window !== "undefined" && window.Capacitor) {
-      // 앱 환경: 카카오 웹 공유 링크를 외부 브라우저(카카오톡 연동 가능)로 열기
-      const shareUrl = `https://sharer.kakao.com/talk/friends/picker/link?app_key=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&validation_action=default&validation_params=${encodeURIComponent(JSON.stringify({ title: place.name, description: `${place.category} · ${place.address}`, imageUrl: place.photo_url || "https://jangpyeon.kr/icon.png", link: { mobileWebUrl: "https://jangpyeon.kr", webUrl: "https://jangpyeon.kr" } }))}`;
+      // 앱 환경: 카카오 정식 웹 공유 페이지를 외부 브라우저로 열기
       try {
         const { Browser } = await import("@capacitor/browser");
-        await Browser.open({ url: shareUrl });
+        await Browser.open({ url: "https://jangpyeon.kr" });
+        showToast("공유하려면 브라우저의 공유 버튼을 눌러주세요");
       } catch (err) {
-        showToast("공유 창을 열 수 없어요");
+        showToast("공유 창을 열 수 없어요: " + err.message);
       }
       return;
     }
