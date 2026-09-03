@@ -1574,17 +1574,12 @@ export default function Page() {
                 <LocateFixed size={18} color={TEAL} />
               </button>
             </div>
-            <div className="flex flex-wrap gap-2 mb-5">
-              {CATEGORIES.map((c) => {
-                const active = mapCategory === c;
-                return (
-                  <button key={c} onClick={() => setMapCategory(active ? null : c)} className="rounded-full px-3.5 py-1.5 text-xs font-bold border transition-all duration-200 active:scale-95"
-                    style={{ border: `1.4px solid ${active ? TEAL : LINE}`, background: active ? TEAL_TINT : "#fff", color: active ? TEAL_DARK : INK_SOFT }}>
-                    {c}
-                  </button>
-                );
-              })}
-            </div>
+            <select value={mapCategory || ""} onChange={(e) => setMapCategory(e.target.value || null)} className="w-full rounded-xl px-4 py-3 mb-5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
+              <option value="">전체 카테고리</option>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
