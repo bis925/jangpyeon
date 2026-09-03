@@ -241,10 +241,10 @@ function LoginScreen({ onSent }) {
     localStorage.setItem("jangpyeon_email", email.trim());
     setSent(true);
   }
-    async function useCoupon(couponId) {
+  async function useCoupon(couponId) {
     if (!window.confirm("이 쿠폰을 사용 처리하시겠어요? 되돌릴 수 없어요.")) return;
     const { error } = await supabase.rpc("use_coupon", { p_coupon_id: couponId });
-    if (error) { showToast("처리 실패: " + error.message); return; }
+    if (error) { window.alert("처리 실패: " + error.message); return; }
     fetchMyCoupons();
     setViewingCoupon(null);
     showToast("쿠폰을 사용 처리했어요");
