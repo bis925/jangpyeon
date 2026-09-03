@@ -1423,6 +1423,9 @@ export default function Page() {
         </div>
         <div className="flex-1">
         <div className="flex items-center justify-end px-5 sm:px-8 py-3.5 relative">
+          <button onClick={() => setShowFavoritesOnly(true)} className="flex sm:hidden rounded-full p-2 flex-shrink-0 mr-2 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
+            <Star size={16} color={INK_SOFT} />
+          </button>
           <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1" style={{ background: PAPER }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
             <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
