@@ -921,8 +921,6 @@ export default function Page() {
     return () => document.removeEventListener("click", handleGlobalClick);
   }, []);
 
-  useEffect(() => {
-    let ticking = false;
 
   
   /* --- 인증 상태 감지 --- */
