@@ -544,6 +544,7 @@ export default function Page() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [reportingPlace, setReportingPlace] = useState(null);
     const [deletingPlace, setDeletingPlace] = useState(null);
+    const [showLimitReached, setShowLimitReached] = useState(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
@@ -1283,7 +1284,15 @@ export default function Page() {
       p_has_elevator: form.badges.lift,
       p_keywords: form.keywords.trim() || null,
     });
-    if (error) { showToast("등록 실패: " + error.message); setIsSubmittingPlace(false); return; }
+       if (error) {
+      setIsSubmittingPlace(false);
+      if (error.message.includes("하루에 등록할 수 있는")) {
+        setShowLimitReached(true);
+      } else {
+        showToast("등록 실패: " + error.message);
+      }
+      return;
+    }
     for (const file of photoFiles) {
       const fileExt = file.name.split(".").pop();
       const filePath = `${data.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
@@ -1476,6 +1485,19 @@ export default function Page() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* ===== DAILY LIMIT REACHED POPUP ===== */}
+      {showLimitReached && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="text-5xl mb-3">🌙</div>
+            <div className="font-extrabold text-base mb-1" style={{ color: INK }}>오늘 등록 횟수를 다 쓰셨어요</div>
+            <div className="text-sm mb-6" style={{ color: INK_SOFT }}>하루에 최대 5곳까지 등록할 수 있어요.<br />내일 다시 새로운 장소를 등록해보세요!</div>
+            <button onClick={() => setShowLimitReached(false)} className="w-full rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+              확인했어요
+            </button>
           </div>
         </div>
       )}
