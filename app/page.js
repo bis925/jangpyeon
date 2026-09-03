@@ -1458,13 +1458,22 @@ export default function Page() {
               <span style={{ fontSize: 14 }}>🪙</span>
               <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
             </div>
-                     <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
-            <LogOut size={14} />
-            로그아웃
-          </button>
-        </div>
+            <button onClick={() => setShowCouponList(true)} className={`relative rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
+              <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
+            </button>
+            <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
+              <Star size={16} color={INK_SOFT} />
+            </button>
+            <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+              <LogOut size={14} />
+              로그아웃
+            </button>
+          </div>
         </div>
              <div className="flex sm:hidden items-center justify-end gap-2 px-5 pb-3">
+                     <button onClick={() => setShowCouponList(true)} className={`relative rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
+            <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
+          </button>
           <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
             <Star size={16} color={INK_SOFT} />
           </button>
