@@ -946,15 +946,21 @@ export default function Page() {
       fetchHistory();
       fetchNotices();
       fetchInquiries();
-      fetchAllInquiries();
       fetchCampaigns();
-      fetchAllProfiles();
-          fetchAdjustLog();
-      fetchReports();
       fetchMyCoupons();
-      fetchAllCoupons();
     }
   }, [session]);
+
+  /* --- 프로필(직급) 로드 후, 관리자/직원 전용 데이터 불러오기 --- */
+  useEffect(() => {
+    if (session && profile) {
+      fetchAllInquiries();
+      fetchAllProfiles();
+      fetchAdjustLog();
+      fetchReports();
+      fetchAllCoupons();
+    }
+  }, [session, profile]);
 
   async function fetchProfile() {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
