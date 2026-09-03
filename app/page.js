@@ -2457,8 +2457,10 @@ export default function Page() {
                       <div className="text-xs" style={{ color: INK }}>{r.reason}</div>
                       <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{new Date(r.created_at).toLocaleDateString("ko-KR")}</div>
                     </div>
-                    {r.status !== "resolved" && (
-                      <button onClick={() => resolveReport(r.id)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>처리완료</button>
+                                      {r.status !== "resolved" ? (
+                      <button onClick={() => resolveReport(r.id)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>처리 완료로 표시</button>
+                    ) : (
+                      <span className="text-[10px] font-bold rounded-full px-2 py-1 flex-shrink-0" style={{ background: PAPER, color: INK_SOFT }}>처리완료됨</span>
                     )}
                   </div>
                 </div>
