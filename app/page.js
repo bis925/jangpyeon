@@ -243,11 +243,17 @@ function LoginScreen({ onSent }) {
   }
   async function useCoupon(couponId) {
     if (!window.confirm("이 쿠폰을 사용 처리하시겠어요? 되돌릴 수 없어요.")) return;
-    const { error } = await supabase.rpc("use_coupon", { p_coupon_id: couponId });
-    if (error) { window.alert("처리 실패: " + error.message); return; }
-    fetchMyCoupons();
-    setViewingCoupon(null);
-    showToast("쿠폰을 사용 처리했어요");
+    try {
+      window.alert("처리 시작, couponId: " + couponId);
+      const { error } = await supabase.rpc("use_coupon", { p_coupon_id: couponId });
+      if (error) { window.alert("처리 실패: " + JSON.stringify(error)); return; }
+      window.alert("성공! 목록 새로고침할게요");
+      await fetchMyCoupons();
+      setViewingCoupon(null);
+      showToast("쿠폰을 사용 처리했어요");
+    } catch (err) {
+      window.alert("예외 발생: " + err.message);
+    }
   }
   async function pasteOtp() {
     try {
