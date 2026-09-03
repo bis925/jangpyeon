@@ -242,6 +242,7 @@ function LoginScreen({ onSent }) {
     setSent(true);
   }
   function useCoupon(couponId) {
+    setViewingCoupon(null);
     setConfirmingUseCoupon(couponId);
   }
   async function confirmUseCoupon() {
