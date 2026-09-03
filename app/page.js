@@ -135,7 +135,7 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete }) {
   const badges = getBadges(place);
   return (
         <div className="relative rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
@@ -164,9 +164,14 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
         <div className="flex items-center gap-1.5">
           <div className="font-extrabold" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
           {isOwner && (
-            <button onClick={() => onEdit(place)} className="rounded-full p-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정">
-              <Pencil size={13} color={INK_SOFT} />
-            </button>
+            <>
+              <button onClick={() => onEdit(place)} className="rounded-full p-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정">
+                <Pencil size={13} color={INK_SOFT} />
+              </button>
+              <button onClick={() => onDelete(place)} className="rounded-full p-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="삭제">
+                <Trash2 size={13} color={CORAL} />
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -1198,6 +1203,13 @@ export default function Page() {
     setPhotoFiles(newFiles);
     setPhotoPreviews(newFiles.map((f) => URL.createObjectURL(f)));
   }
+    async function deletePlace(place) {
+    if (!window.confirm(`"${place.name}"을(를) 정말 삭제하시겠어요? 이 작업은 되돌릴 수 없어요.`)) return;
+    const { error } = await supabase.from("places").delete().eq("id", place.id).eq("created_by", session.user.id);
+    if (error) { showToast("삭제 실패: " + error.message); return; }
+    fetchPlaces();
+    showToast("장소가 삭제됐어요");
+  }
   function startEdit(place) {
     setEditingPlaceId(place.id);
     setForm({
@@ -1455,7 +1467,7 @@ export default function Page() {
               <div className="grid sm:grid-cols-2 gap-3">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                    <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} />
+                    <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} />
                   </div>
                 ))}
               </div>
@@ -1602,7 +1614,7 @@ export default function Page() {
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -1632,7 +1644,7 @@ export default function Page() {
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={setPreviewImage} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} />
                 </div>
               ))}
             </div>
