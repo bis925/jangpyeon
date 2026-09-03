@@ -1208,12 +1208,14 @@ export default function Page() {
   function deletePlace(place) {
     setDeletingPlace(place);
   }
-  async function confirmDeletePlace() {
-    const { error } = await supabase.from("places").delete().eq("id", deletingPlace.id).eq("created_by", session.user.id);
+   async function confirmDeletePlace() {
+    const { error } = await supabase.rpc("delete_own_place", { p_place_id: deletingPlace.id });
     if (error) { showToast("삭제 실패: " + error.message); return; }
     setDeletingPlace(null);
     fetchPlaces();
-    showToast("장소가 삭제됐어요");
+    fetchProfile();
+    fetchHistory();
+    showToast("장소가 삭제됐어요 (포인트 2P 회수)");
   }
   function startEdit(place) {
     setEditingPlaceId(place.id);
