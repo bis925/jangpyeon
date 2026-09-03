@@ -283,23 +283,21 @@ function LoginScreen({ onSent }) {
               <div className="font-bold text-sm mb-1" style={{ color: TEAL_DARK }}>메일함을 확인해주세요</div>
               <div className="text-xs mb-4" style={{ color: INK_SOFT }}>{email}로 인증코드 8자리를 보냈어요</div>
               <form onSubmit={handleVerify}>
-                <div className="flex gap-2 mb-3">
                   <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={8}
-                    required
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
-                    placeholder="인증코드 8자리"
-                    className="flex-1 rounded-xl px-4 py-3 text-sm text-center outline-none"
-                    style={{ border: `1.4px solid ${LINE}`, color: INK, letterSpacing: 4, fontFamily: MONO_FONT }}
-                  />
-                          <button type="button" onClick={pasteOtp} className="flex items-center gap-1.5 rounded-xl px-3.5 flex-shrink-0 transition-all duration-200 active:scale-95" style={{ background: TEAL_TINT, color: TEAL_DARK }} aria-label="붙여넣기">
-                    <Clipboard size={16} />
-                    <span className="text-xs font-bold">붙여넣기</span>
-                  </button>
-                </div>
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={8}
+                  required
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
+                  placeholder="인증코드 8자리"
+                  className="w-full rounded-xl px-4 py-3 mb-2 text-sm text-center outline-none"
+                  style={{ border: `1.4px solid ${LINE}`, color: INK, letterSpacing: 4, fontFamily: MONO_FONT }}
+                />
+                <button type="button" onClick={pasteOtp} className="w-full flex items-center justify-center gap-1.5 rounded-xl py-3 mb-3 transition-all duration-200 active:scale-95" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                  <Clipboard size={16} />
+                  <span className="text-sm font-bold">붙여넣기</span>
+                </button>
                 <button
                   type="submit"
                   disabled={verifying}
