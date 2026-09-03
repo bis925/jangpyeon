@@ -560,6 +560,7 @@ export default function Page() {
   const [couponDrafts, setCouponDrafts] = useState({});
   const [couponImageFile, setCouponImageFile] = useState(null);
   const [couponImagePreview, setCouponImagePreview] = useState(null);
+  const [showCouponList, setShowCouponList] = useState(false);
   const swipeStartX = useRef(0);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
