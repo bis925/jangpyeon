@@ -557,6 +557,10 @@ export default function Page() {
   const [expandedMemberId, setExpandedMemberId] = useState(null);
    const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(0);
+  const [navbarHeight, setNavbarHeight] = useState(0);
+  const [tabsHeight, setTabsHeight] = useState(0);
+  const navbarRef = useRef(null);
+  const tabsRef = useRef(null);
   const pendingCouponAnnounce = useRef(false);
   const [couponDrafts, setCouponDrafts] = useState({});
   const [couponImageFile, setCouponImageFile] = useState(null);
@@ -917,7 +921,7 @@ export default function Page() {
     return () => document.removeEventListener("click", handleGlobalClick);
   }, []);
 
-    useEffect(() => {
+   useEffect(() => {
     function handleScroll() {
       setNavbarOffset(window.scrollY || document.documentElement.scrollTop || 0);
     }
@@ -928,6 +932,17 @@ export default function Page() {
       document.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    function measure() {
+      if (navbarRef.current) setNavbarHeight(navbarRef.current.offsetHeight);
+      if (tabsRef.current) setTabsHeight(tabsRef.current.offsetHeight);
+    }
+    measure();
+    window.addEventListener("resize", measure);
+    const timer = setTimeout(measure, 300);
+    return () => { window.removeEventListener("resize", measure); clearTimeout(timer); };
+  }, [session]);
   
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
@@ -1528,7 +1543,7 @@ export default function Page() {
   return (
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
           {/* ===== NAVBAR ===== */}
-<div className="z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, position: "absolute", top: navbarOffset, left: 0, right: 0 }}>
+<div ref={navbarRef} className="z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, position: "absolute", top: navbarOffset, left: 0, right: 0 }}>
         <div className="flex items-center pl-5 sm:pl-8 flex-shrink-0">
           <LogoMark size={40} />
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: 24, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
@@ -1615,7 +1630,7 @@ export default function Page() {
         </div>
       </div>
            {/* ===== MOBILE TABS ===== */}
-         <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}`, position: "absolute", top: navbarOffset + 88, left: 0, right: 0, zIndex: 9 }}>
+      <div ref={tabsRef} className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}`, position: "absolute", top: navbarOffset + navbarHeight, left: 0, right: 0, zIndex: 9 }}>
         {NAV.map((n) => {
           const Icon = n.icon;
           const active = tab === n.id;
@@ -1860,7 +1875,7 @@ export default function Page() {
         {toast && <div className="rounded-full px-5 py-3 text-sm font-bold text-white shadow-lg" style={{ background: INK }}>{toast}</div>}
       </div>
 
-       <main className="max-w-5xl mx-auto px-5 sm:px-8 py-8 pt-32 sm:pt-20" key={tab} style={{ animation: "fadeIn 0.25s ease" }}>
+      <main className="max-w-5xl mx-auto px-5 sm:px-8 py-8" key={tab} style={{ animation: "fadeIn 0.25s ease", paddingTop: (navbarHeight + tabsHeight + 32) }}>
         <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }`}</style>
 
         {/* ===================== 홈 ===================== */}
