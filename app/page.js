@@ -894,7 +894,13 @@ export default function Page() {
       if (typeof window !== "undefined" && window.speechSynthesis) {
         const utter = new SpeechSynthesisUtterance(`사용하실 수 있는 쿠폰이 ${count}개 있습니다. 쿠폰함을 확인해보세요.`);
         utter.lang = "ko-KR";
-        utter.rate = 1.0;
+        utter.rate = 0.95;
+        utter.pitch = 1.15;
+        utter.volume = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const koreanVoice = voices.find((v) => v.lang === "ko-KR" && /female|여성|유나|Yuna|Sora|소라/i.test(v.name))
+          || voices.find((v) => v.lang === "ko-KR");
+        if (koreanVoice) utter.voice = koreanVoice;
         window.speechSynthesis.speak(utter);
       }
     }
