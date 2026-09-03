@@ -241,19 +241,17 @@ function LoginScreen({ onSent }) {
     localStorage.setItem("jangpyeon_email", email.trim());
     setSent(true);
   }
-  async function useCoupon(couponId) {
-    if (!window.confirm("이 쿠폰을 사용 처리하시겠어요? 되돌릴 수 없어요.")) return;
-    try {
-      window.alert("처리 시작, couponId: " + couponId);
-      const { error } = await supabase.rpc("use_coupon", { p_coupon_id: couponId });
-      if (error) { window.alert("처리 실패: " + JSON.stringify(error)); return; }
-      window.alert("성공! 목록 새로고침할게요");
-      await fetchMyCoupons();
-      setViewingCoupon(null);
-      showToast("쿠폰을 사용 처리했어요");
-    } catch (err) {
-      window.alert("예외 발생: " + err.message);
-    }
+  function useCoupon(couponId) {
+    setConfirmingUseCoupon(couponId);
+  }
+  async function confirmUseCoupon() {
+    const couponId = confirmingUseCoupon;
+    setConfirmingUseCoupon(null);
+    const { error } = await supabase.rpc("use_coupon", { p_coupon_id: couponId });
+    if (error) { showToast("처리 실패: " + error.message); return; }
+    await fetchMyCoupons();
+    setViewingCoupon(null);
+    showToast("쿠폰을 사용 처리했어요");
   }
   async function pasteOtp() {
     try {
@@ -563,6 +561,7 @@ export default function Page() {
   const [previewIndex, setPreviewIndex] = useState(0);
   const [myCoupons, setMyCoupons] = useState([]);
   const [viewingCoupon, setViewingCoupon] = useState(null);
+  const [confirmingUseCoupon, setConfirmingUseCoupon] = useState(null);
   const [couponDrafts, setCouponDrafts] = useState({});
   const [couponImageFile, setCouponImageFile] = useState(null);
   const [couponImagePreview, setCouponImagePreview] = useState(null);
@@ -1647,6 +1646,26 @@ export default function Page() {
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ===== USE COUPON CONFIRM POPUP ===== */}
+      {confirmingUseCoupon && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+              <Gift size={22} color={TEAL} />
+            </div>
+            <div className="font-extrabold text-base mb-1" style={{ color: INK }}>쿠폰을 사용 처리하시겠어요?</div>
+            <div className="text-sm mb-6" style={{ color: INK_SOFT }}>사용 처리하면 되돌릴 수 없어요.</div>
+            <div className="flex gap-2">
+              <button onClick={() => setConfirmingUseCoupon(null)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                취소
+              </button>
+              <button onClick={confirmUseCoupon} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                사용하기
+              </button>
             </div>
           </div>
         </div>
