@@ -926,9 +926,16 @@ export default function Page() {
     const withPhoto = (data || []).map((p) => ({ ...p, photo_urls: (p.place_photos || []).map((ph) => ph.photo_url), photo_url: p.place_photos?.[0]?.photo_url || null }));
     setPlaces(withPhoto);
   }
-    async function fetchMyCoupons() {
+      async function fetchMyCoupons() {
     const { data } = await supabase.from("coupons").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
     setMyCoupons(data || []);
+    const unusedCount = (data || []).filter((c) => c.status === "unused").length;
+    if (unusedCount > 0 && typeof window !== "undefined" && window.speechSynthesis) {
+      const utter = new SpeechSynthesisUtterance(`사용하실 수 있는 쿠폰이 ${unusedCount}개 있습니다. 쿠폰함을 확인해보세요.`);
+      utter.lang = "ko-KR";
+      utter.rate = 1.0;
+      window.speechSynthesis.speak(utter);
+    }
   }
     async function fetchAllCoupons() {
     if (session.user.email !== ADMIN_EMAIL) return;
