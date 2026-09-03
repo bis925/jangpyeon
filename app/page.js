@@ -241,7 +241,7 @@ function LoginScreen({ onSent }) {
     localStorage.setItem("jangpyeon_email", email.trim());
     setSent(true);
   }
-  function useCoupon(couponId) {
+  function openUseCouponConfirm(couponId) {
     setViewingCoupon(null);
     setConfirmingUseCoupon(couponId);
   }
@@ -1644,7 +1644,7 @@ export default function Page() {
                   닫기
                 </button>
                 {viewingCoupon.status === "unused" && (
-                  <button onClick={() => useCoupon(viewingCoupon.id)} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                                  <button onClick={() => openUseCouponConfirm(viewingCoupon.id)} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
                     사용하기
                   </button>
                 )}
