@@ -553,6 +553,7 @@ export default function Page() {
    const [confirmingUseCoupon, setConfirmingUseCoupon] = useState(null);
   const [allCoupons, setAllCoupons] = useState([]);
   const [expandedMemberId, setExpandedMemberId] = useState(null);
+  const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
   const pendingCouponAnnounce = useRef(false);
   const [couponDrafts, setCouponDrafts] = useState({});
   const [couponImageFile, setCouponImageFile] = useState(null);
@@ -1388,21 +1389,37 @@ export default function Page() {
     });
     setTab("register");
   }
-  async function submitEdit() {
+   async function submitEdit() {
     if (!form.name.trim()) return;
-    const { error } = await supabase
-      .from("places")
-           .update({
-        name: form.name.trim(),
-        address: form.address.trim() || "주소 정보 없음",
-        category: form.category,
-        has_ramp: form.badges.ramp,
-        has_restroom: form.badges.door,
-        has_stroller_access: form.badges.stroller,
-        has_elevator: form.badges.lift,
-        keywords: form.keywords.trim() || null,
-      })
-      .eq("id", editingPlaceId);
+    const fullAddress = form.address.trim() || "주소 정보 없음";
+    let error;
+    if (isAdminEditingPlace) {
+      ({ error } = await supabase.rpc("admin_update_place", {
+        p_place_id: editingPlaceId,
+        p_name: form.name.trim(),
+        p_address: fullAddress,
+        p_category: form.category,
+        p_has_ramp: form.badges.ramp,
+        p_has_restroom: form.badges.door,
+        p_has_stroller_access: form.badges.stroller,
+        p_has_elevator: form.badges.lift,
+        p_keywords: form.keywords.trim() || null,
+      }));
+    } else {
+      ({ error } = await supabase
+        .from("places")
+        .update({
+          name: form.name.trim(),
+          address: fullAddress,
+          category: form.category,
+          has_ramp: form.badges.ramp,
+          has_restroom: form.badges.door,
+          has_stroller_access: form.badges.stroller,
+          has_elevator: form.badges.lift,
+          keywords: form.keywords.trim() || null,
+        })
+        .eq("id", editingPlaceId));
+    }
     if (error) { showToast("수정 실패: " + error.message); return; }
     for (const file of photoFiles) {
       const fileExt = file.name.split(".").pop();
@@ -1418,7 +1435,8 @@ export default function Page() {
     setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFiles([]);
     setPhotoPreviews([]);
-    setTab("home");
+    setTab(isAdminEditingPlace ? "admin" : "home");
+    setIsAdminEditingPlace(false);
     fetchPlaces();
   }
 
@@ -1980,8 +1998,8 @@ export default function Page() {
                     <Plus size={22} color={TEAL} />
                   </div>
                   <div>
-               <h2 className="font-extrabold text-xl" style={{ color: INK }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
-                    <div className="text-xs" style={{ color: INK_SOFT }}>{editingPlaceId ? "정보를 최신으로 업데이트해주세요" : "접근성 정보를 등록하고 포인트를 받으세요"}</div>
+                                   <h2 className="font-extrabold text-xl" style={{ color: INK, fontFamily: DISPLAY_FONT }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
+                    <div className="text-xs" style={{ color: INK_SOFT }}>{isAdminEditingPlace ? "🛠️ 관리자 권한으로 신고된 정보를 수정하고 있어요" : editingPlaceId ? "정보를 최신으로 업데이트해주세요" : "접근성 정보를 등록하고 포인트를 받으세요"}</div>
                   </div>
                 </div>
 
@@ -2457,11 +2475,28 @@ export default function Page() {
                       <div className="text-xs" style={{ color: INK }}>{r.reason}</div>
                       <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{new Date(r.created_at).toLocaleDateString("ko-KR")}</div>
                     </div>
-                                      {r.status !== "resolved" ? (
-                      <button onClick={() => resolveReport(r.id)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>처리 완료로 표시</button>
-                    ) : (
-                      <span className="text-[10px] font-bold rounded-full px-2 py-1 flex-shrink-0" style={{ background: PAPER, color: INK_SOFT }}>처리완료됨</span>
-                    )}
+                                                  <div className="flex flex-col gap-1.5 flex-shrink-0">
+                      {r.status !== "resolved" ? (
+                        <button onClick={() => resolveReport(r.id)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white" style={{ background: TEAL }}>처리 완료로 표시</button>
+                      ) : (
+                        <span className="text-[10px] font-bold rounded-full px-2 py-1 text-center" style={{ background: PAPER, color: INK_SOFT }}>처리완료됨</span>
+                      )}
+                      {r.place_id && (
+                        <button
+                          onClick={() => {
+                            const place = places.find((pl) => pl.id === r.place_id);
+                            if (!place) { showToast("장소를 찾을 수 없어요 (삭제됐을 수 있어요)"); return; }
+                            setIsAdminEditingPlace(true);
+                            startEdit(place);
+                            setTab("register");
+                          }}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-bold"
+                          style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}
+                        >
+                          수정하기
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
