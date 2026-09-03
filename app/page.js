@@ -686,13 +686,17 @@ export default function Page() {
   }
   async function shareToKakao(place) {
     if (typeof window !== "undefined" && window.Capacitor) {
-      // 앱 환경: 카카오 정식 웹 공유 페이지를 외부 브라우저로 열기
+      // 앱 환경: 안드로이드 표준 공유창 사용 (카카오톡, 문자 등 선택 가능)
       try {
-        const { Browser } = await import("@capacitor/browser");
-        await Browser.open({ url: "https://jangpyeon.kr" });
-        showToast("공유하려면 브라우저의 공유 버튼을 눌러주세요");
+        const { Share } = await import("@capacitor/share");
+        await Share.share({
+          title: place.name,
+          text: `${place.name} (${place.category})\n${place.address}\n장편에서 확인해보세요!`,
+          url: "https://jangpyeon.kr",
+          dialogTitle: "공유하기",
+        });
       } catch (err) {
-        showToast("공유 창을 열 수 없어요: " + err.message);
+        // 사용자가 공유창을 취소한 경우도 여기로 오니, 에러 표시는 생략
       }
       return;
     }
