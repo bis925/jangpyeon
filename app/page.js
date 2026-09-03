@@ -1522,7 +1522,7 @@ export default function Page() {
   return (
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
           {/* ===== NAVBAR ===== */}
-<div className="sticky top-0 z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
+<div className="z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
         <div className="flex items-center pl-5 sm:pl-8 flex-shrink-0">
           <LogoMark size={40} />
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: 24, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
