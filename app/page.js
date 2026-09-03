@@ -1633,14 +1633,11 @@ export default function Page() {
                 <input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="예: 족발, 갈비, 한식 (쉼표로 구분)"
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
-                <div className="flex flex-wrap gap-2 mb-5">
+                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl px-4 py-3 mb-5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
                   {CATEGORIES.map((c) => (
-                    <button type="button" key={c} onClick={() => setForm({ ...form, category: c })} className="rounded-full px-3.5 py-1.5 text-xs font-bold border transition-all duration-200 active:scale-95"
-                      style={{ borderColor: form.category === c ? TEAL : LINE, background: form.category === c ? TEAL_TINT : "#fff", color: form.category === c ? TEAL_DARK : INK_SOFT }}>
-                      {c}
-                    </button>
+                    <option key={c} value={c}>{c}</option>
                   ))}
-                </div>
+                </select>
 
                 <label className="block text-xs font-bold mb-2" style={{ color: INK_SOFT }}>접근성 체크리스트</label>
                 <div className="grid grid-cols-2 gap-2 mb-6">
