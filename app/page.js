@@ -2240,8 +2240,19 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
-                <div className="col-span-2 text-center py-14 text-sm" style={{ color: INK_SOFT }}>
-                  아직 등록된 장소가 없어요. 직접 첫 장소를 등록해보시겠어요?
+                <div className="col-span-2 text-center py-14">
+                  <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+                    <MapPin size={26} color={TEAL} />
+                  </div>
+                  <div className="text-sm font-bold mb-1" style={{ color: INK }}>
+                    {query.trim() || activeFilters.length > 0 ? "검색 결과가 없어요" : "아직 등록된 장소가 없어요"}
+                  </div>
+                  <div className="text-xs mb-4" style={{ color: INK_SOFT }}>
+                    {query.trim() || activeFilters.length > 0 ? "이 장소를 알고 계신가요? 직접 등록해보세요!" : "첫 번째 장소를 등록하고 포인트를 받아보세요"}
+                  </div>
+                  <button onClick={() => setTab("register")} className="rounded-full px-5 py-2.5 text-xs font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                    장소 등록하러 가기
+                  </button>
                 </div>
               )}
             </div>
