@@ -564,6 +564,7 @@ export default function Page() {
   const [reportingPlace, setReportingPlace] = useState(null);
     const [deletingPlace, setDeletingPlace] = useState(null);
   const [showLimitReached, setShowLimitReached] = useState(false);
+  const [showDuplicatePlace, setShowDuplicatePlace] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [myCoupons, setMyCoupons] = useState([]);
@@ -1511,10 +1512,12 @@ export default function Page() {
       p_keywords: form.keywords.trim() || null,
       p_phone: form.phone.trim() || null,
     });
-       if (error) {
+    if (error) {
       setIsSubmittingPlace(false);
       if (error.message.includes("하루에 등록할 수 있는")) {
         setShowLimitReached(true);
+      } else if (error.message.includes("이미 등록된 장소")) {
+        setShowDuplicatePlace(true);
       } else {
         showToast("등록 실패: " + error.message);
       }
@@ -1795,6 +1798,23 @@ export default function Page() {
           </div>
         </div>
       )}
+
+      {/* ===== DUPLICATE PLACE POPUP ===== */}
+      {showDuplicatePlace && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: CORAL_TINT }}>
+              <MapPin size={22} color={CORAL} />
+            </div>
+            <div className="font-extrabold text-base mb-1" style={{ color: INK }}>이미 등록된 장소예요</div>
+            <div className="text-sm mb-6" style={{ color: INK_SOFT }}>같은 이름과 주소의 장소가 이미 등록되어 있어요.<br />지도에서 검색해보시겠어요?</div>
+            <button onClick={() => setShowDuplicatePlace(false)} className="w-full rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+              확인했어요
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ===== DAILY LIMIT REACHED POPUP ===== */}
       {showLimitReached && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
