@@ -2276,7 +2276,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                                       setForm({ ...form, openHolidays: next });
                                     }}
                                   />
-                                                                  <span style={{ color: INK }}>{date} ({Array.isArray(names) ? names.join(", ") : names})</span>
+ <span style={{ color: INK }}>{date} ({Array.isArray(names) ? names.join(", ") : (typeof names === "string" ? names : JSON.stringify(names))})</span>
                                 </label>
                               );
                             })}
