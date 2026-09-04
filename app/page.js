@@ -109,7 +109,28 @@ function renderRichText(text) {
   return nodes;
 }
 
-const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑"];
+const CATEGORIES =const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑"];
+const WEEKDAYS = [
+  { key: "mon", label: "월" }, { key: "tue", label: "화" }, { key: "wed", label: "수" },
+  { key: "thu", label: "목" }, { key: "fri", label: "금" }, { key: "sat", label: "토" }, { key: "sun", label: "일" },
+];
+const DEFAULT_HOURS = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { open: "09:00", close: "18:00", closed: false } }), {});
+
+function isOpenNow(businessHours) {
+  if (!businessHours) return null;
+  const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  const now = new Date();
+  const today = dayKeys[now.getDay()];
+  const todayHours = businessHours[today];
+  if (!todayHours || todayHours.closed) return false;
+  if (!todayHours.open || !todayHours.close) return null;
+  const [openH, openM] = todayHours.open.split(":").map(Number);
+  const [closeH, closeM] = todayHours.close.split(":").map(Number);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const openMinutes = openH * 60 + openM;
+  const closeMinutes = closeH * 60 + closeM;
+  return nowMinutes >= openMinutes && nowMinutes < closeMinutes;
+} ["공공기관", "음식점", "카페", "문화시설", "쇼핑"];
 const ADMIN_EMAIL = "bis925@naver.com";
 
 /* ===================== 작은 컴포넌트 ===================== */
@@ -137,8 +158,20 @@ function Badge({ badgeKey }) {
 
 function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete }) {
   const badges = getBadges(place);
+  const openStatus = isOpenNow(place.business_hours);
   return (
-        <div className="relative rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+    <div className="relative rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}>
+      {openStatus === false && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-2xl z-20 pointer-events-none">
+          <span className="rounded-full px-4 py-1.5 text-sm font-extrabold" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}>영업 종료</span>
+        </div>
+      )}
+      {openStatus === true && (
+        <div className="absolute top-3 right-12 flex items-center gap-1 rounded-full px-2 py-1 z-10" style={{ background: "rgba(255,255,255,0.9)" }}>
+          <div className="rounded-full" style={{ width: 7, height: 7, background: "#22C55E" }} />
+          <span className="text-[10px] font-bold" style={{ color: "#16A34A" }}>영업중</span>
+        </div>
+      )}
         <button onClick={() => onToggleFavorite(place.id)} className="absolute top-3 right-3 rounded-full p-1.5 z-10 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
         <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
       </button>
@@ -512,6 +545,8 @@ export default function Page() {
   const [form, setForm] = useState({
     name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "",
     badges: { ramp: false, door: false, stroller: false, lift: false },
+    businessHours: DEFAULT_HOURS,
+    useHours: false,
   });
     const [isSubmittingPlace, setIsSubmittingPlace] = useState(false);
   const [photoFiles, setPhotoFiles] = useState([]);
@@ -1431,6 +1466,8 @@ export default function Page() {
       category: place.category,
       keywords: place.keywords || "",
       phone: place.phone || "",
+      businessHours: place.business_hours || DEFAULT_HOURS,
+      useHours: !!place.business_hours,
       badges: {
         ramp: place.has_ramp,
         door: place.has_restroom,
@@ -1456,6 +1493,7 @@ export default function Page() {
         p_has_elevator: form.badges.lift,
         p_keywords: form.keywords.trim() || null,
         p_phone: form.phone.trim() || null,
+        p_business_hours: form.useHours ? form.businessHours : null,
       }));
     } else {
       ({ error } = await supabase
@@ -1470,6 +1508,7 @@ export default function Page() {
           has_elevator: form.badges.lift,
           keywords: form.keywords.trim() || null,
           phone: form.phone.trim() || null,
+          business_hours: form.useHours ? form.businessHours : null,
         })
         .eq("id", editingPlaceId));
     }
@@ -1485,7 +1524,7 @@ export default function Page() {
     }
     showToast("수정 완료!");
     setEditingPlaceId(null);
-   setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
+setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "", businessHours: DEFAULT_HOURS, useHours: false, badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFiles([]);
     setPhotoPreviews([]);
     setTab(isAdminEditingPlace ? "admin" : "home");
@@ -1501,7 +1540,7 @@ export default function Page() {
     const fullAddress = form.addressDetail.trim()
       ? `${form.address.trim() || "주소 정보 없음"} ${form.addressDetail.trim()}`
       : (form.address.trim() || "주소 정보 없음");
-      const { data, error } = await supabase.rpc("register_place", {
+    const { data, error } = await supabase.rpc("register_place", {
       p_name: form.name.trim(),
       p_address: fullAddress,
       p_category: form.category,
@@ -1511,6 +1550,7 @@ export default function Page() {
       p_has_elevator: form.badges.lift,
       p_keywords: form.keywords.trim() || null,
       p_phone: form.phone.trim() || null,
+      p_business_hours: form.useHours ? form.businessHours : null,
     });
     if (error) {
       setIsSubmittingPlace(false);
@@ -1533,7 +1573,7 @@ export default function Page() {
       }
     }
     setJustRegistered(data);
-  setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
+setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "", businessHours: DEFAULT_HOURS, useHours: false, badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFiles([]);
     setPhotoPreviews([]);
     fetchPlaces();
@@ -2184,6 +2224,38 @@ export default function Page() {
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>전화번호 (선택)</label>
                 <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="예: 02-1234-5678"
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold" style={{ color: INK_SOFT }}>영업시간 설정 (선택)</label>
+                  <button type="button" onClick={() => setForm({ ...form, useHours: !form.useHours })} className="relative rounded-full transition-all duration-200" style={{ width: 40, height: 22, background: form.useHours ? TEAL : LINE }}>
+                    <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 16, height: 16, top: 3, left: form.useHours ? 21 : 3 }} />
+                  </button>
+                </div>
+                {form.useHours && (
+                  <div className="rounded-xl p-3 mb-4" style={{ border: `1.4px solid ${LINE}` }}>
+                    {WEEKDAYS.map((d) => {
+                      const dayData = form.businessHours[d.key];
+                      return (
+                        <div key={d.key} className="flex items-center gap-2 mb-2 last:mb-0">
+                          <span className="text-xs font-bold w-5 flex-shrink-0" style={{ color: INK }}>{d.label}</span>
+                          <button type="button" onClick={() => setForm({ ...form, businessHours: { ...form.businessHours, [d.key]: { ...dayData, closed: !dayData.closed } } })}
+                            className="text-[10px] font-bold rounded-lg px-2 py-1.5 flex-shrink-0" style={{ background: dayData.closed ? CORAL_TINT : TEAL_TINT, color: dayData.closed ? CORAL : TEAL_DARK }}>
+                            {dayData.closed ? "휴무" : "영업"}
+                          </button>
+                          {!dayData.closed && (
+                            <>
+                              <input type="time" value={dayData.open} onChange={(e) => setForm({ ...form, businessHours: { ...form.businessHours, [d.key]: { ...dayData, open: e.target.value } } })}
+                                className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
+                              <span className="text-xs" style={{ color: INK_SOFT }}>~</span>
+                              <input type="time" value={dayData.close} onChange={(e) => setForm({ ...form, businessHours: { ...form.businessHours, [d.key]: { ...dayData, close: e.target.value } } })}
+                                className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl px-4 py-3 mb-5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
                   {CATEGORIES.map((c) => (
