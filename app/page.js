@@ -2265,8 +2265,23 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 16, height: 16, top: 3, left: form.useHours ? 21 : 3 }} />
                   </button>
                 </div>
-                               {form.useHours && (
+                                       {form.useHours && (
                   <div className="rounded-xl p-3 mb-4" style={{ border: `1.4px solid ${LINE}` }}>
+                    <div className="flex gap-2 mb-3">
+                      <button type="button" onClick={() => {
+                        const allDay = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { open: "00:00", close: "23:59", closed: false } }), {});
+                        setForm({ ...form, businessHours: allDay });
+                      }} className="flex-1 rounded-lg py-2 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                        24시간 영업
+                      </button>
+                      <button type="button" onClick={() => {
+                        const first = form.businessHours.mon;
+                        const sameEveryday = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { ...first } }), {});
+                        setForm({ ...form, businessHours: sameEveryday });
+                      }} className="flex-1 rounded-lg py-2 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                        매일 동일하게
+                      </button>
+                    </div>
                     {holidays && (
                       <div className="mb-3 pb-3" style={{ borderBottom: `1px dashed ${LINE}` }}>
                         <div className="text-xs font-bold mb-2" style={{ color: INK_SOFT }}>다가오는 공휴일에도 영업하시나요? (선택)</div>
