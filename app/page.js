@@ -659,6 +659,10 @@ export default function Page() {
   const [imageScale, setImageScale] = useState(1);
   const pinchStartDistance = useRef(null);
   const pinchStartScale = useRef(1);
+  const previewImagesRef = useRef([]);
+  const tabRef = useRef("home");
+    useEffect(() => { previewImagesRef.current = previewImages; }, [previewImages]);
+  useEffect(() => { tabRef.current = tab; }, [tab]);
   const didSwipe = useRef(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
@@ -713,19 +717,19 @@ export default function Page() {
     if (typeof window === "undefined" || !window.Capacitor) return;
     let subPromise;
     import("@capacitor/app").then(({ App }) => {
-              subPromise = App.addListener("backButton", () => {
-        if (previewImages.length > 0) {
+      subPromise = App.addListener("backButton", () => {
+        if (previewImagesRef.current.length > 0) {
           setPreviewImages([]);
           setImageScale(1);
-        } else if (tab !== "home") {
+        } else if (tabRef.current !== "home") {
           setTab("home");
         } else {
           setShowExitConfirm(true);
         }
       });
     });
-       return () => { if (subPromise) subPromise.then((s) => s.remove()); };
-  }, [tab, previewImages]);
+    return () => { if (subPromise) subPromise.then((s) => s.remove()); };
+  }, []);
   useEffect(() => {
     if (window.kakao && window.kakao.maps) { setKakaoLoaded(true); return; }
     const script = document.createElement("script");
