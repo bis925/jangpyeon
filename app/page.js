@@ -2420,9 +2420,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     갤러리에서 선택
                   </label>
                 </div>
-                <button type="submit" disabled={!form.name.trim()}
+                          <button type="submit"
                   className="w-full rounded-full py-3.5 font-extrabold text-white flex items-center justify-center gap-1 transition-all duration-200 active:scale-[0.98] hover:opacity-90"
-                                style={{ background: (form.name.trim() && !isSubmittingPlace) ? CORAL : LINE, cursor: (form.name.trim() && !isSubmittingPlace) ? "pointer" : "not-allowed" }}
+                  style={{ background: (form.name.trim() && !isSubmittingPlace) ? CORAL : LINE, cursor: (form.name.trim() && !isSubmittingPlace) ? "pointer" : "not-allowed" }}
                   disabled={!form.name.trim() || isSubmittingPlace}>
                   {isSubmittingPlace ? (
                     <>
