@@ -197,7 +197,7 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo, onShowRecencyHelp }) {
   const badges = getBadges(place);
   const openStatus = isOpenNow(place.business_hours, holidays);
   return (
@@ -265,11 +265,11 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
       {place.created_at && (() => {
         const recency = getRecencyInfo(place.created_at, place.last_confirmed_at);
         return (
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <div className="inline-flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: recency.bg }}>
+                 <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <button onClick={(e) => { e.stopPropagation(); onShowRecencyHelp(); }} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: recency.bg }}>
               <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
               <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
-            </div>
+            </button>
             <button onClick={(e) => { e.stopPropagation(); onConfirmInfo(place.id); }} className="text-[10px] font-bold underline" style={{ color: INK_SOFT }}>
               아직 정보가 맞아요
             </button>
@@ -1938,7 +1938,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <div className="grid sm:grid-cols-2 gap-3">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}mageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} />
+                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}mageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
                         </div>
                 ))}
               </div>
@@ -2394,7 +2394,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -2435,7 +2435,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}ImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}ImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
                 </div>
               ))}
             </div>
