@@ -140,11 +140,13 @@ function useKoreanHolidays() {
   return holidays;
 }
 
-function getRecencyInfo(createdAt) {
-  const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
-  if (days < 90) return { label: days < 1 ? "오늘 등록됨" : `${days}일 전 등록됨`, color: "#22C55E", bg: "#DCFCE7" };
-  if (days < 365) return { label: `${Math.floor(days / 30)}개월 전 등록됨`, color: "#CA8A04", bg: "#FEF9C3" };
-  return { label: `${Math.floor(days / 365)}년 전 등록됨, 확인 권장`, color: "#DC2626", bg: "#FEE2E2" };
+function getRecencyInfo(createdAt, lastConfirmedAt) {
+  const baseDate = lastConfirmedAt || createdAt;
+  const days = Math.floor((Date.now() - new Date(baseDate).getTime()) / (1000 * 60 * 60 * 24));
+  const suffix = lastConfirmedAt ? "확인됨" : "등록됨";
+  if (days < 90) return { label: days < 1 ? `오늘 ${suffix}` : `${days}일 전 ${suffix}`, color: "#22C55E", bg: "#DCFCE7" };
+  if (days < 365) return { label: `${Math.floor(days / 30)}개월 전 ${suffix}`, color: "#CA8A04", bg: "#FEF9C3" };
+  return { label: `${Math.floor(days / 365)}년 전 ${suffix}, 확인 권장`, color: "#DC2626", bg: "#FEE2E2" };
 }
 
 function isOpenNow(businessHours, holidays) {
@@ -195,7 +197,7 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo }) {
   const badges = getBadges(place);
   const openStatus = isOpenNow(place.business_hours, holidays);
   return (
@@ -261,11 +263,16 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
       </div>
            <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
       {place.created_at && (() => {
-        const recency = getRecencyInfo(place.created_at);
+        const recency = getRecencyInfo(place.created_at, place.last_confirmed_at);
         return (
-          <div className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 mb-2" style={{ background: recency.bg }}>
-            <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
-            <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <div className="inline-flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: recency.bg }}>
+              <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
+              <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
+            </div>
+            <button onClick={(e) => { e.stopPropagation(); onConfirmInfo(place.id); }} className="text-[10px] font-bold underline" style={{ color: INK_SOFT }}>
+              아직 정보가 맞아요
+            </button>
           </div>
         );
       })()}
@@ -913,6 +920,13 @@ export default function Page() {
     if (error) { showToast("삭제 실패: " + error.message); return; }
     fetchReviews(viewingReviewsPlace.id);
     showToast("리뷰가 삭제됐어요");
+  }
+
+    async function confirmPlaceInfo(placeId) {
+    const { error } = await supabase.rpc("confirm_place_info", { p_place_id: placeId });
+    if (error) { showToast("처리 실패: " + error.message); return; }
+    fetchPlaces();
+    showToast("확인해주셔서 감사해요! 다른 분들에게 도움이 돼요");
   }
   
   function reportPlace(place) {
@@ -1924,7 +1938,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <div className="grid sm:grid-cols-2 gap-3">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}mageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} />
+                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}mageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} />
                         </div>
                 ))}
               </div>
@@ -2380,7 +2394,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -2421,7 +2435,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}ImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}ImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} />
                 </div>
               ))}
             </div>
