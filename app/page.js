@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -187,7 +187,7 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews }) {
   const badges = getBadges(place);
   const openStatus = isOpenNow(place.business_hours, holidays);
   return (
@@ -277,9 +277,15 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           </button>
         )}
       </div>
-      <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75" style={{ color: CORAL }}>
-        도움이 됐어요 {place.helpful_count} · 눌러서 응원하기
-      </button>
+        <div className="flex items-center justify-between">
+        <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75" style={{ color: CORAL }}>
+          도움이 됐어요 {place.helpful_count} · 눌러서 응원하기
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75" style={{ color: TEAL }}>
+          <MessageSquare size={13} />
+          리뷰
+        </button>
+      </div>
     </div>
   );
 }
@@ -643,6 +649,9 @@ export default function Page() {
    const [confirmingUseCoupon, setConfirmingUseCoupon] = useState(null);
   const [allCoupons, setAllCoupons] = useState([]);
   const [expandedMemberId, setExpandedMemberId] = useState(null);
+  const [viewingReviewsPlace, setViewingReviewsPlace] = useState(null);
+  const [placeReviews, setPlaceReviews] = useState([]);
+  const [newReviewText, setNewReviewText] = useState("");
    const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
@@ -856,6 +865,26 @@ export default function Page() {
     } else if (diff > 0 && previewIndex > 0) {
       setPreviewIndex(previewIndex - 1);
     }
+  }
+
+  async function fetchReviews(placeId) {
+    const { data } = await supabase.from("place_reviews").select("*, profiles(nickname)").eq("place_id", placeId).order("created_at", { ascending: false });
+    setPlaceReviews(data || []);
+  }
+  async function submitReview() {
+    if (!newReviewText.trim()) return;
+    const { error } = await supabase.from("place_reviews").insert({ place_id: viewingReviewsPlace.id, user_id: session.user.id, content: newReviewText.trim() });
+    if (error) { showToast("리뷰 등록 실패: " + error.message); return; }
+    setNewReviewText("");
+    fetchReviews(viewingReviewsPlace.id);
+    showToast("리뷰가 등록됐어요");
+  }
+  async function deleteReview(reviewId) {
+    if (!window.confirm("이 리뷰를 삭제하시겠어요?")) return;
+    const { error } = await supabase.from("place_reviews").delete().eq("id", reviewId);
+    if (error) { showToast("삭제 실패: " + error.message); return; }
+    fetchReviews(viewingReviewsPlace.id);
+    showToast("리뷰가 삭제됐어요");
   }
   
   function reportPlace(place) {
@@ -1867,7 +1896,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <div className="grid sm:grid-cols-2 gap-3">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}mageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} />
+                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}mageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} />
                         </div>
                 ))}
               </div>
@@ -2061,7 +2090,55 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </div>
           </div>
         )}
-
+      {/* ===== REVIEWS POPUP ===== */}
+      {viewingReviewsPlace && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col" style={{ background: CARD, height: "80vh", maxHeight: 600 }}>
+            <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${LINE}` }}>
+              <div>
+                <div className="font-extrabold text-sm" style={{ color: INK }}>{viewingReviewsPlace.name}</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>리뷰 {placeReviews.length}개</div>
+              </div>
+              <button onClick={() => setViewingReviewsPlace(null)} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
+                <X size={20} color={INK_SOFT} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              {placeReviews.length === 0 ? (
+                <div className="text-center py-10 text-sm" style={{ color: INK_SOFT }}>
+                  아직 리뷰가 없어요.<br />첫 리뷰를 남겨보세요!
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {placeReviews.map((r) => (
+                    <div key={r.id} className="rounded-xl p-3" style={{ background: PAPER }}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold" style={{ color: INK }}>{r.profiles?.nickname || "익명"}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px]" style={{ color: INK_SOFT }}>{new Date(r.created_at).toLocaleDateString("ko-KR")}</span>
+                          {(r.user_id === session.user.id || session.user.email === ADMIN_EMAIL) && (
+                            <button onClick={() => deleteReview(r.id)} className="rounded-full p-1" aria-label="리뷰 삭제">
+                              <Trash2 size={12} color={CORAL} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-sm" style={{ color: INK }}>{r.content}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 px-5 py-4 flex-shrink-0" style={{ borderTop: `1px solid ${LINE}` }}>
+              <input value={newReviewText} onChange={(e) => setNewReviewText(e.target.value)} placeholder="이 장소에 대한 한줄평을 남겨주세요"
+                className="flex-1 rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <button onClick={submitReview} className="rounded-xl px-4 py-2.5 text-sm font-bold text-white flex-shrink-0" style={{ background: TEAL }}>
+                등록
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -2236,7 +2313,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -2277,7 +2354,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}ImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}ImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} />
                 </div>
               ))}
             </div>
