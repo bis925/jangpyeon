@@ -121,7 +121,20 @@ function useKoreanHolidays() {
   useEffect(() => {
     fetch("https://holidays.hyunbin.page/basic.json")
       .then((res) => res.json())
-      .then((data) => setHolidays(data))
+      .then((data) => {
+        const flat = {};
+        for (const key in data) {
+          const val = data[key];
+          if (Array.isArray(val)) {
+            flat[key] = val;
+          } else if (val && typeof val === "object") {
+            Object.assign(flat, val);
+          } else if (typeof val === "string") {
+            flat[key] = [val];
+          }
+        }
+        setHolidays(flat);
+      })
       .catch(() => setHolidays({}));
   }, []);
   return holidays;
