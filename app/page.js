@@ -237,13 +237,13 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
       <div className="flex items-center justify-between gap-2 mb-1">
         <div className="flex items-center gap-1.5">
           <div className="font-extrabold" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
-          {isOwner && (
+                  {isOwner && (
             <>
-              <button onClick={() => onEdit(place)} className="flex items-center gap-1 rounded-full pl-1.5 pr-2 py-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정하기">
+              <button onClick={(e) => { e.stopPropagation(); onEdit(place); }} className="flex items-center gap-1 rounded-full pl-1.5 pr-2 py-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정하기">
                 <Pencil size={13} color={INK_SOFT} />
                 <span style={{ fontSize: 10, fontWeight: 700, color: INK_SOFT }}>수정</span>
               </button>
-              <button onClick={() => onDelete(place)} className="flex items-center gap-1 rounded-full pl-1.5 pr-2 py-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="삭제하기">
+              <button onClick={(e) => { e.stopPropagation(); onDelete(place); }} className="flex items-center gap-1 rounded-full pl-1.5 pr-2 py-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="삭제하기">
                 <Trash2 size={13} color={CORAL} />
                 <span style={{ fontSize: 10, fontWeight: 700, color: CORAL }}>삭제</span>
               </button>
