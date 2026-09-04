@@ -144,9 +144,9 @@ function getRecencyInfo(createdAt, lastConfirmedAt) {
   const baseDate = lastConfirmedAt || createdAt;
   const days = Math.floor((Date.now() - new Date(baseDate).getTime()) / (1000 * 60 * 60 * 24));
   const suffix = lastConfirmedAt ? "확인됨" : "등록됨";
-  if (days < 90) return { label: days < 1 ? `오늘 ${suffix}` : `${days}일 전 ${suffix}`, color: "#22C55E", bg: "#DCFCE7" };
-  if (days < 365) return { label: `${Math.floor(days / 30)}개월 전 ${suffix}`, color: "#CA8A04", bg: "#FEF9C3" };
-  return { label: `${Math.floor(days / 365)}년 전 ${suffix}, 확인 권장`, color: "#DC2626", bg: "#FEE2E2" };
+  if (days < 90) return { label: days < 1 ? `오늘 ${suffix}` : `${days}일 전 ${suffix}`, color: "#3E8E6E", bg: "#E8F3ED" };
+  if (days < 365) return { label: `${Math.floor(days / 30)}개월 전 ${suffix}`, color: "#B08A3E", bg: "#F5EEE0" };
+  return { label: `${Math.floor(days / 365)}년 전 ${suffix}, 확인 권장`, color: "#C56B5C", bg: "#F5E6E3" };
 }
 
 function isOpenNow(businessHours, holidays) {
