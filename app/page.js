@@ -1555,9 +1555,8 @@ export default function Page() {
           has_stroller_access: form.badges.stroller,
           has_elevator: form.badges.lift,
           keywords: form.keywords.trim() || null,
-          phone: form.phone.trim() || null,
+                 phone: form.phone.trim() || null,
           business_hours: finalBusinessHours,
-        })
         })
         .eq("id", editingPlaceId));
     }
