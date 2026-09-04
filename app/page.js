@@ -724,8 +724,8 @@ export default function Page() {
         }
       });
     });
-    return () => { if (subPromise) subPromise.then((s) => s.remove()); };
-  }, [tab]);
+       return () => { if (subPromise) subPromise.then((s) => s.remove()); };
+  }, [tab, previewImages]);
   useEffect(() => {
     if (window.kakao && window.kakao.maps) { setKakaoLoaded(true); return; }
     const script = document.createElement("script");
