@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -182,6 +182,12 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
       <div className="flex items-center gap-1 mb-3">
+        {place.phone && (
+          <a href={`tel:${place.phone}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL_TINT }} aria-label="전화 걸기">
+            <Phone size={14} color={TEAL_DARK} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: TEAL_DARK }}>전화</span>
+          </a>
+        )}
         <button onClick={() => onShare(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
           <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
           <span style={{ fontSize: 10, fontWeight: 700, color: "#3C1E1E" }}>공유</span>
@@ -494,7 +500,7 @@ export default function Page() {
   const [toast, setToast] = useState(null);
   const [justRegistered, setJustRegistered] = useState(null);
   const [form, setForm] = useState({
-    name: "", address: "", addressDetail: "", category: "공공기관", keywords: "",
+    name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "",
     badges: { ramp: false, door: false, stroller: false, lift: false },
   });
     const [isSubmittingPlace, setIsSubmittingPlace] = useState(false);
@@ -1401,6 +1407,7 @@ export default function Page() {
       addressDetail: "",
       category: place.category,
       keywords: place.keywords || "",
+      phone: place.phone || "",
       badges: {
         ramp: place.has_ramp,
         door: place.has_restroom,
@@ -1425,6 +1432,7 @@ export default function Page() {
         p_has_stroller_access: form.badges.stroller,
         p_has_elevator: form.badges.lift,
         p_keywords: form.keywords.trim() || null,
+        p_phone: form.phone.trim() || null,
       }));
     } else {
       ({ error } = await supabase
@@ -1438,6 +1446,7 @@ export default function Page() {
           has_stroller_access: form.badges.stroller,
           has_elevator: form.badges.lift,
           keywords: form.keywords.trim() || null,
+          phone: form.phone.trim() || null,
         })
         .eq("id", editingPlaceId));
     }
@@ -1453,7 +1462,7 @@ export default function Page() {
     }
     showToast("수정 완료!");
     setEditingPlaceId(null);
-    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
+   setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFiles([]);
     setPhotoPreviews([]);
     setTab(isAdminEditingPlace ? "admin" : "home");
@@ -1469,7 +1478,7 @@ export default function Page() {
     const fullAddress = form.addressDetail.trim()
       ? `${form.address.trim() || "주소 정보 없음"} ${form.addressDetail.trim()}`
       : (form.address.trim() || "주소 정보 없음");
-    const { data, error } = await supabase.rpc("register_place", {
+      const { data, error } = await supabase.rpc("register_place", {
       p_name: form.name.trim(),
       p_address: fullAddress,
       p_category: form.category,
@@ -1478,6 +1487,7 @@ export default function Page() {
       p_has_stroller_access: form.badges.stroller,
       p_has_elevator: form.badges.lift,
       p_keywords: form.keywords.trim() || null,
+      p_phone: form.phone.trim() || null,
     });
        if (error) {
       setIsSubmittingPlace(false);
@@ -1498,7 +1508,7 @@ export default function Page() {
       }
     }
     setJustRegistered(data);
-    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
+  setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "", badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFiles([]);
     setPhotoPreviews([]);
     fetchPlaces();
@@ -2125,8 +2135,12 @@ export default function Page() {
                     {locatingAddress ? "위치 확인 중..." : "현재 위치로 주소 찾기"}
                   </button>
                 </div>
-                <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>검색 키워드 (선택)</label>
+                              <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>검색 키워드 (선택)</label>
                 <input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="예: 족발, 갈비, 한식 (쉼표로 구분)"
+                  className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+
+                <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>전화번호 (선택)</label>
+                <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="예: 02-1234-5678"
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl px-4 py-3 mb-5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
