@@ -135,13 +135,23 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete }) {
   const badges = getBadges(place);
   return (
         <div className="relative rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-      <button onClick={() => onToggleFavorite(place.id)} className="absolute top-3 right-3 rounded-full p-1.5 z-10 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
+        <button onClick={() => onToggleFavorite(place.id)} className="absolute top-3 right-3 rounded-full p-1.5 z-10 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
         <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
       </button>
+      {isAdminUser && !isOwner && (
+        <div className="absolute top-3 left-3 flex gap-1 z-10">
+          <button onClick={() => onAdminEdit(place)} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.9)" }} aria-label="관리자 권한으로 수정">
+            <Pencil size={14} color={INK_SOFT} />
+          </button>
+          <button onClick={() => onAdminDelete(place)} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.9)" }} aria-label="관리자 권한으로 삭제">
+            <Trash2 size={14} color={CORAL} />
+          </button>
+        </div>
+      )}
       <div className="mb-3 min-w-0">
         {place.photo_urls && place.photo_urls.length > 0 ? (
           <div className="flex gap-1.5 overflow-x-auto min-w-0">
@@ -1399,6 +1409,18 @@ export default function Page() {
     fetchHistory();
     showToast("장소가 삭제됐어요 (포인트 2P 회수)");
   }
+    async function confirmAdminDeletePlace() {
+    const { error } = await supabase.rpc("admin_delete_place", { p_place_id: deletingPlace.id });
+    if (error) { showToast("삭제 실패: " + error.message); return; }
+    setDeletingPlace(null);
+    fetchPlaces();
+    showToast("장소가 삭제됐어요 (관리자 권한)");
+  }
+  function adminEditPlace(place) {
+    setIsAdminEditingPlace(true);
+    startEdit(place);
+    setTab("register");
+  }
   function startEdit(place) {
     setEditingPlaceId(place.id);
     setForm({
@@ -1709,7 +1731,8 @@ export default function Page() {
               <div className="grid sm:grid-cols-2 gap-3">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} />
+                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} />
+              />
                   </div>
                 ))}
               </div>
@@ -1799,7 +1822,7 @@ export default function Page() {
               <button onClick={() => setDeletingPlace(null)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
                 취소
               </button>
-              <button onClick={confirmDeletePlace} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: CORAL }}>
+                           <button onClick={() => { deletingPlace?.isAdminAction ? confirmAdminDeletePlace() : confirmDeletePlace(); }} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: CORAL }}>
                 삭제하기
               </button>
             </div>
@@ -2053,7 +2076,7 @@ export default function Page() {
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -2083,7 +2106,7 @@ export default function Page() {
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} />
                 </div>
               ))}
             </div>
