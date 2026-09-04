@@ -109,7 +109,7 @@ function renderRichText(text) {
   return nodes;
 }
 
-const CATEGORIES =const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑"];
+const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑"];
 const WEEKDAYS = [
   { key: "mon", label: "월" }, { key: "tue", label: "화" }, { key: "wed", label: "수" },
   { key: "thu", label: "목" }, { key: "fri", label: "금" }, { key: "sat", label: "토" }, { key: "sun", label: "일" },
