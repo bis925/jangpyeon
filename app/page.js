@@ -1558,8 +1558,7 @@ export default function Page() {
           phone: form.phone.trim() || null,
           business_hours: finalBusinessHours,
         })
-        .eq("id", editingPlaceId));
-    }
+        })
         .eq("id", editingPlaceId));
     }
     if (error) { showToast("수정 실패: " + error.message); return; }
