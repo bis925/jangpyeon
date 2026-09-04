@@ -656,6 +656,9 @@ export default function Page() {
   const [showCouponList, setShowCouponList] = useState(false);
   const swipeStartX = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [imageScale, setImageScale] = useState(1);
+  const pinchStartDistance = useRef(null);
+  const pinchStartScale = useRef(1);
   const didSwipe = useRef(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
@@ -792,18 +795,41 @@ export default function Page() {
     return () => clearInterval(timer);
   }, [campaigns]);
 
-   function handleSwipeStart(e) {
+  function handleSwipeStart(e) {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchStartDistance.current = Math.sqrt(dx * dx + dy * dy);
+      pinchStartScale.current = imageScale;
+      return;
+    }
     swipeStartX.current = e.touches[0].clientX;
     didSwipe.current = false;
   }
+  function handlePinchMove(e) {
+    if (e.touches.length === 2 && pinchStartDistance.current) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const scale = Math.min(Math.max(pinchStartScale.current * (distance / pinchStartDistance.current), 1), 4);
+      setImageScale(scale);
+    }
+  }
   function handleSwipeEnd(e) {
+    if (pinchStartDistance.current) {
+      pinchStartDistance.current = null;
+      return;
+    }
     const diff = e.changedTouches[0].clientX - swipeStartX.current;
     if (Math.abs(diff) < 50) return;
     didSwipe.current = true;
     if (diff < 0 && previewIndex < previewImages.length - 1) {
       setPreviewIndex(previewIndex + 1);
+      setImageScale(1);
     } else if (diff > 0 && previewIndex > 0) {
       setPreviewIndex(previewIndex - 1);
+      setImageScale(1);
     }
   }
   function handleMouseDown(e) {
@@ -2060,15 +2086,16 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         {/* ===== IMAGE PREVIEW ===== */}
       {previewImages.length > 0 && (
         <div
-          onClick={() => { if (!didSwipe.current) setPreviewImages([]); }}
+          onClick={() => { if (!didSwipe.current && imageScale === 1) setPreviewImages([]); }}
           onTouchStart={handleSwipeStart}
+          onTouchMove={handlePinchMove}
           onTouchEnd={handleSwipeEnd}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden"
           style={{ background: "rgba(0,0,0,0.85)", cursor: "grab" }}
         >
-          <img src={previewImages[previewIndex]} alt="확대 이미지" className="max-w-full max-h-full rounded-2xl" />
+          <img src={previewImages[previewIndex]} alt="확대 이미지" className="max-w-full max-h-full rounded-2xl transition-transform duration-100" style={{ transform: `scale(${imageScale})` }} />
                {previewImages.length > 1 && (
             <>
               {previewIndex > 0 && (
@@ -2088,7 +2115,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             </>
           )}
-          <button onClick={() => setPreviewImages([])} className="absolute top-5 right-5 rounded-full p-3" style={{ background: "rgba(255,255,255,0.15)" }} aria-label="닫기">
+          <button onClick={() => { setPreviewImages([]); setImageScale(1); }} className="absolute top-5 right-5 rounded-full p-3" style={{ background: "rgba(255,255,255,0.15)" }} aria-label="닫기">
             <X size={22} color="#fff" />
           </button>
         </div>
