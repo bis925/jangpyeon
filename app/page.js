@@ -206,12 +206,12 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
         <button onClick={() => onToggleFavorite(place.id)} className="absolute top-3 right-3 rounded-full p-1.5 z-10 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
         <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
       </button>
-      {isAdminUser && !isOwner && (
+        {isAdminUser && !isOwner && (
         <div className="absolute top-3 left-3 flex gap-1 z-10">
-          <button onClick={() => onAdminEdit(place)} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.9)" }} aria-label="관리자 권한으로 수정">
+          <button onClick={(e) => { e.stopPropagation(); onAdminEdit(place); }} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.9)" }} aria-label="관리자 권한으로 수정">
             <Pencil size={14} color={INK_SOFT} />
           </button>
-          <button onClick={() => onAdminDelete(place)} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.9)" }} aria-label="관리자 권한으로 삭제">
+          <button onClick={(e) => { e.stopPropagation(); onAdminDelete(place); }} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.9)" }} aria-label="관리자 권한으로 삭제">
             <Trash2 size={14} color={CORAL} />
           </button>
         </div>
