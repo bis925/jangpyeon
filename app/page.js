@@ -713,8 +713,11 @@ export default function Page() {
     if (typeof window === "undefined" || !window.Capacitor) return;
     let subPromise;
     import("@capacitor/app").then(({ App }) => {
-          subPromise = App.addListener("backButton", () => {
-        if (tab !== "home") {
+              subPromise = App.addListener("backButton", () => {
+        if (previewImages.length > 0) {
+          setPreviewImages([]);
+          setImageScale(1);
+        } else if (tab !== "home") {
           setTab("home");
         } else {
           setShowExitConfirm(true);
