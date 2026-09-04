@@ -580,6 +580,9 @@ export default function Page() {
     businessHours: DEFAULT_HOURS,
     useHours: false,
     openHolidays: [],
+    hoursMode: "custom",
+    sameOpen: "09:00",
+    sameClose: "18:00",
   });
     const [isSubmittingPlace, setIsSubmittingPlace] = useState(false);
   const [photoFiles, setPhotoFiles] = useState([]);
@@ -1511,10 +1514,21 @@ export default function Page() {
     });
     setTab("register");
   }
-   async function submitEdit() {
+  async function submitEdit() {
     if (!form.name.trim()) return;
     const fullAddress = form.address.trim() || "주소 정보 없음";
-    let error;
+    let finalBusinessHours = null;
+    if (form.useHours) {
+      if (form.hoursMode === "24h") {
+        finalBusinessHours = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { open: "00:00", close: "23:59", closed: false } }), {});
+      } else if (form.hoursMode === "same") {
+        finalBusinessHours = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { open: form.sameOpen, close: form.sameClose, closed: false } }), {});
+      } else {
+        finalBusinessHours = form.businessHours;
+      }
+      finalBusinessHours.openHolidays = form.openHolidays;
+    }
+       let error;
     if (isAdminEditingPlace) {
       ({ error } = await supabase.rpc("admin_update_place", {
         p_place_id: editingPlaceId,
@@ -1527,7 +1541,7 @@ export default function Page() {
         p_has_elevator: form.badges.lift,
         p_keywords: form.keywords.trim() || null,
         p_phone: form.phone.trim() || null,
-        p_business_hours: form.useHours ? { ...form.businessHours, openHolidays: form.openHolidays } : null,
+        p_business_hours: finalBusinessHours,
       }));
     } else {
       ({ error } = await supabase
@@ -1542,8 +1556,10 @@ export default function Page() {
           has_elevator: form.badges.lift,
           keywords: form.keywords.trim() || null,
           phone: form.phone.trim() || null,
-           business_hours: form.useHours ? { ...form.businessHours, openHolidays: form.openHolidays } : null,
+          business_hours: finalBusinessHours,
         })
+        .eq("id", editingPlaceId));
+    }
         .eq("id", editingPlaceId));
     }
     if (error) { showToast("수정 실패: " + error.message); return; }
@@ -1574,6 +1590,17 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
     const fullAddress = form.addressDetail.trim()
       ? `${form.address.trim() || "주소 정보 없음"} ${form.addressDetail.trim()}`
       : (form.address.trim() || "주소 정보 없음");
+        let finalBusinessHours = null;
+    if (form.useHours) {
+      if (form.hoursMode === "24h") {
+        finalBusinessHours = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { open: "00:00", close: "23:59", closed: false } }), {});
+      } else if (form.hoursMode === "same") {
+        finalBusinessHours = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { open: form.sameOpen, close: form.sameClose, closed: false } }), {});
+      } else {
+        finalBusinessHours = form.businessHours;
+      }
+      finalBusinessHours.openHolidays = form.openHolidays;
+    }
     const { data, error } = await supabase.rpc("register_place", {
       p_name: form.name.trim(),
       p_address: fullAddress,
@@ -1584,7 +1611,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       p_has_elevator: form.badges.lift,
       p_keywords: form.keywords.trim() || null,
       p_phone: form.phone.trim() || null,
-      p_business_hours: form.useHours ? { ...form.businessHours, openHolidays: form.openHolidays } : null,
+      p_business_hours: finalBusinessHours,
     });
     if (error) {
       setIsSubmittingPlace(false);
@@ -2265,24 +2292,35 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 16, height: 16, top: 3, left: form.useHours ? 21 : 3 }} />
                   </button>
                 </div>
-                                       {form.useHours && (
+                                                    {form.useHours && (
                   <div className="rounded-xl p-3 mb-4" style={{ border: `1.4px solid ${LINE}` }}>
                     <div className="flex gap-2 mb-3">
-                      <button type="button" onClick={() => {
-                        const allDay = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { open: "00:00", close: "23:59", closed: false } }), {});
-                        setForm({ ...form, businessHours: allDay });
-                      }} className="flex-1 rounded-lg py-2 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                      <button type="button" onClick={() => setForm({ ...form, hoursMode: "24h" })} className="flex-1 rounded-lg py-2 text-xs font-bold" style={{ background: form.hoursMode === "24h" ? TEAL : PAPER, color: form.hoursMode === "24h" ? "#fff" : INK_SOFT }}>
                         24시간 영업
                       </button>
-                      <button type="button" onClick={() => {
-                        const first = form.businessHours.mon;
-                        const sameEveryday = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { ...first } }), {});
-                        setForm({ ...form, businessHours: sameEveryday });
-                      }} className="flex-1 rounded-lg py-2 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
+                      <button type="button" onClick={() => setForm({ ...form, hoursMode: "same" })} className="flex-1 rounded-lg py-2 text-xs font-bold" style={{ background: form.hoursMode === "same" ? TEAL : PAPER, color: form.hoursMode === "same" ? "#fff" : INK_SOFT }}>
                         매일 동일하게
                       </button>
+                      <button type="button" onClick={() => setForm({ ...form, hoursMode: "custom" })} className="flex-1 rounded-lg py-2 text-xs font-bold" style={{ background: form.hoursMode === "custom" ? TEAL : PAPER, color: form.hoursMode === "custom" ? "#fff" : INK_SOFT }}>
+                        요일별로
+                      </button>
                     </div>
-                    {holidays && (
+
+                    {form.hoursMode === "24h" && (
+                      <div className="text-center py-4 text-xs font-bold" style={{ color: TEAL }}>연중무휴 24시간 영업이에요</div>
+                    )}
+
+                    {form.hoursMode === "same" && (
+                      <div className="flex items-center gap-2 py-2">
+                        <input type="time" value={form.sameOpen} onChange={(e) => setForm({ ...form, sameOpen: e.target.value })}
+                          className="flex-1 rounded-lg px-2 py-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
+                        <span className="text-xs" style={{ color: INK_SOFT }}>~</span>
+                        <input type="time" value={form.sameClose} onChange={(e) => setForm({ ...form, sameClose: e.target.value })}
+                          className="flex-1 rounded-lg px-2 py-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
+                      </div>
+                    )}
+
+                    {form.hoursMode === "custom" && holidays && (
                       <div className="mb-3 pb-3" style={{ borderBottom: `1px dashed ${LINE}` }}>
                         <div className="text-xs font-bold mb-2" style={{ color: INK_SOFT }}>다가오는 공휴일에도 영업하시나요? (선택)</div>
                         <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
@@ -2329,9 +2367,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                                 className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
                             </>
                           )}
-                        </div>
+                                          </div>
                       );
                     })}
+                  </div>
+                )}
                   </div>
                 )}
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
