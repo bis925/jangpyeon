@@ -2318,7 +2318,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                       </div>
                     )}
 
-                    {form.hoursMode === "custom" && holidays && (
+                                {form.hoursMode === "custom" && (
+                      <div>
+                      {holidays && (
                       <div className="mb-3 pb-3" style={{ borderBottom: `1px dashed ${LINE}` }}>
                         <div className="text-xs font-bold mb-2" style={{ color: INK_SOFT }}>다가오는 공휴일에도 영업하시나요? (선택)</div>
                         <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
@@ -2365,12 +2367,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                                 className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
                             </>
                           )}
-                                          </div>
+                                                                                 </div>
                       );
-                    })}
+                                  })}
                   </div>
                 )}
-                  </div>
                 )}
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl px-4 py-3 mb-5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
