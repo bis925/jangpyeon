@@ -139,6 +139,14 @@ function useKoreanHolidays() {
   }, []);
   return holidays;
 }
+
+function getRecencyInfo(createdAt) {
+  const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
+  if (days < 90) return { label: days < 1 ? "오늘 등록됨" : `${days}일 전 등록됨`, color: "#22C55E", bg: "#DCFCE7" };
+  if (days < 365) return { label: `${Math.floor(days / 30)}개월 전 등록됨`, color: "#CA8A04", bg: "#FEF9C3" };
+  return { label: `${Math.floor(days / 365)}년 전 등록됨, 확인 권장`, color: "#DC2626", bg: "#FEE2E2" };
+}
+
 function isOpenNow(businessHours, holidays) {
   if (!businessHours) return null;
   const now = new Date();
@@ -251,7 +259,16 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           )}
         </div>
       </div>
-      <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
+           <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
+      {place.created_at && (() => {
+        const recency = getRecencyInfo(place.created_at);
+        return (
+          <div className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 mb-2" style={{ background: recency.bg }}>
+            <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
+            <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
+          </div>
+        );
+      })()}
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
@@ -652,6 +669,7 @@ export default function Page() {
   const [viewingReviewsPlace, setViewingReviewsPlace] = useState(null);
   const [placeReviews, setPlaceReviews] = useState([]);
   const [newReviewText, setNewReviewText] = useState("");
+  const [showRecencyHelp, setShowRecencyHelp] = useState(false);
    const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
@@ -2149,6 +2167,40 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </div>
         </div>
       )}
+      {/* ===== RECENCY HELP POPUP ===== */}
+      {showRecencyHelp && (
+        <div onClick={() => setShowRecencyHelp(false)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-6" style={{ background: CARD }}>
+            <div className="font-extrabold text-base mb-4" style={{ color: INK }}>정보 등록 시기 안내</div>
+            <div className="flex items-start gap-2 mb-3">
+              <div className="rounded-full mt-1 flex-shrink-0" style={{ width: 8, height: 8, background: "#22C55E" }} />
+              <div>
+                <div className="text-sm font-bold" style={{ color: INK }}>최근 정보 (3개월 이내)</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>믿고 참고하셔도 좋아요</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 mb-3">
+              <div className="rounded-full mt-1 flex-shrink-0" style={{ width: 8, height: 8, background: "#CA8A04" }} />
+              <div>
+                <div className="text-sm font-bold" style={{ color: INK }}>조금 지난 정보 (3개월~1년)</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>큰 변화는 없을 가능성이 높지만, 참고해주세요</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 mb-5">
+              <div className="rounded-full mt-1 flex-shrink-0" style={{ width: 8, height: 8, background: "#DC2626" }} />
+              <div>
+                <div className="text-sm font-bold" style={{ color: INK }}>오래된 정보 (1년 이상)</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>시설이 바뀌었을 수 있어요, 방문 전 확인을 권장해요</div>
+              </div>
+            </div>
+            <button onClick={() => setShowRecencyHelp(false)} className="w-full rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+              확인했어요
+            </button>
+          </div>
+        </div>
+      )}
+
+
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -2313,8 +2365,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             )}
 
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-extrabold text-sm" style={{ color: INK }}>등록된 장소 {filteredPlaces.length}곳</span>
+                <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-sm" style={{ color: INK }}>등록된 장소 {filteredPlaces.length}곳</span>
+                <button onClick={() => setShowRecencyHelp(true)} className="rounded-full p-0.5" aria-label="정보 최신성 안내">
+                  <span className="flex items-center justify-center rounded-full text-[10px] font-extrabold" style={{ width: 15, height: 15, background: LINE, color: INK_SOFT }}>?</span>
+                </button>
+              </div>
               {activeFilters.length > 0 && (
                 <button onClick={() => setActiveFilters([])} className="text-xs font-bold flex items-center gap-1" style={{ color: INK_SOFT }}><X size={12} /> 필터 초기화</button>
               )}
