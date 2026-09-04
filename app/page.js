@@ -2135,10 +2135,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
               )}
             </div>
-            <div className="flex gap-2 px-5 py-4 flex-shrink-0" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <div className="flex flex-col sm:flex-row gap-2 px-5 py-4 flex-shrink-0" style={{ borderTop: `1px solid ${LINE}` }}>
               <input value={newReviewText} onChange={(e) => setNewReviewText(e.target.value)} placeholder="이 장소에 대한 한줄평을 남겨주세요"
-                className="flex-1 rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-              <button onClick={submitReview} className="rounded-xl px-4 py-2.5 text-sm font-bold text-white flex-shrink-0" style={{ background: TEAL }}>
+                className="w-full sm:flex-1 rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
+              <button onClick={submitReview} className="w-full sm:w-auto rounded-xl px-4 py-2.5 text-sm font-bold text-white flex-shrink-0" style={{ background: TEAL }}>
                 등록
               </button>
             </div>
