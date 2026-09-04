@@ -671,8 +671,10 @@ export default function Page() {
   const previewImagesRef = useRef([]);
   const tabRef = useRef("home");
   const [showSwipeHint, setShowSwipeHint] = useState(false);
-    useEffect(() => { previewImagesRef.current = previewImages; }, [previewImages]);
+  useEffect(() => { previewImagesRef.current = previewImages; }, [previewImages]);
   useEffect(() => { tabRef.current = tab; }, [tab]);
+  const viewingReviewsPlaceRef = useRef(null);
+  useEffect(() => { viewingReviewsPlaceRef.current = viewingReviewsPlace; }, [viewingReviewsPlace]);
   const didSwipe = useRef(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
@@ -731,6 +733,8 @@ export default function Page() {
         if (previewImagesRef.current.length > 0) {
           setPreviewImages([]);
           setImageScale(1);
+        } else if (viewingReviewsPlaceRef.current) {
+          setViewingReviewsPlace(null);
         } else if (tabRef.current !== "home") {
           setTab("home");
         } else {
@@ -2098,8 +2102,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         )}
       {/* ===== REVIEWS POPUP ===== */}
       {viewingReviewsPlace && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-          <div className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col" style={{ background: CARD, height: "80vh", maxHeight: 600 }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full sm:max-w-md rounded-2xl overflow-hidden flex flex-col" style={{ background: CARD, height: "80vh", maxHeight: 600 }}>
             <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${LINE}` }}>
               <div>
                 <div className="font-extrabold text-sm" style={{ color: INK }}>{viewingReviewsPlace.name}</div>
