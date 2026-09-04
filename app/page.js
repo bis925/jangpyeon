@@ -868,8 +868,14 @@ export default function Page() {
   }
 
   async function fetchReviews(placeId) {
-    const { data } = await supabase.from("place_reviews").select("*, profiles(nickname)").eq("place_id", placeId).order("created_at", { ascending: false });
-    setPlaceReviews(data || []);
+    const { data: reviews } = await supabase.from("place_reviews").select("*").eq("place_id", placeId).order("created_at", { ascending: false });
+    if (!reviews || reviews.length === 0) { setPlaceReviews([]); return; }
+    const userIds = [...new Set(reviews.map((r) => r.user_id))];
+    const { data: profilesData } = await supabase.from("profiles").select("id, nickname").in("id", userIds);
+    const nicknameMap = {};
+    (profilesData || []).forEach((p) => { nicknameMap[p.id] = p.nickname; });
+    const merged = reviews.map((r) => ({ ...r, profiles: { nickname: nicknameMap[r.user_id] } }));
+    setPlaceReviews(merged);
   }
   async function submitReview() {
     if (!newReviewText.trim()) return;
