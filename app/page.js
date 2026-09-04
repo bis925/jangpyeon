@@ -116,10 +116,28 @@ const WEEKDAYS = [
 ];
 const DEFAULT_HOURS = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d.key]: { open: "09:00", close: "18:00", closed: false } }), {});
 
-function isOpenNow(businessHours) {
+function useKoreanHolidays() {
+  const [holidays, setHolidays] = useState(null);
+  useEffect(() => {
+    fetch("https://holidays.hyunbin.page/basic.json")
+      .then((res) => res.json())
+      .then((data) => setHolidays(data))
+      .catch(() => setHolidays({}));
+  }, []);
+  return holidays;
+}
+function isOpenNow(businessHours, holidays) {
   if (!businessHours) return null;
-  const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
   const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  const isHolidayToday = holidays && holidays[todayStr];
+  const openOnThisHoliday = businessHours.openHolidays && businessHours.openHolidays.includes(todayStr);
+  if (isHolidayToday && !openOnThisHoliday) {
+    return false;
+  }
+
+  const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
   const today = dayKeys[now.getDay()];
   const todayHours = businessHours[today];
   if (!todayHours || todayHours.closed) return false;
@@ -156,9 +174,9 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays }) {
   const badges = getBadges(place);
-  const openStatus = isOpenNow(place.business_hours);
+  const openStatus = isOpenNow(place.business_hours, holidays);
   return (
     <div className="relative rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}>
       {openStatus === false && (
@@ -513,6 +531,7 @@ function OnboardingScreen({ onFinish }) {
 export default function Page() {
     const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
+    const holidays = useKoreanHolidays();
   const [isDark, setIsDark] = useDarkMode();
   applyTheme(isDark);
   const [fontScale, setFontScale] = useFontScale();
@@ -547,6 +566,7 @@ export default function Page() {
     badges: { ramp: false, door: false, stroller: false, lift: false },
     businessHours: DEFAULT_HOURS,
     useHours: false,
+    openHolidays: [],
   });
     const [isSubmittingPlace, setIsSubmittingPlace] = useState(false);
   const [photoFiles, setPhotoFiles] = useState([]);
@@ -1468,6 +1488,7 @@ export default function Page() {
       phone: place.phone || "",
       businessHours: place.business_hours || DEFAULT_HOURS,
       useHours: !!place.business_hours,
+      openHolidays: place.business_hours?.openHolidays || [],
       badges: {
         ramp: place.has_ramp,
         door: place.has_restroom,
@@ -1493,7 +1514,7 @@ export default function Page() {
         p_has_elevator: form.badges.lift,
         p_keywords: form.keywords.trim() || null,
         p_phone: form.phone.trim() || null,
-        p_business_hours: form.useHours ? form.businessHours : null,
+        p_business_hours: form.useHours ? { ...form.businessHours, openHolidays: form.openHolidays } : null,
       }));
     } else {
       ({ error } = await supabase
@@ -1508,7 +1529,7 @@ export default function Page() {
           has_elevator: form.badges.lift,
           keywords: form.keywords.trim() || null,
           phone: form.phone.trim() || null,
-          business_hours: form.useHours ? form.businessHours : null,
+           business_hours: form.useHours ? { ...form.businessHours, openHolidays: form.openHolidays } : null,
         })
         .eq("id", editingPlaceId));
     }
@@ -1550,7 +1571,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       p_has_elevator: form.badges.lift,
       p_keywords: form.keywords.trim() || null,
       p_phone: form.phone.trim() || null,
-      p_business_hours: form.useHours ? form.businessHours : null,
+      p_business_hours: form.useHours ? { ...form.businessHours, openHolidays: form.openHolidays } : null,
     });
     if (error) {
       setIsSubmittingPlace(false);
@@ -1774,7 +1795,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <div className="grid sm:grid-cols-2 gap-3">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} />
+                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} />
                         </div>
                 ))}
               </div>
@@ -2135,7 +2156,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} />
+                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} />
                 </div>
               ))}
               {filteredPlaces.length === 0 && (
@@ -2165,7 +2186,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="grid sm:grid-cols-2 gap-3">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} />
+                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} />
                 </div>
               ))}
             </div>
@@ -2231,8 +2252,37 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 16, height: 16, top: 3, left: form.useHours ? 21 : 3 }} />
                   </button>
                 </div>
-                {form.useHours && (
+                               {form.useHours && (
                   <div className="rounded-xl p-3 mb-4" style={{ border: `1.4px solid ${LINE}` }}>
+                    {holidays && (
+                      <div className="mb-3 pb-3" style={{ borderBottom: `1px dashed ${LINE}` }}>
+                        <div className="text-xs font-bold mb-2" style={{ color: INK_SOFT }}>다가오는 공휴일에도 영업하시나요? (선택)</div>
+                        <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
+                          {Object.entries(holidays)
+                            .filter(([date]) => new Date(date) >= new Date(new Date().toDateString()))
+                            .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+                            .slice(0, 8)
+                            .map(([date, names]) => {
+                              const checked = form.openHolidays.includes(date);
+                              return (
+                                <label key={date} className="flex items-center gap-2 text-xs cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={(e) => {
+                                      const next = e.target.checked
+                                        ? [...form.openHolidays, date]
+                                        : form.openHolidays.filter((d) => d !== date);
+                                      setForm({ ...form, openHolidays: next });
+                                    }}
+                                  />
+                                  <span style={{ color: INK }}>{date} ({names.join(", ")})</span>
+                                </label>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
                     {WEEKDAYS.map((d) => {
                       const dayData = form.businessHours[d.key];
                       return (
