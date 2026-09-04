@@ -167,9 +167,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
         </div>
       )}
       {openStatus === true && (
-        <div className="absolute top-3 right-12 flex items-center gap-1 rounded-full px-2 py-1 z-10" style={{ background: "rgba(255,255,255,0.9)" }}>
-          <div className="rounded-full" style={{ width: 7, height: 7, background: "#22C55E" }} />
-          <span className="text-[10px] font-bold" style={{ color: "#16A34A" }}>영업중</span>
+        <div className="absolute top-3 right-12 flex items-center gap-1.5 rounded-full px-2.5 py-1.5 z-10" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
+          <div className="rounded-full" style={{ width: 8, height: 8, background: "#22C55E" }} />
+          <span className="text-xs font-extrabold" style={{ color: "#16A34A" }}>영업중</span>
         </div>
       )}
         <button onClick={() => onToggleFavorite(place.id)} className="absolute top-3 right-3 rounded-full p-1.5 z-10 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
