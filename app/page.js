@@ -2369,9 +2369,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                           )}
                                                                                  </div>
                       );
-                                  })}
+                                                         })}
                   </div>
                 )}
+                  </div>
                 )}
                 <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>카테고리</label>
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl px-4 py-3 mb-5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
