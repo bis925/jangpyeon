@@ -1913,19 +1913,6 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       p_lat: placeLat,
       p_lng: placeLng,
     });
-    
-    const { data, error } = await supabase.rpc("register_place", {
-      p_name: form.name.trim(),
-      p_address: fullAddress,
-      p_category: form.category,
-      p_has_ramp: form.badges.ramp,
-      p_has_restroom: form.badges.door,
-      p_has_stroller_access: form.badges.stroller,
-      p_has_elevator: form.badges.lift,
-      p_keywords: form.keywords.trim() || null,
-      p_phone: form.phone.trim() || null,
-      p_business_hours: finalBusinessHours,
-    });
     if (error) {
       setIsSubmittingPlace(false);
       if (error.message.includes("하루에 등록할 수 있는")) {
