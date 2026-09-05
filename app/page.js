@@ -2513,7 +2513,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <button onClick={() => setShareLink(null)} className="flex-1 rounded-full py-3 text-sm font-bold" style={{ background: PAPER, color: INK }}>
                 닫기
               </button>
-              <button onClick={() => { navigator.clipboard.writeText(shareLink); showToast("링크가 복사됐어요!"); }} className="flex-1 rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
+                  <button onClick={() => { navigator.clipboard.writeText(shareLink); showToast("링크가 복사됐어요!"); setShareLink(null); }} className="flex-1 rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
                 링크 복사
               </button>
             </div>
