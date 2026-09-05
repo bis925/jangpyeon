@@ -971,10 +971,16 @@ export default function Page() {
           const originalFile = await urlToFile(url, filePath.split("/").pop());
           const compressedFile = await compressImage(originalFile, bucket.maxWidth, 0.85);
 
-          const { error: uploadError } = await supabase.storage.from(bucket.name).upload(filePath, compressedFile, { upsert: true, contentType: "image/jpeg" });
+                    const jpgFilePath = filePath.replace(/\.[^.]+$/, ".jpg");
+          const { error: uploadError } = await supabase.storage.from(bucket.name).upload(jpgFilePath, compressedFile, { upsert: true, contentType: "image/jpeg" });
           if (uploadError) { totalFailed++; continue; }
 
-          totalDone++;
+          if (jpgFilePath !== filePath) {
+            const { data: urlData } = supabase.storage.from(bucket.name).getPublicUrl(jpgFilePath);
+            await supabase.from(bucket.table).update({ [bucket.column]: urlData.publicUrl }).eq("id", row.id);
+          }
+           totalDone++;
+          
         } catch (err) {
           totalFailed++;
         }
