@@ -1806,13 +1806,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         <div className="flex items-center justify-end px-5 sm:px-8 py-3.5 relative">
           <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("coupon-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className={`flex sm:hidden items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 mr-2 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
             <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
-                      <span style={{ fontSize: `${11 * FONT_SCALES[fontScale] * 0.7}px`, fontWeight: 700, color: myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT }}>쿠폰</span>
+           <span style={{ fontSize: `${11 * FONT_SCALES[fontScale] * 0.55}px`, fontWeight: 700, color: myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT }}>쿠폰</span>
           </button>
           <button onClick={() => setShowFavoritesOnly(true)} className="flex sm:hidden rounded-full p-2 flex-shrink-0 mr-2 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
             <Star size={16} color={INK_SOFT} />
           </button>
           <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1" style={{ background: PAPER }}>
-          <span style={{ fontSize: 9, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
+               <span style={{ fontSize: 5, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
         <button onClick={() => stepFontScale("down")} disabled={fontScale === "xsmall"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xsmall" ? 0.35 : 1 }} aria-label="글자 작게">
               <ZoomOut size={15} color={INK_SOFT} />
             </button>
