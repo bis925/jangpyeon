@@ -2145,7 +2145,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </div>
         </div>
       )}
-      {/* ===== FAVORITES POPUP ===== */}
+         {/* ===== FAVORITES POPUP ===== */}
        {showFavoritesOnly && (
         <div className="fixed inset-0 z-50 flex flex-col" style={{ background: PAPER }}>
           <div className="sticky top-0 flex items-center justify-between px-5 py-4" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
@@ -2168,36 +2168,40 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 아직 즐겨찾기한 장소가 없어요.<br />장소 카드의 별 아이콘을 눌러 저장해보세요!
               </div>
             ) : (
-                   <div className="grid sm:grid-cols-2 gap-3 min-w-0">
-              {visiblePlaces.map((p) => (
-                <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer min-w-0">
-                <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
+              <>
+                <div className="grid sm:grid-cols-2 gap-3 min-w-0">
+                  {visiblePlaces.map((p) => (
+                    <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer min-w-0">
+                      <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
+                    </div>
+                  ))}
+                  {filteredPlaces.length === 0 && (
+                    <div className="col-span-2 text-center py-14">
+                      <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+                        <MapPin size={26} color={TEAL} />
+                      </div>
+                      <div className="text-sm font-bold mb-1" style={{ color: INK }}>
+                        {query.trim() || activeFilters.length > 0 ? "검색 결과가 없어요" : "아직 등록된 장소가 없어요"}
+                      </div>
+                      <div className="text-xs mb-4" style={{ color: INK_SOFT }}>
+                        {query.trim() || activeFilters.length > 0 ? "이 장소를 알고 계신가요? 직접 등록해보세요!" : "첫 번째 장소를 등록하고 포인트를 받아보세요"}
+                      </div>
+                      <button onClick={() => setTab("register")} className="rounded-full px-5 py-2.5 text-xs font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                        장소 등록하러 가기
+                      </button>
+                    </div>
+                  )}
                 </div>
-              ))}
-              {filteredPlaces.length === 0 && (
-                <div className="col-span-2 text-center py-14">
-                  <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
-                    <MapPin size={26} color={TEAL} />
+                {visibleCount < filteredPlaces.length && (
+                  <div ref={scrollSentinelRef} className="flex items-center justify-center py-6">
+                    <div className="rounded-full animate-spin" style={{ width: 24, height: 24, border: `3px solid ${LINE}`, borderTopColor: TEAL }} />
                   </div>
-                  <div className="text-sm font-bold mb-1" style={{ color: INK }}>
-                    {query.trim() || activeFilters.length > 0 ? "검색 결과가 없어요" : "아직 등록된 장소가 없어요"}
-                  </div>
-                  <div className="text-xs mb-4" style={{ color: INK_SOFT }}>
-                    {query.trim() || activeFilters.length > 0 ? "이 장소를 알고 계신가요? 직접 등록해보세요!" : "첫 번째 장소를 등록하고 포인트를 받아보세요"}
-                  </div>
-                                                               <button onClick={() => setTab("register")} className="rounded-full px-5 py-2.5 text-xs font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
-                    장소 등록하러 가기
-                  </button>
-                </div>
-              )}
-            </div>
-            {visibleCount < filteredPlaces.length && (
-              <div ref={scrollSentinelRef} className="flex items-center justify-center py-6">
-                <div className="rounded-full animate-spin" style={{ width: 24, height: 24, border: `3px solid ${LINE}`, borderTopColor: TEAL }} />
-              </div>
-            )}                   
+                )}
+              </>
+            )}
           </div>
-        )}
+        </div>
+      )}
       {/* ===== COUPON DETAIL POPUP ===== */}
       {viewingCoupon && (
         <div onClick={() => setViewingCoupon(null)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
