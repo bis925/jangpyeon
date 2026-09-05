@@ -1111,7 +1111,7 @@ async function handleAvatarChange(e) {
         }
       },
       () => { showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"); },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }
   function locateMeForRegister() {
