@@ -606,6 +606,10 @@ export default function Page() {
   const [mapCategory, setMapCategory] = useState(null);
     const [pendingFocusId, setPendingFocusId] = useState(null);
   const [toast, setToast] = useState(null);
+  function showToast(message) {
+    setToast(message);
+    setTimeout(() => setToast(null), 2500);
+  }
   const [justRegistered, setJustRegistered] = useState(null);
   const [form, setForm] = useState({
     name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "",
