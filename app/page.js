@@ -682,6 +682,7 @@ export default function Page() {
   const [pointRanking, setPointRanking] = useState([]);
   const [expandedNoticeAdminId, setExpandedNoticeAdminId] = useState(null);
   const [expandedReportId, setExpandedReportId] = useState(null);
+  const [expandedInquiryAdminId, setExpandedInquiryAdminId] = useState(null);
    const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
@@ -2173,31 +2174,41 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               })}
             </div>
 
-            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
+                    <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
             <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {allInquiries.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>문의가 없어요</div>}
-              {allInquiries.map((q) => (
+              {allInquiries.map((q) => {
+                const isExpandedInquiry = expandedInquiryAdminId === q.id;
+                return (
                 <div key={q.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-bold" style={{ color: INK }}>{q.title}</div>
-                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: q.status === "answered" ? TEAL_TINT : CORAL_TINT, color: q.status === "answered" ? TEAL_DARK : CORAL }}>
-                      {q.status === "answered" ? "답변완료" : "답변대기"}
-                    </span>
-                  </div>
-                  <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{q.content}</div>
-                  {q.answer ? (
-                    <div className="mt-2 rounded-xl p-3 text-xs" style={{ background: PAPER, color: INK }}>
-                      <span className="font-bold" style={{ color: TEAL }}>답변: </span>{q.answer}
+                  <button onClick={() => setExpandedInquiryAdminId(isExpandedInquiry ? null : q.id)} className="w-full flex items-center justify-between gap-2 text-left">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-bold truncate" style={{ color: INK }}>{q.title}</span>
+                      <span className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: q.status === "answered" ? TEAL_TINT : CORAL_TINT, color: q.status === "answered" ? TEAL_DARK : CORAL }}>
+                        {q.status === "answered" ? "답변완료" : "답변대기"}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="flex gap-2 mt-2">
-                      <input value={replyDrafts[q.id] || ""} onChange={(e) => setReplyDrafts({ ...replyDrafts, [q.id]: e.target.value })} placeholder="답변 입력"
-                        className="flex-1 rounded-xl px-3 py-2 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-                      <button onClick={() => submitReply(q.id)} className="rounded-xl px-3 py-2 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>답변</button>
+                    <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpandedInquiry ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
+                  {isExpandedInquiry && (
+                    <div className="mt-2">
+                      <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{q.content}</div>
+                      {q.answer ? (
+                        <div className="rounded-xl p-3 text-xs" style={{ background: PAPER, color: INK }}>
+                          <span className="font-bold" style={{ color: TEAL }}>답변: </span>{q.answer}
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <input value={replyDrafts[q.id] || ""} onChange={(e) => setReplyDrafts({ ...replyDrafts, [q.id]: e.target.value })} placeholder="답변 입력"
+                            className="flex-1 rounded-xl px-3 py-2 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                          <button onClick={() => submitReply(q.id)} className="rounded-xl px-3 py-2 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>답변</button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -3317,30 +3328,40 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </div>
 
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
-            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+                <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {allInquiries.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>문의가 없어요</div>}
-              {allInquiries.map((q) => (
+              {allInquiries.map((q) => {
+                const isExpandedInquiry = expandedInquiryAdminId === q.id;
+                return (
                 <div key={q.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-bold" style={{ color: INK }}>{q.title}</div>
-                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: q.status === "answered" ? TEAL_TINT : CORAL_TINT, color: q.status === "answered" ? TEAL_DARK : CORAL }}>
-                      {q.status === "answered" ? "답변완료" : "답변대기"}
-                    </span>
-                  </div>
-                  <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{q.content}</div>
-                  {q.answer ? (
-                    <div className="mt-2 rounded-xl p-3 text-xs" style={{ background: PAPER, color: INK }}>
-                      <span className="font-bold" style={{ color: TEAL }}>답변: </span>{q.answer}
+                  <button onClick={() => setExpandedInquiryAdminId(isExpandedInquiry ? null : q.id)} className="w-full flex items-center justify-between gap-2 text-left">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-bold truncate" style={{ color: INK }}>{q.title}</span>
+                      <span className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: q.status === "answered" ? TEAL_TINT : CORAL_TINT, color: q.status === "answered" ? TEAL_DARK : CORAL }}>
+                        {q.status === "answered" ? "답변완료" : "답변대기"}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="flex gap-2 mt-2">
-                      <input value={replyDrafts[q.id] || ""} onChange={(e) => setReplyDrafts({ ...replyDrafts, [q.id]: e.target.value })} placeholder="답변 입력"
-                        className="flex-1 rounded-xl px-3 py-2 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-                      <button onClick={() => submitReply(q.id)} className="rounded-xl px-3 py-2 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>답변</button>
+                    <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpandedInquiry ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
+                  {isExpandedInquiry && (
+                    <div className="mt-2">
+                      <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{q.content}</div>
+                      {q.answer ? (
+                        <div className="rounded-xl p-3 text-xs" style={{ background: PAPER, color: INK }}>
+                          <span className="font-bold" style={{ color: TEAL }}>답변: </span>{q.answer}
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <input value={replyDrafts[q.id] || ""} onChange={(e) => setReplyDrafts({ ...replyDrafts, [q.id]: e.target.value })} placeholder="답변 입력"
+                            className="flex-1 rounded-xl px-3 py-2 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                          <button onClick={() => submitReply(q.id)} className="rounded-xl px-3 py-2 text-xs font-bold text-white flex-shrink-0" style={{ background: TEAL }}>답변</button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
