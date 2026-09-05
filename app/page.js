@@ -1533,7 +1533,8 @@ async function handleNoticeImageChange(e) {
     if (error) { showToast("저장 실패: " + error.message); return; }
 
     if (savedNotice) {
-      const rawPlainText = noticeData.content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+      const noHtmlEntities = noticeData.content.replace(/&nbsp;/g, " ").replace(/&amp;/g, "그리고").replace(/&[a-zA-Z]+;/g, " ");
+      const rawPlainText = noHtmlEntities.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
       const rawSpeechText = `${noticeData.title}. ${rawPlainText}`;
       const speechText = rawSpeechText.replace(/[^\uAC00-\uD7A3\s.,!?0-9]/g, "").replace(/\s+/g, " ").trim();
       supabase.functions.invoke("text-to-speech", {
