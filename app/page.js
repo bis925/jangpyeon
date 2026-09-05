@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
-const FONT_SCALES = { small: 0.9, normal: 1, large: 1.15, xlarge: 1.3 };
-const FONT_SCALE_LABELS = { small: "작게", normal: "보통", large: "크게", xlarge: "매우 크게" };
+const FONT_SCALES = { xsmall: 0.8, small: 0.9, normal: 1, large: 1.15, xlarge: 1.3 };
+const FONT_SCALE_LABELS = { xsmall: "매우 작게", small: "작게", normal: "보통", large: "크게", xlarge: "매우 크게" };
 function useFontScale() {
   const [scale, setScale] = useState("normal");
   useEffect(() => {
@@ -1813,7 +1813,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </button>
           <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1" style={{ background: PAPER }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
-            <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
+        <button onClick={() => stepFontScale("down")} disabled={fontScale === "xsmall"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xsmall" ? 0.35 : 1 }} aria-label="글자 작게">
               <ZoomOut size={15} color={INK_SOFT} />
             </button>
             <button onClick={() => stepFontScale("up")} disabled={fontScale === "xlarge"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xlarge" ? 0.35 : 1 }} aria-label="글자 크게">
@@ -1835,7 +1835,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           <div className="hidden sm:flex items-center gap-2">
             <div className="flex items-center gap-0.5 rounded-full pl-3 pr-1 py-1" style={{ background: PAPER }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: INK_SOFT }} className="mr-1">글자크기</span>
-              <button onClick={() => stepFontScale("down")} disabled={fontScale === "small"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "small" ? 0.35 : 1 }} aria-label="글자 작게">
+        <button onClick={() => stepFontScale("down")} disabled={fontScale === "xsmall"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xsmall" ? 0.35 : 1 }} aria-label="글자 작게">
                 <ZoomOut size={15} color={INK_SOFT} />
               </button>
               <button onClick={() => stepFontScale("up")} disabled={fontScale === "xlarge"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xlarge" ? 0.35 : 1 }} aria-label="글자 크게">
@@ -2829,7 +2829,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <Type size={15} color={INK} />
                 <span className="text-sm font-bold" style={{ color: INK }}>글자 크기</span>
               </div>
-              <div className="grid grid-cols-4 gap-1.5">
+             <div className="grid grid-cols-5 gap-1.5">
                 {Object.keys(FONT_SCALES).map((key) => (
                   <button key={key} onClick={() => setFontScale(key)} className="rounded-xl py-2 text-xs font-bold transition-all duration-200 active:scale-95"
                     style={{ background: fontScale === key ? TEAL : PAPER, color: fontScale === key ? "#fff" : INK_SOFT }}>
