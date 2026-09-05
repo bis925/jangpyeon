@@ -1236,20 +1236,7 @@ async function handleAvatarChange(e) {
     return () => document.removeEventListener("click", handleGlobalClick);
   }, []);
 
-  useEffect(() => {
-    if (!scrollSentinelRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => prev + 20);
-        }
-      },
-      { rootMargin: "200px" }
-    );
-    observer.observe(scrollSentinelRef.current);
-    return () => observer.disconnect();
-  }, [tab, filteredPlaces.length]);
-  
+
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -1684,6 +1671,20 @@ async function handleNoticeImageChange(e) {
   useEffect(() => {
     setVisibleCount(20);
   }, [query, activeFilters]);
+
+  useEffect(() => {
+    if (!scrollSentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + 20);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(scrollSentinelRef.current);
+    return () => observer.disconnect();
+  }, [tab, filteredPlaces.length]);
 
   async function toggleFavorite(id) {
     if (favorites.has(id)) {
