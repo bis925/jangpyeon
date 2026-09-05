@@ -724,6 +724,8 @@ export default function Page() {
   const [showRecencyHelp, setShowRecencyHelp] = useState(false);
   const [showNicknamePrompt, setShowNicknamePrompt] = useState(false);
   const [speakingNoticeId, setSpeakingNoticeId] = useState(null);
+  const [playingAudioId, setPlayingAudioId] = useState(null);
+  const audioRefs = useRef({});
   const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
   const [visibleCount, setVisibleCount] = useState(20);
@@ -3087,13 +3089,41 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
                                     {isExpanded && (
                     <>
-                                                               {n.audio_url ? (
-                        <div className="rounded-xl p-3 mb-3" style={{ background: TEAL_TINT }}>
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <Headset size={14} color={TEAL_DARK} />
-                            <span className="text-xs font-bold" style={{ color: TEAL_DARK }}>음성으로 들어보세요</span>
+                                                  {n.audio_url ? (
+                        <div className="rounded-xl p-4 mb-3" style={{ background: TEAL_TINT }}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Headset size={16} color={TEAL_DARK} />
+                            <span className="text-sm font-bold" style={{ color: TEAL_DARK }}>🔊 음성으로 읽어드려요</span>
                           </div>
-                          <audio controls src={n.audio_url} className="w-full" style={{ height: 40 }} />
+                          <audio
+                            ref={(el) => { audioRefs.current[n.id] = el; }}
+                            src={n.audio_url}
+                            onEnded={() => setPlayingAudioId(null)}
+                            className="hidden"
+                          />
+                          <button
+                            onClick={() => {
+                              const audioEl = audioRefs.current[n.id];
+                              if (!audioEl) return;
+                              if (playingAudioId === n.id) {
+                                audioEl.pause();
+                                setPlayingAudioId(null);
+                              } else {
+                                Object.values(audioRefs.current).forEach((a) => a?.pause());
+                                audioEl.currentTime = 0;
+                                audioEl.play();
+                                setPlayingAudioId(n.id);
+                              }
+                            }}
+                            className="flex items-center justify-center gap-2 w-full rounded-full py-3 font-extrabold text-white transition-all duration-200 active:scale-95"
+                            style={{ background: playingAudioId === n.id ? CORAL : TEAL }}
+                          >
+                            {playingAudioId === n.id ? (
+                              <>⏸️ 음성 멈추기</>
+                            ) : (
+                              <>▶️ 음성으로 듣기</>
+                            )}
+                          </button>
                         </div>
                       ) : (
                         <button
