@@ -683,6 +683,7 @@ export default function Page() {
   const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
   const [compressionProgress, setCompressionProgress] = useState(null);
+  const [shareLink, setShareLink] = useState(null);
   const [expandedNoticeAdminId, setExpandedNoticeAdminId] = useState(null);
   const [expandedReportId, setExpandedReportId] = useState(null);
   const [expandedInquiryAdminId, setExpandedInquiryAdminId] = useState(null);
@@ -938,6 +939,13 @@ export default function Page() {
     showToast("확인해주셔서 감사해요! 다른 분들에게 도움이 돼요");
   }
 
+  async function createFavoriteShareLink() {
+    const { data, error } = await supabase.rpc("create_favorite_share");
+    if (error) { showToast(error.message.includes("없어요") ? "즐겨찾기한 장소가 없어요" : "공유 링크 생성 실패: " + error.message); return; }
+    const url = `https://jangpyeon.kr/share/${data}`;
+    setShareLink(url);
+  }
+  
     async function runBulkCompression() {
     if (!window.confirm("기존에 올라간 모든 사진을 압축합니다. 되돌릴 수 없어요. 계속할까요?")) return;
 
@@ -2057,16 +2065,21 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         </div>
       )}
       {/* ===== FAVORITES POPUP ===== */}
-      {showFavoritesOnly && (
+       {showFavoritesOnly && (
         <div className="fixed inset-0 z-50 flex flex-col" style={{ background: PAPER }}>
           <div className="sticky top-0 flex items-center justify-between px-5 py-4" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
             <div className="flex items-center gap-2">
               <Star size={18} color={"#E8A800"} fill={"#E8A800"} />
               <span className="font-extrabold text-base" style={{ color: INK }}>즐겨찾기</span>
             </div>
-            <button onClick={() => setShowFavoritesOnly(false)} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
-              <X size={20} color={INK_SOFT} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={createFavoriteShareLink} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                <MessageCircle size={13} /> 공유
+              </button>
+              <button onClick={() => setShowFavoritesOnly(false)} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
+                <X size={20} color={INK_SOFT} />
+              </button>
+            </div>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-5">
             {places.filter((p) => favorites.has(p.id)).length === 0 ? (
@@ -2407,7 +2420,25 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </div>
         </div>
       )}
-
+      {/* ===== SHARE LINK POPUP ===== */}
+      {shareLink && (
+        <div onClick={() => setShareLink(null)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="text-4xl mb-3">🗺️</div>
+            <div className="font-extrabold text-base mb-1" style={{ color: INK }}>즐겨찾기 지도가 만들어졌어요!</div>
+            <div className="text-sm mb-4" style={{ color: INK_SOFT }}>이 링크를 보내면, 로그인 없이도 바로 볼 수 있어요</div>
+            <div className="rounded-xl p-3 mb-4 text-xs break-all" style={{ background: PAPER, color: INK_SOFT }}>{shareLink}</div>
+            <div className="flex gap-2">
+              <button onClick={() => setShareLink(null)} className="flex-1 rounded-full py-3 text-sm font-bold" style={{ background: PAPER, color: INK }}>
+                닫기
+              </button>
+              <button onClick={() => { navigator.clipboard.writeText(shareLink); showToast("링크가 복사됐어요!"); }} className="flex-1 rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
+                링크 복사
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
