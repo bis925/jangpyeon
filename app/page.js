@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabaseClient";
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -264,8 +264,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
               <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
               <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
             </button>
-            <button onClick={(e) => { e.stopPropagation(); onConfirmInfo(place.id); }} className="text-[10px] font-bold underline" style={{ color: INK_SOFT }}>
-              아직 정보가 맞아요
+              <button onClick={(e) => { e.stopPropagation(); onConfirmInfo(place.id); }} className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: TEAL_TINT }}>
+              <CheckCircle size={11} color={TEAL_DARK} />
+              <span className="text-[10px] font-bold" style={{ color: TEAL_DARK }}>정보 확인했어요</span>
             </button>
           </div>
         );
@@ -2229,6 +2230,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <div className="text-sm font-bold" style={{ color: INK }}>오래된 정보 (1년 이상)</div>
                 <div className="text-xs" style={{ color: INK_SOFT }}>시설이 바뀌었을 수 있어요, 방문 전 확인을 권장해요</div>
               </div>
+            </div>
+            <div className="rounded-xl p-3 mb-5" style={{ background: TEAL_TINT }}>
+              <div className="text-xs font-bold" style={{ color: TEAL_DARK }}>💡 "정보 확인했어요" 버튼이 뭔가요?</div>
+              <div className="text-xs mt-1" style={{ color: INK_SOFT }}>직접 방문해서 정보가 여전히 맞다고 느끼셨다면 눌러주세요. 다른 분들에게 "최근에 확인된 정보"라고 알려주는 역할을 해요.</div>
             </div>
             <button onClick={() => setShowRecencyHelp(false)} className="w-full rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
               확인했어요
