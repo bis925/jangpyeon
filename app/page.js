@@ -2751,8 +2751,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     장소 등록하러 가기
                   </button>
                 </div>
-              )}
+                      )}
             </div>
+        
            </div>
         )}
         {/* ===================== 지도·검색 ===================== */}
