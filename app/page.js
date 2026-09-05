@@ -2607,14 +2607,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       {/* ===== COUPON POP ANIMATION ===== */}
       {showCouponPop && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none overflow-hidden">
-           <div className="coupon-shockwave" />
+              <div className="coupon-shockwave" />
           <div className="coupon-box-fall">
-            <div className="coupon-box-wrap">
-              <div className="coupon-box-lid">🎁</div>
-              <div className="coupon-box-body">
-                <Gift size={90} color="#fff" />
-              </div>
-            </div>
+            <div className="coupon-emoji-box">🎁</div>
           </div>
            {Array.from({ length: 40 }).map((_, i) => {
             const angle = (Math.PI * 2 * i) / 40 + (Math.random() * 0.5 - 0.25);
