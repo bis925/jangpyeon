@@ -1949,7 +1949,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           const userIds = nearbyUsers.map((u) => u.user_id);
           await fetch("https://xyyewfqfurtrzfonplat.supabase.co/functions/v1/swift-endpoint", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}`,
+            },
             body: JSON.stringify({
               title: "📍 근처에 새 장소가 등록됐어요!",
               body: `"${data.name}"이(가) 우리 동네에 새로 등록됐어요`,
