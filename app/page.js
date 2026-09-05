@@ -2185,17 +2185,17 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   <div className="text-xs mb-4" style={{ color: INK_SOFT }}>
                     {query.trim() || activeFilters.length > 0 ? "이 장소를 알고 계신가요? 직접 등록해보세요!" : "첫 번째 장소를 등록하고 포인트를 받아보세요"}
                   </div>
-                  <button onClick={() => setTab("register")} className="rounded-full px-5 py-2.5 text-xs font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                                                               <button onClick={() => setTab("register")} className="rounded-full px-5 py-2.5 text-xs font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
                     장소 등록하러 가기
                   </button>
                 </div>
               )}
             </div>
-                      {visibleCount < filteredPlaces.length && (
+            {visibleCount < filteredPlaces.length && (
               <div ref={scrollSentinelRef} className="flex items-center justify-center py-6">
                 <div className="rounded-full animate-spin" style={{ width: 24, height: 24, border: `3px solid ${LINE}`, borderTopColor: TEAL }} />
               </div>
-            )}
+            )}                   
           </div>
         )}
       {/* ===== COUPON DETAIL POPUP ===== */}
@@ -2753,12 +2753,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
               )}
             </div>
-            {visibleCount < filteredPlaces.length && (
-              <div ref={scrollSentinelRef} className="flex items-center justify-center py-6">
-                <div className="rounded-full animate-spin" style={{ width: 24, height: 24, border: `3px solid ${LINE}`, borderTopColor: TEAL }} />
-              </div>
-            )}
-          </div>
+           </div>
         )}
         {/* ===================== 지도·검색 ===================== */}
         {tab === "map" && (
