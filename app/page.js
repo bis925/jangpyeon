@@ -3125,12 +3125,31 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>내 동네 설정</div>
             <div className="rounded-2xl p-4 mb-6" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {profile?.home_address ? (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-xs mb-0.5" style={{ color: INK_SOFT }}>현재 설정된 동네</div>
-                    <div className="text-sm font-bold" style={{ color: INK }}>📍 {profile.home_address}</div>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <div className="text-xs mb-0.5" style={{ color: INK_SOFT }}>현재 설정된 동네</div>
+                      <div className="text-sm font-bold" style={{ color: INK }}>📍 {profile.home_address}</div>
+                    </div>
+                    <button onClick={setHomeLocation} className="rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>변경</button>
                   </div>
-                  <button onClick={setHomeLocation} className="rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>변경</button>
+                  <div className="flex items-center justify-between pt-3" style={{ borderTop: `1px solid ${LINE}` }}>
+                    <div>
+                      <div className="text-sm font-bold" style={{ color: INK }}>근처 새 장소 알림</div>
+                      <div className="text-xs" style={{ color: INK_SOFT }}>{profile?.nearby_alerts_enabled === false ? "꺼짐" : "켜짐"}</div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const newValue = !(profile?.nearby_alerts_enabled !== false);
+                        const { error } = await supabase.from("profiles").update({ nearby_alerts_enabled: newValue }).eq("id", session.user.id);
+                        if (!error) setProfile((prev) => ({ ...prev, nearby_alerts_enabled: newValue }));
+                      }}
+                      className="relative rounded-full transition-all duration-200"
+                      style={{ width: 44, height: 26, background: profile?.nearby_alerts_enabled !== false ? TEAL : LINE }}
+                    >
+                      <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 20, height: 20, top: 3, left: profile?.nearby_alerts_enabled !== false ? 21 : 3 }} />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div>
