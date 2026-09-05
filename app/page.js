@@ -2822,24 +2822,29 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </div>
 
             <div className="flex items-center gap-1.5 mb-3">
-              <span className="font-extrabold text-sm" style={{ color: INK }}>실시간 포인트 랭킹 TOP 5</span>
-              <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold" style={{ background: CORAL_TINT, color: CORAL }}>LIVE</span>
+              <span className="font-extrabold text-sm" style={{ color: INK }}>🏆 실시간 포인트 랭킹</span>
+              <span className="rounded-full px-2 py-0.5 text-[9px] font-extrabold text-white" style={{ background: CORAL }}>● LIVE</span>
             </div>
-            <div className="rounded-2xl overflow-hidden mb-6" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+            <div className="rounded-2xl overflow-hidden mb-6" style={{ border: `1px solid ${LINE}`, background: CARD, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               {pointRanking.length === 0 && (
                 <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>아직 랭킹 정보가 없어요</div>
               )}
               {pointRanking.map((p, i) => {
-                const medalColors = ["#FFD700", "#C0C0C0", "#CD7F32"];
+                const medalGradients = [
+                  "linear-gradient(135deg, #FFD700, #FFA500)",
+                  "linear-gradient(135deg, #E8E8E8, #B0B0B0)",
+                  "linear-gradient(135deg, #D9924A, #A85F2A)",
+                ];
+                const isTop3 = i < 3;
                 return (
-                  <div key={i} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i !== pointRanking.length - 1 ? `1px solid ${LINE}` : "none" }}>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center rounded-full font-extrabold text-sm flex-shrink-0" style={{ width: 26, height: 26, background: i < 3 ? medalColors[i] : PAPER, color: i < 3 ? "#fff" : INK_SOFT }}>
-                        {i + 1}
+                  <div key={i} className="flex items-center justify-between px-4 py-3.5 transition-all duration-200" style={{ borderBottom: i !== pointRanking.length - 1 ? `1px solid ${LINE}` : "none", background: i === 0 ? "linear-gradient(90deg, #FFF9E6, transparent)" : "transparent" }}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center justify-center rounded-full font-extrabold flex-shrink-0 relative" style={{ width: isTop3 ? 32 : 26, height: isTop3 ? 32 : 26, background: isTop3 ? medalGradients[i] : PAPER, color: isTop3 ? "#fff" : INK_SOFT, fontSize: isTop3 ? 15 : 12, boxShadow: isTop3 ? "0 2px 6px rgba(0,0,0,0.2)" : "none" }}>
+                        {i === 0 ? "👑" : i + 1}
                       </div>
-                      <span className="text-sm font-bold" style={{ color: INK }}>{maskEmail(p.email)}</span>
+                      <span className="text-sm font-bold truncate" style={{ color: INK }}>{maskEmail(p.email)}</span>
                     </div>
-                    <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 14 }}>{p.points.toLocaleString()}P</span>
+                    <span className="flex-shrink-0" style={{ fontFamily: MONO_FONT, color: isTop3 ? CORAL : INK_SOFT, fontWeight: 800, fontSize: isTop3 ? 15 : 13 }}>{p.points.toLocaleString()}P</span>
                   </div>
                 );
               })}
