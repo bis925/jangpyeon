@@ -3070,9 +3070,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
                                     {isExpanded && (
                     <>
-                      <button onClick={() => speakNotice(n.title, n.content)} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 mb-3 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
-                        <Headset size={13} /> 음성으로 듣기
-                      </button>
+                                  {n.audio_url ? (
+                        <audio controls src={n.audio_url} className="w-full mb-3" style={{ height: 40 }} />
+                      ) : (
+                        <button onClick={() => speakNotice(n.title, n.content)} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 mb-3 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                          <Headset size={13} /> 음성으로 듣기 (기본 음성)
+                        </button>
+                      )}
                       {n.image_url && (
                         <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
                       )}
