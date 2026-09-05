@@ -679,6 +679,8 @@ export default function Page() {
   const [placeReviews, setPlaceReviews] = useState([]);
   const [newReviewText, setNewReviewText] = useState("");
   const [showRecencyHelp, setShowRecencyHelp] = useState(false);
+  const [showNicknamePrompt, setShowNicknamePrompt] = useState(false);
+  const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
   const [expandedNoticeAdminId, setExpandedNoticeAdminId] = useState(null);
   const [expandedReportId, setExpandedReportId] = useState(null);
@@ -982,6 +984,23 @@ export default function Page() {
       ],
     });
   }
+
+  async function saveNicknameFromPrompt() {
+    if (nicknamePromptDraft.trim()) {
+      const { error } = await supabase.from("profiles").update({ nickname: nicknamePromptDraft.trim() }).eq("id", session.user.id);
+      if (!error) {
+        setProfile((prev) => ({ ...prev, nickname: nicknamePromptDraft.trim() }));
+        showToast("닉네임이 설정됐어요!");
+      }
+    }
+    localStorage.setItem("jangpyeon_nickname_prompt_dismissed", "true");
+    setShowNicknamePrompt(false);
+  }
+  function dismissNicknamePrompt() {
+    localStorage.setItem("jangpyeon_nickname_prompt_dismissed", "true");
+    setShowNicknamePrompt(false);
+  }
+  
     async function saveNickname() {
     if (!nicknameDraft.trim()) { showToast("닉네임을 입력해주세요"); return; }
     const { error } = await supabase.from("profiles").update({ nickname: nicknameDraft.trim() }).eq("id", session.user.id);
@@ -1182,7 +1201,9 @@ async function handleAvatarChange(e) {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data);
     setAvatarUrl(data?.avatar_url || null);
-
+    if (data && !data.nickname && !localStorage.getItem("jangpyeon_nickname_prompt_dismissed")) {
+      setShowNicknamePrompt(true);
+    }
   }
   async function fetchPlaces() {
     const { data } = await supabase.from("places").select("*, place_photos(photo_url)").eq("status", "approved").order("created_at", { ascending: false });
@@ -2072,6 +2093,34 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             <button onClick={() => setShowDuplicatePlace(false)} className="w-full rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
               확인했어요
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ===== NICKNAME PROMPT POPUP ===== */}
+      {showNicknamePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="text-4xl mb-3">👋</div>
+            <div className="font-extrabold text-base mb-1" style={{ color: INK }}>닉네임을 설정해보세요</div>
+            <div className="text-sm mb-4" style={{ color: INK_SOFT }}>다른 분들에게 어떤 이름으로 보이고 싶으세요?<br />나중에 마이페이지에서 언제든 바꿀 수 있어요</div>
+            <input
+              value={nicknamePromptDraft}
+              onChange={(e) => setNicknamePromptDraft(e.target.value)}
+              placeholder="닉네임 입력 (선택)"
+              maxLength={12}
+              autoFocus
+              className="w-full rounded-xl px-4 py-3 mb-4 text-sm text-center outline-none"
+              style={{ border: `1.4px solid ${LINE}`, color: INK }}
+            />
+            <div className="flex gap-2">
+              <button onClick={dismissNicknamePrompt} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                나중에 할게요
+              </button>
+              <button onClick={saveNicknameFromPrompt} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                설정하기
+              </button>
+            </div>
           </div>
         </div>
       )}
