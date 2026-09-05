@@ -606,18 +606,19 @@ export default function Page() {
   const [mapCategory, setMapCategory] = useState(null);
     const [pendingFocusId, setPendingFocusId] = useState(null);
   const [toast, setToast] = useState(null);
-      async function speakNotice(title, htmlContent) {
+  async function speakNotice(title, htmlContent) {
     const plainText = htmlContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     const rawText = `${title}. ${plainText}`;
-    const text = rawText.replace(/[^\uAC00-\uD7A3\s.,!?0-9]/g, "").replace(/\s+/g, " ").trim();
+    const cleaned = rawText.replace(/[^\uAC00-\uD7A3\s.,!?0-9]/g, "").replace(/\s+/g, " ").trim();
+    const text = cleaned.replace(/([.!?])/g, "$1 , ,");
     if (typeof window !== "undefined" && window.Capacitor) {
       const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
-      TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.95, pitch: 1.05, volume: 1.0, category: "ambient" });
+      TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.82, pitch: 1.05, volume: 1.0, category: "ambient" });
     } else if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = "ko-KR";
-      utter.rate = 0.95;
+      utter.rate = 0.82;
       utter.pitch = 1.05;
       const voices = window.speechSynthesis.getVoices();
       const koreanVoice = voices.find((v) => v.lang === "ko-KR" && /female|여성|유나|Yuna|Sora|소라/i.test(v.name)) || voices.find((v) => v.lang === "ko-KR");
