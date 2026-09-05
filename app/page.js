@@ -606,6 +606,24 @@ export default function Page() {
   const [mapCategory, setMapCategory] = useState(null);
     const [pendingFocusId, setPendingFocusId] = useState(null);
   const [toast, setToast] = useState(null);
+    async function speakNotice(title, htmlContent) {
+    const plainText = htmlContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    const text = `${title}. ${plainText}`;
+    if (typeof window !== "undefined" && window.Capacitor) {
+      const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
+      TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.95, pitch: 1.05, volume: 1.0, category: "ambient" });
+    } else if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "ko-KR";
+      utter.rate = 0.95;
+      utter.pitch = 1.05;
+      const voices = window.speechSynthesis.getVoices();
+      const koreanVoice = voices.find((v) => v.lang === "ko-KR" && /female|여성|유나|Yuna|Sora|소라/i.test(v.name)) || voices.find((v) => v.lang === "ko-KR");
+      if (koreanVoice) utter.voice = koreanVoice;
+      window.speechSynthesis.speak(utter);
+    }
+  }
   function showToast(message) {
     setToast(message);
     setTimeout(() => setToast(null), 2500);
@@ -3034,8 +3052,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <ChevronRight size={16} color={INK_SOFT} style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </button>
                   <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
-                  {isExpanded && (
+                                    {isExpanded && (
                     <>
+                      <button onClick={() => speakNotice(n.title, n.content)} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 mb-3 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                        <Headset size={13} /> 음성으로 듣기
+                      </button>
                       {n.image_url && (
                         <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
                       )}
