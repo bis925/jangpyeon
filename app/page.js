@@ -195,8 +195,8 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           <span className="rounded-full px-4 py-1.5 text-sm font-extrabold" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}>영업 종료</span>
         </div>
       )}
-      <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-        <div className="flex items-center gap-1 flex-wrap min-w-0">
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <div className="flex items-center gap-1 flex-wrap min-w-0 flex-1">
           {isAdminUser && !isOwner && (
             <>
               <button onClick={(e) => { e.stopPropagation(); onAdminEdit(place); }} className="rounded-full p-1.5" style={{ background: PAPER }} aria-label="관리자 권한으로 수정">
