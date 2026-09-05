@@ -1,7 +1,10 @@
 "use client";
-
 import { useEffect, useState, useMemo, useRef } from "react";
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
 import { supabase } from "../lib/supabaseClient";
+
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
     Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare,
@@ -90,23 +93,8 @@ function getBadges(place) {
     .map(([key]) => key);
 }
 
-function renderRichText(text) {
-  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|__(.+?)__|==(.+?)==|\[(.+?)\]\((.+?)\)/g;
-  const nodes = [];
-  let lastIndex = 0;
-  let match;
-  let key = 0;
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
-    if (match[1] !== undefined) nodes.push(<strong key={key++}>{match[1]}</strong>);
-    else if (match[2] !== undefined) nodes.push(<em key={key++}>{match[2]}</em>);
-    else if (match[3] !== undefined) nodes.push(<u key={key++}>{match[3]}</u>);
-    else if (match[4] !== undefined) nodes.push(<mark key={key++} style={{ background: YELLOW, padding: "0 2px" }}>{match[4]}</mark>);
-    else if (match[5] !== undefined) nodes.push(<a key={key++} href={match[6]} target="_blank" rel="noopener noreferrer" style={{ color: TEAL, textDecoration: "underline" }}>{match[5]}</a>);
-    lastIndex = regex.lastIndex;
-  }
-  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
-  return nodes;
+function renderRichText(html) {
+  return <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원"];
@@ -3115,35 +3103,26 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                            <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
-                            <div className="flex flex-wrap gap-1.5 mb-1.5 relative">
-                <button type="button" onClick={() => wrapSelection("**", "**", "굵은 글씨")} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
-                  <Bold size={12} /> 굵게
-                </button>
-                <button type="button" onClick={() => wrapSelection("*", "*", "기울임 글씨")} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
-                  <Italic size={12} /> 기울임
-                </button>
-                <button type="button" onClick={() => wrapSelection("__", "__", "밑줄 글씨")} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
-                  <Underline size={12} /> 밑줄
-                </button>
-                <button type="button" onClick={() => wrapSelection("==", "==", "강조 글씨")} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
-                  <Highlighter size={12} /> 강조색
-                </button>
-                <button type="button" onClick={insertLink} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
-                  <Link2 size={12} /> 링크
-                </button>
-                <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold" style={{ background: PAPER, color: INK_SOFT }}>
-                  😀 이모티콘
-                </button>
-                {showEmojiPicker && (
-                  <div className="absolute top-full left-0 mt-1 z-10 rounded-xl p-2 grid grid-cols-8 gap-1" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                    {["😀","😊","👍","🎉","❤️","⭐","📢","✅","🎁","📌","🚨","💡","🙏","👏","🔥","😍"].map((e) => (
-                      <button type="button" key={e} onClick={() => insertEmoji(e)} className="text-lg hover:bg-black/5 rounded p-1">{e}</button>
-                    ))}
-                  </div>
-                )}
+            
+        <div className="mb-2 rounded-xl overflow-hidden" style={{ border: `1.4px solid ${LINE}` }}>
+                <ReactQuill
+                  theme="snow"
+                  value={noticeForm.content}
+                  onChange={(value) => setNoticeForm({ ...noticeForm, content: value })}
+                  placeholder="공지 내용을 입력해주세요"
+                  modules={{
+                    toolbar: [
+                      [{ header: [1, 2, 3, false] }],
+                      ["bold", "italic", "underline", "strike"],
+                      [{ color: [] }, { background: [] }],
+                      [{ list: "ordered" }, { list: "bullet" }],
+                      [{ align: [] }],
+                      ["link", "image"],
+                      ["clean"],
+                    ],
+                  }}
+                />
               </div>
-                            <textarea ref={noticeContentRef} value={noticeForm.content} onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })} placeholder="공지 내용 (글자를 선택하고 위 버튼을 눌러서 꾸며보세요)" rows={4}
-                className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
               <input value={noticeForm.link_url} onChange={(e) => setNoticeForm({ ...noticeForm, link_url: e.target.value })} placeholder="이벤트 링크 (선택, 예: https://...)"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
