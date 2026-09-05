@@ -113,9 +113,9 @@ html, body {
   animation: text-pop-v2 5s ease forwards;
 }
 @keyframes text-pop-v2 {
-  0%, 33% { transform: scale(0); opacity: 0; }
-  45% { transform: scale(1.15); opacity: 1; }
-  53%, 88% { transform: scale(1); opacity: 1; }
+  0%, 55% { transform: scale(0); opacity: 0; }
+  65% { transform: scale(1.15); opacity: 1; }
+  72%, 88% { transform: scale(1); opacity: 1; }
   100% { opacity: 0; }
 }
 @keyframes confetti-burst-v2 {
