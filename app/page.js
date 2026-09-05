@@ -680,6 +680,7 @@ export default function Page() {
   const [newReviewText, setNewReviewText] = useState("");
   const [showRecencyHelp, setShowRecencyHelp] = useState(false);
   const [pointRanking, setPointRanking] = useState([]);
+  const [expandedNoticeAdminId, setExpandedNoticeAdminId] = useState(null);
    const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
@@ -3266,18 +3267,26 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>등록된 공지 목록</div>
             <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {notices.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>공지사항이 없어요</div>}
-              {notices.map((n) => (
-                <div key={n.id} className="flex items-start justify-between px-4 py-3 gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
-                  <div>
-                    <div className="text-sm font-bold" style={{ color: INK }}>{n.title}</div>
-                    <div className="text-xs mt-0.5" style={{ color: INK_SOFT }}>{n.content}</div>
-                  </div>
-                               <div className="flex gap-2 flex-shrink-0">
-                    <button onClick={() => startEditNotice(n)} className="text-xs font-bold" style={{ color: TEAL }}>수정</button>
-                    <button onClick={() => deleteNotice(n.id)} className="text-xs font-bold" style={{ color: CORAL }}>삭제</button>
-                  </div>
+              {notices.map((n) => {
+                const isExpandedAdmin = expandedNoticeAdminId === n.id;
+                return (
+                <div key={n.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <button onClick={() => setExpandedNoticeAdminId(isExpandedAdmin ? null : n.id)} className="w-full flex items-center justify-between gap-2 text-left">
+                    <div className="text-sm font-bold truncate" style={{ color: INK }}>{n.title}</div>
+                    <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpandedAdmin ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
+                  {isExpandedAdmin && (
+                    <>
+                      <div className="text-xs mt-1.5 mb-2" style={{ color: INK_SOFT }}>{n.content.replace(/<[^>]*>/g, "").slice(0, 100)}</div>
+                      <div className="flex gap-2">
+                        <button onClick={() => startEditNotice(n)} className="text-xs font-bold" style={{ color: TEAL }}>수정</button>
+                        <button onClick={() => deleteNotice(n.id)} className="text-xs font-bold" style={{ color: CORAL }}>삭제</button>
+                      </div>
+                    </>
+                  )}
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
