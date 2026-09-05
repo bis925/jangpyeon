@@ -69,13 +69,15 @@ html, body {
 }
 
 @keyframes coupon-fall {
-  0% { transform: translateY(-120vh) scale(0.8); opacity: 0; }
-  15% { opacity: 1; }
-  55% { transform: translateY(0) scale(1); }
-  62% { transform: translateY(-20px) scale(1.05); }
-  70% { transform: translateY(0) scale(1); }
-  85% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(0) scale(1); opacity: 0; }
+  0% { transform: translateY(-130vh) rotate(-25deg) scale(0.6); opacity: 0; }
+  12% { opacity: 1; }
+  50% { transform: translateY(0) rotate(8deg) scale(1.15); }
+  56% { transform: translateY(10px) scaleX(1.35) scaleY(0.65) rotate(0deg); }
+  64% { transform: translateY(-50px) scaleX(0.85) scaleY(1.2) rotate(-4deg); }
+  72% { transform: translateY(0) scaleX(1.1) scaleY(0.92) rotate(3deg); }
+  80% { transform: translateY(-15px) scale(1) rotate(-1deg); }
+  88% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; }
 }
 @keyframes lid-pop {
   0%, 55% { transform: translateY(0) rotate(0deg); opacity: 1; }
@@ -95,7 +97,21 @@ html, body {
 }
 
 .coupon-box-fall {
-  animation: coupon-fall 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: coupon-fall 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes shockwave {
+  0%, 54% { transform: scale(0); opacity: 0; }
+  58% { transform: scale(0.3); opacity: 0.8; }
+  75% { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.coupon-shockwave {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 6px solid #FFD700;
+  animation: shockwave 2.2s ease-out forwards;
 }
 .coupon-box-wrap {
   position: relative;
