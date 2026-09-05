@@ -128,6 +128,15 @@ function useKoreanHolidays() {
   return holidays;
 }
 
+function maskEmail(email) {
+  if (!email) return "익명";
+  const atIndex = email.indexOf("@");
+  if (atIndex === -1) return email.slice(0, 4) + "****";
+  const localPart = email.slice(0, atIndex);
+  const visible = localPart.slice(0, 4);
+  return visible + "*".repeat(Math.max(localPart.length - 4, 3));
+}
+
 function getRecencyInfo(createdAt, lastConfirmedAt) {
   const baseDate = lastConfirmedAt || createdAt;
   const days = Math.floor((Date.now() - new Date(baseDate).getTime()) / (1000 * 60 * 60 * 24));
@@ -670,6 +679,7 @@ export default function Page() {
   const [placeReviews, setPlaceReviews] = useState([]);
   const [newReviewText, setNewReviewText] = useState("");
   const [showRecencyHelp, setShowRecencyHelp] = useState(false);
+  const [pointRanking, setPointRanking] = useState([]);
    const [isAdminEditingPlace, setIsAdminEditingPlace] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
@@ -1134,7 +1144,19 @@ async function handleAvatarChange(e) {
       fetchInquiries();
       fetchCampaigns();
       fetchMyCoupons();
+      fetchPointRanking();
     }
+  }, [session]);
+
+  useEffect(() => {
+    if (!session) return;
+    const channel = supabase
+      .channel("point-ranking-changes")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => {
+        fetchPointRanking();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [session]);
 
   /* --- 프로필(직급) 로드 후, 관리자/직원 전용 데이터 불러오기 --- */
@@ -1148,6 +1170,11 @@ async function handleAvatarChange(e) {
     }
   }, [session, profile]);
 
+  async function fetchPointRanking() {
+    const { data } = await supabase.from("profiles").select("email, points").order("points", { ascending: false }).limit(5);
+    setPointRanking(data || []);
+  }
+  
   async function fetchProfile() {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data);
@@ -2794,6 +2821,30 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             </div>
 
+            <div className="flex items-center gap-1.5 mb-3">
+              <span className="font-extrabold text-sm" style={{ color: INK }}>실시간 포인트 랭킹 TOP 5</span>
+              <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold" style={{ background: CORAL_TINT, color: CORAL }}>LIVE</span>
+            </div>
+            <div className="rounded-2xl overflow-hidden mb-6" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {pointRanking.length === 0 && (
+                <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>아직 랭킹 정보가 없어요</div>
+              )}
+              {pointRanking.map((p, i) => {
+                const medalColors = ["#FFD700", "#C0C0C0", "#CD7F32"];
+                return (
+                  <div key={i} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i !== pointRanking.length - 1 ? `1px solid ${LINE}` : "none" }}>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center rounded-full font-extrabold text-sm flex-shrink-0" style={{ width: 26, height: 26, background: i < 3 ? medalColors[i] : PAPER, color: i < 3 ? "#fff" : INK_SOFT }}>
+                        {i + 1}
+                      </div>
+                      <span className="text-sm font-bold" style={{ color: INK }}>{maskEmail(p.email)}</span>
+                    </div>
+                    <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 14 }}>{p.points.toLocaleString()}P</span>
+                  </div>
+                );
+              })}
+            </div>
+                  
            <div id="point-history-section" className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 내역</div>
             <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {history.length === 0 && (
