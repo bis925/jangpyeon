@@ -2235,7 +2235,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   {placeReviews.map((r) => (
                     <div key={r.id} className="rounded-xl p-3" style={{ background: PAPER }}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-bold" style={{ color: INK }}>{r.profiles?.nickname || "익명"}</span>
+                        <span className="text-xs font-bold" style={{ color: INK }}>{currentTier(r.profiles?.points ?? 0).emoji} {r.profiles?.nickname || "익명"}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-[11px]" style={{ color: INK_SOFT }}>{new Date(r.created_at).toLocaleDateString("ko-KR")}</span>
                           {(r.user_id === session.user.id || session.user.email === ADMIN_EMAIL) && (
