@@ -212,8 +212,12 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
             <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
           </div>
         )}
-        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
+         <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
           <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 rounded-full px-2 py-1.5" style={{ background: TEAL_TINT }}>
+          <MessageSquare size={14} color={TEAL_DARK} />
+          <span style={{ fontSize: 10, fontWeight: 700, color: TEAL_DARK }}>리뷰</span>
         </button>
       </div>
       <div className="mb-3 min-w-0">
@@ -291,15 +295,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           </button>
         )}
       </div>
-             <div className="flex items-center justify-between gap-2 flex-wrap">
-        <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75 min-w-0 truncate" style={{ color: CORAL }}>
-          도움이 됐어요 {place.helpful_count} · 눌러서 응원하기
-        </button>
-        <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75 flex-shrink-0" style={{ color: TEAL }}>
-          <MessageSquare size={13} />
-          리뷰
-        </button>
-      </div>
+      <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75 block w-full text-left truncate" style={{ color: CORAL }}>
+        도움이 됐어요 {place.helpful_count} · 눌러서 응원하기
+      </button>
     </div>
   );
 }
