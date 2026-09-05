@@ -2612,11 +2612,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               🎉 쿠폰이 도착했어요!
             </div>
           </div>
-             <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }}>
-            <div className="coupon-box-fall">
-              <div className="coupon-box-base">📦</div>
-            </div>
-            <div className="coupon-box-lid-v2">🎀</div>
+                          <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }}>
+            <div className="coupon-box-pop-in">🎁</div>
             {Array.from({ length: 50 }).map((_, i) => {
               const angle = (Math.PI * 2 * i) / 50 + (Math.random() * 0.5 - 0.25);
               const distance = 150 + Math.random() * 220;
