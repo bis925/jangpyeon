@@ -828,6 +828,9 @@ export default function Page() {
         map.setLevel(3);
         infowindow.open(map, marker);
         setPendingFocusId(null);
+        setTimeout(() => {
+          mapContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
       }
     }
 
