@@ -189,7 +189,7 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
   const badges = getBadges(place);
   const openStatus = isOpenNow(place.business_hours, holidays);
   return (
-    <div className="relative rounded-2xl p-4 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}>
+    <div className="relative rounded-2xl p-4 min-w-0 overflow-hidden transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}>
       {openStatus === false && (
         <div className="absolute inset-0 flex items-center justify-center rounded-2xl z-20 pointer-events-none">
           <span className="rounded-full px-4 py-1.5 text-sm font-extrabold" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}>영업 종료</span>
@@ -249,7 +249,7 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           )}
         </div>
       </div>
-           <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
+      <div className="text-xs mb-2 truncate" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
       {place.created_at && (() => {
         const recency = getRecencyInfo(place.created_at, place.last_confirmed_at);
         return (
@@ -1923,7 +1923,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 아직 즐겨찾기한 장소가 없어요.<br />장소 카드의 별 아이콘을 눌러 저장해보세요!
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="grid sm:grid-cols-2 gap-3 min-w-0">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setShowFavoritesOnly(false); setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
                 <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}mageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
@@ -2379,7 +2379,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               )}
             </div>
 
-               <div className="grid sm:grid-cols-2 gap-3">
+               <div className="grid sm:grid-cols-2 gap-3 min-w-0">
               {filteredPlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer">
                             <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
@@ -2420,7 +2420,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
-                    <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="grid sm:grid-cols-2 gap-3 min-w-0">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer">
                                                          <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}ImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
