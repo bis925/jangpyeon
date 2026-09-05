@@ -2736,7 +2736,16 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                       {n.image_url && (
                         <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
                       )}
-                      <div className="text-sm mb-2 whitespace-pre-wrap" style={{ color: INK }}>
+                                 <div className="text-sm mb-2 whitespace-pre-wrap" style={{ color: INK }} onClick={(e) => {
+                        const link = e.target.closest("a");
+                        if (link && link.getAttribute("href") === "#ranking") {
+                          e.preventDefault();
+                          setTab("my");
+                          setTimeout(() => {
+                            document.getElementById("point-ranking-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          }, 100);
+                        }
+                      }}>
                         {renderRichText(n.content)}
                       </div>
                       {n.file_url && (
@@ -2821,7 +2830,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 mb-3">
+                 <div id="point-ranking-section" className="flex items-center gap-1.5 mb-3">
               <span className="font-extrabold text-sm" style={{ color: INK }}>🏆 실시간 포인트 랭킹</span>
               <span className="rounded-full px-2 py-0.5 text-[9px] font-extrabold text-white" style={{ background: CORAL }}>● LIVE</span>
             </div>
