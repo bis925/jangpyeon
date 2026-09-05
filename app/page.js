@@ -2410,8 +2410,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-extrabold text-sm truncate" style={{ color: INK }}>등록된 장소 {filteredPlaces.length}곳</span>
-                <button onClick={() => setShowRecencyHelp(true)} className="rounded-full p-0.5 flex-shrink-0" aria-label="정보 최신성 안내">
-                  <span className="flex items-center justify-center rounded-full text-[10px] font-extrabold flex-shrink-0" style={{ width: 15, height: 15, background: LINE, color: INK_SOFT }}>?</span>
+                              <button onClick={() => setShowRecencyHelp(true)} className="rounded-full p-0.5 flex-shrink-0" aria-label="정보 최신성 안내">
+                  <span className="flex items-center justify-center rounded-full text-xs font-extrabold flex-shrink-0" style={{ width: 20, height: 20, background: TEAL, color: "#fff" }}>?</span>
                 </button>
               </div>
               {activeFilters.length > 0 && (
