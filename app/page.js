@@ -2605,43 +2605,38 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       )}
 
       {/* ===== COUPON POP ANIMATION ===== */}
-       {showCouponPop && (
-        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center pointer-events-none overflow-hidden" style={{ background: "rgba(0,0,0,0.35)" }}>
-          <div className="coupon-pop-text mb-6">
-            <div className="font-extrabold text-3xl text-white text-center px-6" style={{ textShadow: "0 2px 16px rgba(0,0,0,0.5)" }}>
+        {showCouponPop && (
+        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center pointer-events-none overflow-hidden">
+          <div className="coupon-pop-text-v2 mb-6">
+            <div className="font-extrabold text-3xl text-center px-6" style={{ color: INK, textShadow: "0 2px 12px rgba(255,255,255,0.9)" }}>
               🎉 쿠폰이 발급됐어요!
             </div>
           </div>
           <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }}>
-            <div className="coupon-shockwave" />
             <div className="coupon-box-fall">
               <div className="coupon-emoji-box">🎁</div>
             </div>
-            {Array.from({ length: 40 }).map((_, i) => {
-              const angle = (Math.PI * 2 * i) / 40 + (Math.random() * 0.5 - 0.25);
-              const distance = 120 + Math.random() * 180;
+            {Array.from({ length: 50 }).map((_, i) => {
+              const angle = (Math.PI * 2 * i) / 50 + (Math.random() * 0.5 - 0.25);
+              const distance = 150 + Math.random() * 220;
               const tx = Math.cos(angle) * distance;
               const ty = Math.sin(angle) * distance * 0.6 - 60;
               const isCircle = i % 3 === 0;
               return (
-                <div key={i} className="confetti-piece" style={{
+                <div key={i} className="confetti-piece-v2" style={{
                   "--tx": `${tx}px`,
                   "--ty": `${ty}px`,
                   "--rot": `${360 + Math.random() * 360}deg`,
-                  width: isCircle ? 10 : 8,
-                  height: isCircle ? 10 : 14,
+                  width: isCircle ? 12 : 9,
+                  height: isCircle ? 12 : 16,
                   borderRadius: isCircle ? "50%" : "2px",
-                  background: [TEAL, CORAL, YELLOW, "#fff", "#FFD700"][i % 5],
-                  animationDelay: `1.15s`,
-                  animationDuration: `${1.4 + Math.random() * 0.5}s`,
+                  background: [TEAL, CORAL, YELLOW, "#fff", "#FFD700", "#FF6B9D"][i % 6],
                 }} />
               );
             })}
           </div>
-          <div className="text-white text-sm mt-8 opacity-80">화면을 눌러도 계속 이용하실 수 있어요</div>
         </div>
       )}
-
       {/* ===== TOAST ===== */}
       <div className="fixed left-1/2 z-50 pointer-events-none transition-all duration-300"
         style={{ bottom: toast ? 24 : 0, opacity: toast ? 1 : 0, transform: `translateX(-50%) translateY(${toast ? 0 : 10}px)` }}>
