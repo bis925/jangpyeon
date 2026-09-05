@@ -2181,12 +2181,12 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 아직 즐겨찾기한 장소가 없어요.<br />장소 카드의 별 아이콘을 눌러 저장해보세요!
               </div>
             ) : (
-                          <div className="grid sm:grid-cols-2 gap-3 min-w-0">
+                   <div className="grid sm:grid-cols-2 gap-3 min-w-0">
               {visiblePlaces.map((p) => (
                 <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer min-w-0">
                 <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
-                                            </div>
-                ))}
+                </div>
+              ))}
               {filteredPlaces.length === 0 && (
                 <div className="col-span-2 text-center py-14">
                   <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
@@ -2203,15 +2203,14 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   </button>
                 </div>
               )}
+            </div>
+                      {visibleCount < filteredPlaces.length && (
+              <div ref={scrollSentinelRef} className="flex items-center justify-center py-6">
+                <div className="rounded-full animate-spin" style={{ width: 24, height: 24, border: `3px solid ${LINE}`, borderTopColor: TEAL }} />
               </div>
-              {visibleCount < filteredPlaces.length && (
-                <div ref={scrollSentinelRef} className="flex items-center justify-center py-6">
-                  <div className="rounded-full animate-spin" style={{ width: 24, height: 24, border: `3px solid ${LINE}`, borderTopColor: TEAL }} />
-                </div>
-              )}
+            )}
           </div>
-        </div>
-      )}
+        )}
       {/* ===== COUPON DETAIL POPUP ===== */}
       {viewingCoupon && (
         <div onClick={() => setViewingCoupon(null)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
