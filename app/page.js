@@ -606,9 +606,10 @@ export default function Page() {
   const [mapCategory, setMapCategory] = useState(null);
     const [pendingFocusId, setPendingFocusId] = useState(null);
   const [toast, setToast] = useState(null);
-    async function speakNotice(title, htmlContent) {
+      async function speakNotice(title, htmlContent) {
     const plainText = htmlContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-    const text = `${title}. ${plainText}`;
+    const rawText = `${title}. ${plainText}`;
+    const text = rawText.replace(/[^\uAC00-\uD7A3\s.,!?0-9]/g, "").replace(/\s+/g, " ").trim();
     if (typeof window !== "undefined" && window.Capacitor) {
       const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
       TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.95, pitch: 1.05, volume: 1.0, category: "ambient" });
