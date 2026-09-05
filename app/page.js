@@ -1295,7 +1295,7 @@ async function handleAvatarChange(e) {
   }, [session, profile]);
 
   async function fetchPointRanking() {
-    const { data } = await supabase.from("profiles").select("email, points").order("points", { ascending: false }).limit(5);
+    const { data } = await supabase.from("profiles").select("email, points, created_at").order("points", { ascending: false }).order("created_at", { ascending: true }).limit(5);
     setPointRanking(data || []);
   }
   
@@ -3098,10 +3098,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             </div>
 
-                 <div id="point-ranking-section" className="flex items-center gap-1.5 mb-3">
+                            <div id="point-ranking-section" className="flex items-center gap-1.5 mb-1">
               <span className="font-extrabold text-sm" style={{ color: INK }}>🏆 실시간 포인트 랭킹</span>
               <span className="rounded-full px-2 py-0.5 text-[9px] font-extrabold text-white" style={{ background: CORAL }}>● LIVE</span>
             </div>
+            <div className="text-[11px] mb-3" style={{ color: INK_SOFT }}>* 포인트가 같으면 먼저 등록하신 분이 순위에 반영돼요</div>
             <div className="rounded-2xl overflow-hidden mb-6" style={{ border: `1px solid ${LINE}`, background: CARD, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               {pointRanking.length === 0 && (
                 <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>아직 랭킹 정보가 없어요</div>
