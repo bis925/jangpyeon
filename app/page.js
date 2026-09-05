@@ -195,25 +195,29 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           <span className="rounded-full px-4 py-1.5 text-sm font-extrabold" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}>영업 종료</span>
         </div>
       )}
-      {openStatus === true && (
-        <div className="absolute top-3 right-12 flex items-center gap-1 rounded-full px-2 py-1 z-10 max-w-[70px]" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
-          <div className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: "#22C55E" }} />
-          <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
+      <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+        <div className="flex items-center gap-1 flex-wrap min-w-0">
+          {isAdminUser && !isOwner && (
+            <>
+              <button onClick={(e) => { e.stopPropagation(); onAdminEdit(place); }} className="rounded-full p-1.5" style={{ background: PAPER }} aria-label="관리자 권한으로 수정">
+                <Pencil size={14} color={INK_SOFT} />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); onAdminDelete(place); }} className="rounded-full p-1.5" style={{ background: PAPER }} aria-label="관리자 권한으로 삭제">
+                <Trash2 size={14} color={CORAL} />
+              </button>
+            </>
+          )}
+          {openStatus === true && (
+            <div className="flex items-center gap-1 rounded-full px-2 py-1 flex-shrink-0" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
+              <div className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: "#22C55E" }} />
+              <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
+            </div>
+          )}
         </div>
-      )}
-        <button onClick={() => onToggleFavorite(place.id)} className="absolute top-3 right-3 rounded-full p-1.5 z-10 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
-        <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
-      </button>
-        {isAdminUser && !isOwner && (
-        <div className="absolute top-3 left-3 flex gap-1 z-10">
-          <button onClick={(e) => { e.stopPropagation(); onAdminEdit(place); }} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.9)" }} aria-label="관리자 권한으로 수정">
-            <Pencil size={14} color={INK_SOFT} />
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); onAdminDelete(place); }} className="rounded-full p-1.5" style={{ background: "rgba(255,255,255,0.9)" }} aria-label="관리자 권한으로 삭제">
-            <Trash2 size={14} color={CORAL} />
-          </button>
-        </div>
-      )}
+        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 flex-shrink-0 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
+          <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
+        </button>
+      </div>
       <div className="mb-3 min-w-0">
         {place.photo_urls && place.photo_urls.length > 0 ? (
           <div className="flex gap-1.5 overflow-x-auto min-w-0">
@@ -289,11 +293,11 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           </button>
         )}
       </div>
-        <div className="flex items-center justify-between">
-        <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75" style={{ color: CORAL }}>
+             <div className="flex items-center justify-between gap-2 flex-wrap">
+        <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75 min-w-0 truncate" style={{ color: CORAL }}>
           도움이 됐어요 {place.helpful_count} · 눌러서 응원하기
         </button>
-        <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75" style={{ color: TEAL }}>
+        <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75 flex-shrink-0" style={{ color: TEAL }}>
           <MessageSquare size={13} />
           리뷰
         </button>
