@@ -189,7 +189,7 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
   const badges = getBadges(place);
   const openStatus = isOpenNow(place.business_hours, holidays);
   return (
-    <div className="relative rounded-2xl p-4 min-w-0 overflow-hidden transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}>
+       <div className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}>
       {openStatus === false && (
         <div className="absolute inset-0 flex items-center justify-center rounded-2xl z-20 pointer-events-none">
           <span className="rounded-full px-4 py-1.5 text-sm font-extrabold" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}>영업 종료</span>
