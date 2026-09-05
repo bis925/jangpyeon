@@ -12,7 +12,7 @@ import {
 
 /* ===================== 글자 크기 훅 ===================== */
 const FONT_SCALES = { xsmall: 0.8, small: 0.9, normal: 1, large: 1.15, xlarge: 1.3 };
-const FONT_SCALE_LABELS = { xsmall: "매우 작게", small: "작게", normal: "보통", large: "크게", xlarge:<div className="flex gap-2 mb-6"> "매우 크게" };
+const FONT_SCALE_LABELS = { xsmall: "매우 작게", small: "작게", normal: "보통", large: "크게", xlarge: "매우 크게" };
 function useFontScale() {
   const [scale, setScale] = useState("normal");
   useEffect(() => {
