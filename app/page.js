@@ -3138,42 +3138,55 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </div>
 
                             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>장소 정보 신고 ({allReports.filter(r => r.status !== "resolved").length}건 대기중)</div>
-            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+                       <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {allReports.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>신고 내역이 없어요</div>}
-              {allReports.map((r) => (
+              {allReports.map((r) => {
+                const isExpandedReport = expandedReportId === r.id;
+                return (
                 <div key={r.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}`, opacity: r.status === "resolved" ? 0.5 : 1 }}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="text-sm font-bold" style={{ color: INK }}>{r.places?.name || "(삭제된 장소)"}</div>
-                      <div className="text-xs mb-1" style={{ color: INK_SOFT }}>{r.places?.address}</div>
-                      <div className="text-xs" style={{ color: INK }}>{r.reason}</div>
-                      <div className="text-xs mt-1" style={{ color: INK_SOFT }}>{new Date(r.created_at).toLocaleDateString("ko-KR")}</div>
-                    </div>
-                                                  <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <button onClick={() => setExpandedReportId(isExpandedReport ? null : r.id)} className="w-full flex items-center justify-between gap-2 text-left">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-bold truncate" style={{ color: INK }}>{r.places?.name || "(삭제된 장소)"}</span>
                       {r.status !== "resolved" ? (
-                        <button onClick={() => resolveReport(r.id)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white" style={{ background: TEAL }}>처리 완료로 표시</button>
+                        <span className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: CORAL_TINT, color: CORAL }}>대기중</span>
                       ) : (
-                        <span className="text-[10px] font-bold rounded-full px-2 py-1 text-center" style={{ background: PAPER, color: INK_SOFT }}>처리완료됨</span>
-                      )}
-                      {r.place_id && (
-                        <button
-                          onClick={() => {
-                            const place = places.find((pl) => pl.id === r.place_id);
-                            if (!place) { showToast("장소를 찾을 수 없어요 (삭제됐을 수 있어요)"); return; }
-                            setIsAdminEditingPlace(true);
-                            startEdit(place);
-                            setTab("register");
-                          }}
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-bold"
-                          style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}
-                        >
-                          수정하기
-                        </button>
+                        <span className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: PAPER, color: INK_SOFT }}>완료</span>
                       )}
                     </div>
-                  </div>
+                    <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpandedReport ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
+                  {isExpandedReport && (
+                    <div className="mt-2">
+                      <div className="text-xs mb-1" style={{ color: INK_SOFT }}>{r.places?.address}</div>
+                      <div className="text-xs mb-1" style={{ color: INK }}>{r.reason}</div>
+                      <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{new Date(r.created_at).toLocaleDateString("ko-KR")}</div>
+                      <div className="flex gap-2">
+                        {r.status !== "resolved" ? (
+                          <button onClick={() => resolveReport(r.id)} className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-white" style={{ background: TEAL }}>처리 완료로 표시</button>
+                        ) : (
+                          <span className="text-[10px] font-bold rounded-full px-2 py-1.5 flex items-center" style={{ background: PAPER, color: INK_SOFT }}>처리완료됨</span>
+                        )}
+                        {r.place_id && (
+                          <button
+                            onClick={() => {
+                              const place = places.find((pl) => pl.id === r.place_id);
+                              if (!place) { showToast("장소를 찾을 수 없어요 (삭제됐을 수 있어요)"); return; }
+                              setIsAdminEditingPlace(true);
+                              startEdit(place);
+                              setTab("register");
+                            }}
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-bold"
+                            style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}
+                          >
+                            수정하기
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>캠페인 배너 관리</div>
