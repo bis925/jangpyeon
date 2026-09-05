@@ -45,3 +45,8 @@ body {
 .ql-editor { min-height: 150px; font-size: 14px; }
 .ql-toolbar.ql-snow { border-radius: 12px 12px 0 0; }
 .ql-container.ql-snow { border-radius: 0 0 12px 12px; }
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
