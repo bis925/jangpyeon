@@ -2616,14 +2616,26 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             </div>
           </div>
-          {Array.from({ length: 24 }).map((_, i) => (
-            <div key={i} className="confetti-piece" style={{
-              left: `${Math.random() * 100}%`,
-              background: [TEAL, CORAL, YELLOW, "#fff"][i % 4],
-              animationDelay: `${1.1 + Math.random() * 0.4}s`,
-              animationDuration: `${1.2 + Math.random() * 0.8}s`,
-            }} />
-          ))}
+           {Array.from({ length: 40 }).map((_, i) => {
+            const angle = (Math.PI * 2 * i) / 40 + (Math.random() * 0.5 - 0.25);
+            const distance = 120 + Math.random() * 180;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance * 0.6 - 60;
+            const isCircle = i % 3 === 0;
+            return (
+              <div key={i} className="confetti-piece" style={{
+                "--tx": `${tx}px`,
+                "--ty": `${ty}px`,
+                "--rot": `${360 + Math.random() * 360}deg`,
+                width: isCircle ? 10 : 8,
+                height: isCircle ? 10 : 14,
+                borderRadius: isCircle ? "50%" : "2px",
+                background: [TEAL, CORAL, YELLOW, "#fff", "#FFD700"][i % 5],
+                animationDelay: `1.15s`,
+                animationDuration: `${1.4 + Math.random() * 0.5}s`,
+              }} />
+            );
+          })}
           <div className="coupon-pop-text">
             <div className="font-extrabold text-2xl text-white text-center" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
               🎉 쿠폰이 발급됐어요!
