@@ -98,7 +98,11 @@ html, body {
 }
 
 .coupon-box-fall {
-  animation: coupon-fall 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: coupon-fall 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards, coupon-idle 2s ease-in-out 2.2s infinite;
+}
+@keyframes coupon-idle {
+  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+  50% { transform: translateY(-8px) scale(1.02) rotate(2deg); }
 }
 @keyframes shockwave {
   0%, 54% { transform: scale(0); opacity: 0; }
