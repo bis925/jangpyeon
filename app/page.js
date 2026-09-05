@@ -72,12 +72,12 @@ const BADGE_META = {
 };
 
 const TIERS = [
-  { label: "새싹 기록가", min: 0 },
-  { label: "브론즈 기록가", min: 500 },
-  { label: "실버 기록가", min: 1500 },
-  { label: "골드 기록가", min: 3000 },
-  { label: "플래티넘 기록가", min: 4000 },
-  { label: "포인트 사용 가능", min: 5000 },
+  { label: "아기병아리", emoji: "🐤", min: 0 },
+  { label: "아기토끼", emoji: "🐰", min: 500 },
+  { label: "아기여우", emoji: "🦊", min: 1500 },
+  { label: "아기사자", emoji: "🦁", min: 3000 },
+  { label: "날개곰", emoji: "🐻", min: 4000 },
+  { label: "황금독수리", emoji: "🦅", min: 5000 },
 ];
 function currentTier(points) {
   let tier = TIERS[0];
@@ -2834,10 +2834,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   </button>
                 )}
                 <div className="text-xs opacity-70 mb-2">{session.user.email}</div>
-                <div className="inline-block text-[11px] rounded-full px-2.5 py-1" style={{ background: "rgba(255,255,255,0.18)" }}>{tier.label}</div>
+                      <div className="inline-block text-[11px] rounded-full px-2.5 py-1" style={{ background: "rgba(255,255,255,0.18)" }}>{tier.emoji} {tier.label}</div>
               </div>
               <div style={{ fontFamily: MONO_FONT, fontSize: 34, fontWeight: 700 }}>{points.toLocaleString()}P</div>
-              <div className="text-xs opacity-80 mb-4">{next ? `다음 등급(${next.label})까지 ${next.min - points}P 남았어요` : "최고 등급 달성!"}</div>
+               <div className="text-xs opacity-80 mb-4">{next ? `다음 등급(${next.emoji} ${next.label})까지 ${next.min - points}P 남았어요` : "최고 등급 달성! 🎉"}</div>
               <TierBar points={points} />
             </div>
 
