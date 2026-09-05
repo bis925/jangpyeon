@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Accessibility, DoorOpen, Baby, MoveVertical } from "lucide-react";
 import { supabase } from "../../../lib/supabaseClient";
 
 const TEAL = "#0F6E62";
@@ -11,6 +12,13 @@ const CARD = "#FFFFFF";
 const INK = "#1C2420";
 const INK_SOFT = "#66716A";
 const LINE = "#E4DFD1";
+
+const BADGE_META = {
+  has_ramp: { label: "휠체어 출입", icon: Accessibility },
+  has_restroom: { label: "장애인 화장실", icon: DoorOpen },
+  has_stroller_access: { label: "유모차 접근", icon: Baby },
+  has_elevator: { label: "엘리베이터", icon: MoveVertical },
+};
 
 export default function SharedFavoritesPage({ params }) {
   const [places, setPlaces] = useState([]);
@@ -31,13 +39,6 @@ export default function SharedFavoritesPage({ params }) {
     }
     load();
   }, [params.id]);
-
-  const badgeMeta = {
-    has_ramp: { label: "휠체어 출입" },
-    has_restroom: { label: "장애인 화장실" },
-    has_stroller_access: { label: "유모차 접근" },
-    has_elevator: { label: "엘리베이터" },
-  };
 
   if (loading) {
     return (
@@ -61,26 +62,30 @@ export default function SharedFavoritesPage({ params }) {
     <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Nanum Gothic', sans-serif" }}>
       <div style={{ background: TEAL, padding: "40px 24px 32px" }}>
         <div style={{ fontSize: 13, opacity: 0.85, color: "#fff", marginBottom: 6 }}>{nickname}님이 공유한</div>
-        <div style={{ fontSize: 24, fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: 8 }}>
-          🗺️ 즐겨찾기 지도
-        </div>
+        <div style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>🗺️ 즐겨찾기 지도</div>
         <div style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", marginTop: 6 }}>{places.length}곳의 접근성 정보</div>
       </div>
 
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "20px 16px" }}>
         {places.map((p) => (
           <div key={p.id} style={{ background: CARD, border: `1px solid ${LINE}`, borderRadius: 16, padding: 16, marginBottom: 12 }}>
-            {p.photo_url && (
-              <img src={p.photo_url} alt={p.name} style={{ width: "100%", height: 170, objectFit: "cover", borderRadius: 12, marginBottom: 12 }} />
+            {p.photo_url ? (
+              <img src={p.photo_url} alt={p.name} style={{ width: 64, height: 64, objectFit: "cover", borderRadius: 12, marginBottom: 12 }} />
+            ) : (
+              <div style={{ width: 64, height: 64, borderRadius: 12, marginBottom: 12, background: `linear-gradient(135deg, ${TEAL_TINT}, #FFC13B)` }} />
             )}
-            <div style={{ fontWeight: 800, color: INK, fontSize: 16, marginBottom: 4 }}>{p.name}</div>
+            <div style={{ fontWeight: 800, color: INK, fontSize: 15, marginBottom: 4 }}>{p.name}</div>
             <div style={{ fontSize: 13, color: INK_SOFT, marginBottom: 12 }}>{p.category} · {p.address}</div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {Object.entries(badgeMeta).map(([key, meta]) => p[key] && (
-                <span key={key} style={{ fontSize: 11, fontWeight: 700, background: TEAL_TINT, color: TEAL_DARK, padding: "5px 12px", borderRadius: 999 }}>
-                  {meta.label}
-                </span>
-              ))}
+              {Object.entries(BADGE_META).map(([key, meta]) => {
+                if (!p[key]) return null;
+                const Icon = meta.icon;
+                return (
+                  <span key={key} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, background: TEAL_TINT, color: TEAL_DARK, padding: "5px 10px", borderRadius: 999 }}>
+                    <Icon size={12} /> {meta.label}
+                  </span>
+                );
+              })}
             </div>
           </div>
         ))}
