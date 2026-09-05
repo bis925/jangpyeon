@@ -1934,13 +1934,34 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       }
     }
     setJustRegistered(data);
-setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "", businessHours: DEFAULT_HOURS, useHours: false, badges: { ramp: false, door: false, stroller: false, lift: false } });
+    setForm({ name: "", address: "", addressDetail: "", category: "공공기관", keywords: "", phone: "", businessHours: DEFAULT_HOURS, useHours: false, badges: { ramp: false, door: false, stroller: false, lift: false } });
     setPhotoFiles([]);
     setPhotoPreviews([]);
     fetchPlaces();
     fetchProfile();
     fetchHistory();
     setIsSubmittingPlace(false);
+
+    if (placeLat && placeLng) {
+      try {
+        const { data: nearbyUsers } = await supabase.rpc("get_nearby_users", { p_lat: placeLat, p_lng: placeLng, p_radius_km: 3, p_exclude_user: session.user.id });
+        if (nearbyUsers && nearbyUsers.length > 0) {
+          const userIds = nearbyUsers.map((u) => u.user_id);
+          await fetch("https://xyyewfqfurtrzfonplat.supabase.co/functions/v1/swift-endpoint", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: "📍 근처에 새 장소가 등록됐어요!",
+              body: `"${data.name}"이(가) 우리 동네에 새로 등록됐어요`,
+              userIds,
+              target: "map",
+            }),
+          });
+        }
+      } catch (err) {
+        // 알림 실패는 조용히 무시 (등록 자체는 이미 성공했으니까요)
+      }
+    }
   }
 
   if (authLoading) {
