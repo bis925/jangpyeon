@@ -1892,7 +1892,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             <button key={n.id} onClick={() => setTab(n.id)} className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-all duration-200 active:scale-95"
               style={{ color: active ? TEAL : INK_SOFT }}>
               <Icon size={17} />
- <span style={{ fontSize: 9, fontWeight: 700, whiteSpace: "nowrap" }}>{n.label}</span>
+              <span style={{ fontSize: `${9 * FONT_SCALES[fontScale] * 0.4}px`, fontWeight: 700, whiteSpace: "nowrap" }}>{n.label}</span>
             </button>
           );
         })}
