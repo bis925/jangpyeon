@@ -2590,14 +2590,14 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="text-white font-extrabold text-sm">{campaigns[campaignIndex].title}</div>
                   </div>
                 )}
-                {campaigns.length > 1 && (
-                  <div className="absolute top-2 right-2 flex flex-col gap-1" style={{ width: 32 }}>
+                              {campaigns.length > 1 && (
+                  <div className="absolute top-3 right-3 flex flex-col gap-2" style={{ width: 56 }}>
                     {campaigns.slice(0, 4).map((c, i) => (
                       <button
                         key={i}
                         onClick={(e) => { e.stopPropagation(); setCampaignIndex(i); }}
-                        className="rounded-md overflow-hidden transition-all duration-200"
-                        style={{ height: 22, border: i === campaignIndex ? `2px solid #fff` : "2px solid rgba(255,255,255,0.4)", boxShadow: "0 1px 4px rgba(0,0,0,0.3)" }}
+                        className="rounded-lg overflow-hidden transition-all duration-200"
+                        style={{ height: 40, border: i === campaignIndex ? `2.5px solid #fff` : "2.5px solid rgba(255,255,255,0.5)", boxShadow: "0 2px 6px rgba(0,0,0,0.35)" }}
                       >
                         <img src={c.image_url} alt="" className="w-full h-full object-cover" style={{ opacity: i === campaignIndex ? 1 : 0.6 }} />
                       </button>
