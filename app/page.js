@@ -606,14 +606,28 @@ export default function Page() {
   const [mapCategory, setMapCategory] = useState(null);
     const [pendingFocusId, setPendingFocusId] = useState(null);
   const [toast, setToast] = useState(null);
-  async function speakNotice(title, htmlContent) {
+  async function speakNotice(noticeId, title, htmlContent) {
+    if (speakingNoticeId === noticeId) {
+      if (typeof window !== "undefined" && window.Capacitor) {
+        const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
+        TextToSpeech.stop();
+      } else if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      setSpeakingNoticeId(null);
+      return;
+    }
+
     const plainText = htmlContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     const rawText = `${title}. ${plainText}`;
     const cleaned = rawText.replace(/[^\uAC00-\uD7A3\s.,!?0-9]/g, "").replace(/\s+/g, " ").trim();
     const text = cleaned.replace(/([.!?])/g, "$1 , ,");
+    setSpeakingNoticeId(noticeId);
+
     if (typeof window !== "undefined" && window.Capacitor) {
       const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
-      TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.82, pitch: 1.05, volume: 1.0, category: "ambient" });
+      await TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.82, pitch: 1.05, volume: 1.0, category: "ambient" });
+      setSpeakingNoticeId(null);
     } else if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
@@ -623,6 +637,7 @@ export default function Page() {
       const voices = window.speechSynthesis.getVoices();
       const koreanVoice = voices.find((v) => v.lang === "ko-KR" && /female|여성|유나|Yuna|Sora|소라/i.test(v.name)) || voices.find((v) => v.lang === "ko-KR");
       if (koreanVoice) utter.voice = koreanVoice;
+      utter.onend = () => setSpeakingNoticeId(null);
       window.speechSynthesis.speak(utter);
     }
   }
@@ -708,6 +723,7 @@ export default function Page() {
   const [newReviewText, setNewReviewText] = useState("");
   const [showRecencyHelp, setShowRecencyHelp] = useState(false);
   const [showNicknamePrompt, setShowNicknamePrompt] = useState(false);
+  const [speakingNoticeId, setSpeakingNoticeId] = useState(null);
   const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
   const [visibleCount, setVisibleCount] = useState(20);
@@ -3070,11 +3086,15 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
                                     {isExpanded && (
                     <>
-                                  {n.audio_url ? (
+                                                    {n.audio_url ? (
                         <audio controls src={n.audio_url} className="w-full mb-3" style={{ height: 40 }} />
                       ) : (
-                        <button onClick={() => speakNotice(n.title, n.content)} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 mb-3 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
-                          <Headset size={13} /> 음성으로 듣기 (기본 음성)
+                        <button
+                          onClick={() => speakNotice(n.id, n.title, n.content)}
+                          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 mb-3 text-xs font-bold transition-all duration-150"
+                          style={{ background: speakingNoticeId === n.id ? CORAL_TINT : TEAL_TINT, color: speakingNoticeId === n.id ? CORAL : TEAL_DARK }}
+                        >
+                          <Headset size={13} /> {speakingNoticeId === n.id ? "음성 종료" : "음성으로 듣기"}
                         </button>
                       )}
                       {n.image_url && (
