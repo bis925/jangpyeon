@@ -1506,12 +1506,26 @@ async function handleNoticeImageChange(e) {
     if (fileUrl) { noticeData.file_url = fileUrl; noticeData.file_name = fileName; }
 
     let error;
+    let savedNotice;
     if (editingNoticeId) {
-      ({ error } = await supabase.from("notices").update(noticeData).eq("id", editingNoticeId));
+      ({ error, data: savedNotice } = await supabase.from("notices").update(noticeData).eq("id", editingNoticeId).select().single());
     } else {
-      ({ error } = await supabase.from("notices").insert(noticeData));
+      ({ error, data: savedNotice } = await supabase.from("notices").insert(noticeData).select().single());
     }
     if (error) { showToast("저장 실패: " + error.message); return; }
+
+    if (savedNotice) {
+      const plainText = noticeData.content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+      const speechText = `${noticeData.title}. ${plainText}`;
+      supabase.functions.invoke("text-to-speech", {
+        body: { text: speechText, noticeId: savedNotice.id },
+      }).then(async ({ data: ttsData, error: ttsError }) => {
+        if (!ttsError && ttsData?.audioUrl) {
+          await supabase.from("notices").update({ audio_url: ttsData.audioUrl }).eq("id", savedNotice.id);
+          fetchNotices();
+        }
+      });
+    }
 
     setNoticeForm({ title: "", content: "", link_url: "" });
     setNoticeImageFile(null);
