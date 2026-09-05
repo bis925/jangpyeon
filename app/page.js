@@ -2607,9 +2607,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       {/* ===== COUPON POP ANIMATION ===== */}
         {showCouponPop && (
         <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center pointer-events-none overflow-hidden">
-          <div className="coupon-pop-text-v2 mb-6">
+               <div className="coupon-pop-text-v2 mb-6">
             <div className="font-extrabold text-3xl text-center px-6" style={{ color: INK, textShadow: "0 2px 12px rgba(255,255,255,0.9)" }}>
-              🎉 쿠폰이 발급됐어요!
+              🎉 쿠폰이 도착했어요!
             </div>
           </div>
              <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }}>
