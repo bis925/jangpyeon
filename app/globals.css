@@ -52,8 +52,13 @@ html, body {
 }
 
 .ql-tooltip {
-  left: 0 !important;
-  right: 0 !important;
-  max-width: calc(100vw - 40px);
-  margin: 0 auto;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+  max-width: 90vw;
+  margin: 0 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
