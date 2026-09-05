@@ -222,8 +222,8 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
             <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
           </div>
         )}
-        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER, width: 32, height: 32 }} aria-label="즐겨찾기">
-          <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
+             <button onClick={() => onToggleFavorite(place.id)} className="rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER, width: 28, height: 28 }} aria-label="즐겨찾기">
+          <Star size={16} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
         </button>
         <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 rounded-full px-2 py-1.5" style={{ background: TEAL_TINT }}>
           <MessageSquare size={14} color={TEAL_DARK} />
