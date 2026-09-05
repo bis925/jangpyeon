@@ -1843,8 +1843,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </button>
             </div>
                                <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("point-history-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: CORAL_TINT }}>
-            <span style={{ fontSize: ${14 * FONT_SCALES[fontScale]}px }}>🪙</span>
-              <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: ${12 * FONT_SCALES[fontScale]}px }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
+                        <span style={{ fontSize: `${14 * FONT_SCALES[fontScale]}px` }}>🪙</span>
+              <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: `${12 * FONT_SCALES[fontScale]}px` }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
             </button>
             <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("coupon-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className={`relative flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
               <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
@@ -1865,10 +1865,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </button>
           </div>
         </div>
-             <div className="flex sm:hidden items-center justify-end gap-2 px-5 pb-3">
-                <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("point-history-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: CORAL_TINT }}>
-            <span style={{ fontSize: 14 }}>🪙</span>
-            <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 12 }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
+                             <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("point-history-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: CORAL_TINT }}>
+            <span style={{ fontSize: `${14 * FONT_SCALES[fontScale]}px` }}>🪙</span>
+            <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: `${12 * FONT_SCALES[fontScale]}px` }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
           </button>
                                   <button onClick={async () => {
               await supabase.auth.signOut({ scope: "local" });
