@@ -3112,24 +3112,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             </div>
 
-            <div className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-              <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>🗜️ 기존 사진 일괄 압축</div>
-              <div className="text-xs mb-3" style={{ color: INK_SOFT }}>이미 올라간 사진들을 압축해서 저장공간과 로딩속도를 개선해요. 되돌릴 수 없으니 한 번만 실행하세요.</div>
-              {compressionProgress ? (
-                <div>
-                  <div className="text-xs font-bold mb-2" style={{ color: TEAL }}>
-                    {compressionProgress.bucket} 처리 중... ({compressionProgress.current}/{compressionProgress.total})
-                  </div>
-                  <div className="rounded-full overflow-hidden" style={{ background: PAPER, height: 8 }}>
-                    <div className="h-full rounded-full transition-all duration-200" style={{ width: `${(compressionProgress.current / compressionProgress.total) * 100}%`, background: TEAL }} />
-                  </div>
-                </div>
-              ) : (
-                <button onClick={runBulkCompression} className="rounded-xl px-4 py-2.5 text-xs font-bold text-white" style={{ background: TEAL }}>
-                  압축 시작하기
-                </button>
-              )}
-            </div>
+
                       <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>알림 보내기</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <input value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} placeholder="알림 제목 (예: 12월 이벤트 시작!)"
