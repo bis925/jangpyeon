@@ -1140,6 +1140,7 @@ async function handleAvatarChange(e) {
     mapInstanceRef.current.setCenter(entry.position);
     mapInstanceRef.current.setLevel(3);
     entry.infowindow.open(mapInstanceRef.current, entry.marker);
+    mapContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
     useEffect(() => {
     function handleTouchStart(e) {
