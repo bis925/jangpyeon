@@ -35,3 +35,13 @@ body {
 .coupon-badge-glow {
   animation: coupon-glow 1.8s ease-in-out infinite;
 }
+.rich-text-content h1 { font-size: 1.5em; font-weight: 800; margin: 0.5em 0; }
+.rich-text-content h2 { font-size: 1.3em; font-weight: 800; margin: 0.5em 0; }
+.rich-text-content h3 { font-size: 1.15em; font-weight: 700; margin: 0.4em 0; }
+.rich-text-content p { margin: 0.4em 0; line-height: 1.6; }
+.rich-text-content ul, .rich-text-content ol { margin: 0.4em 0; padding-left: 1.5em; }
+.rich-text-content a { color: #0F6E62; text-decoration: underline; }
+.rich-text-content img { max-width: 100%; border-radius: 12px; margin: 0.5em 0; }
+.ql-editor { min-height: 150px; font-size: 14px; }
+.ql-toolbar.ql-snow { border-radius: 12px 12px 0 0; }
+.ql-container.ql-snow { border-radius: 0 0 12px 12px; }
