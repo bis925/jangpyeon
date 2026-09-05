@@ -233,8 +233,8 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
         )}
       </div>
       <div className="flex items-center justify-between gap-2 mb-1">
-        <div className="flex items-center gap-1.5">
-          <div className="font-extrabold" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
+      <div className="flex items-center gap-1.5 min-w-0">
+          <div className="font-extrabold truncate" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
                   {isOwner && (
             <>
               <button onClick={(e) => { e.stopPropagation(); onEdit(place); }} className="flex items-center gap-1 rounded-full pl-1.5 pr-2 py-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정하기">
