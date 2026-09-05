@@ -3184,7 +3184,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <div className="text-sm font-bold" style={{ color: INK }}>{h.note}</div>
                     <div className="text-[11px]" style={{ color: INK_SOFT }}>{new Date(h.created_at).toLocaleDateString("ko-KR")}</div>
                   </div>
-                  <div style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: 13 }}>+{h.points}P</div>
+                                 <div style={{ fontFamily: MONO_FONT, color: h.points >= 0 ? TEAL : CORAL, fontWeight: 700, fontSize: 13 }}>{h.points >= 0 ? "+" : ""}{h.points}P</div>
                 </div>
               ))}
             </div>
