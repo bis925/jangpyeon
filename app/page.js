@@ -1763,7 +1763,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
   ];
 
   return (
-    <div style={{ fontFamil<div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh", zoom: FONT_SCALES[fontScale] }}>y: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
+    <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh", zoom: FONT_SCALES[fontScale] }}>
           {/* ===== NAVBAR ===== */}
 <div className="z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
         <div className="flex items-center pl-5 sm:pl-8 flex-shrink-0">
