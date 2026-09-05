@@ -113,15 +113,15 @@ html, body {
   animation: text-pop-v2 5s ease forwards;
 }
 @keyframes text-pop-v2 {
-  0%, 55% { transform: scale(0); opacity: 0; }
-  65% { transform: scale(1.15); opacity: 1; }
-  72%, 88% { transform: scale(1); opacity: 1; }
+  0%, 51% { transform: scale(0); opacity: 0; }
+  58% { transform: scale(1.15); opacity: 1; }
+  65%, 88% { transform: scale(1); opacity: 1; }
   100% { opacity: 0; }
 }
 @keyframes confetti-burst-v2 {
-  0%, 34% { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 0; }
-  42% { transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) rotate(90deg) scale(1); opacity: 1; }
-  75% { opacity: 1; }
+  0%, 51% { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 0; }
+  56% { transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) rotate(90deg) scale(1); opacity: 1; }
+  80% { opacity: 1; }
   100% { transform: translate(var(--tx), calc(var(--ty) + 300px)) rotate(var(--rot)); opacity: 0; }
 }
 .confetti-piece-v2 {
