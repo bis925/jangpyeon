@@ -3004,7 +3004,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                       {n.image_url && (
                         <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
                       )}
-                                 <div className="text-sm mb-2 whitespace-pre-wrap" style={{ color: INK }} onClick={(e) => {
+                                                  <div className="text-sm mb-2" style={{ color: INK }} onClick={(e) => {
                         const link = e.target.closest("a");
                         if (link && link.getAttribute("href") === "#ranking") {
                           e.preventDefault();
