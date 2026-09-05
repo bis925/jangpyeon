@@ -654,6 +654,7 @@ export default function Page() {
    const [adjustLog, setAdjustLog] = useState([]);
   const [adjustLogPage, setAdjustLogPage] = useState(1);
   const [historyPage, setHistoryPage] = useState(1);
+  const [showCouponPop, setShowCouponPop] = useState(false);
     const [allReports, setAllReports] = useState([]);
   const [notifTitle, setNotifTitle] = useState("");
   const [notifBody, setNotifBody] = useState("");
@@ -1319,6 +1320,8 @@ async function handleAvatarChange(e) {
     setMyCoupons(data || []);
     if (unusedCount > 0 && !hadUnusedBefore) {
       pendingCouponAnnounce.current = unusedCount;
+      setShowCouponPop(true);
+      setTimeout(() => setShowCouponPop(false), 3500);
     }
   }
     async function fetchAllCoupons() {
