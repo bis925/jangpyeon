@@ -643,7 +643,7 @@ export default function Page() {
   }
   function showToast(message) {
     setToast(message);
-    setTimeout(() => setToast(null), 2500);
+    setTimeout(() => setToast(null), 10000);
   }
   const [justRegistered, setJustRegistered] = useState(null);
   const [form, setForm] = useState({
