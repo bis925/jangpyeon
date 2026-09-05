@@ -973,13 +973,13 @@ export default function Page() {
     setEditingNickname(false);
     showToast("닉네임이 변경됐어요!");
   }
-    async function handleAvatarChange(e) {
+async function handleAvatarChange(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    setAvatarFile(file);
-    const fileExt = file.name.split(".").pop();
-    const filePath = `${session.user.id}/avatar.${fileExt}`;
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, { upsert: true });
+    const compressed = await compressImage(file, 600, 0.85);
+    setAvatarFile(compressed);
+    const filePath = `${session.user.id}/avatar.jpg`;
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, compressed, { upsert: true });
     if (uploadError) { showToast("업로드 실패: " + uploadError.message); return; }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
     const newUrl = urlData.publicUrl + "?t=" + Date.now();
@@ -1239,11 +1239,12 @@ export default function Page() {
     const { data } = await supabase.from("point_history").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false }).limit(30);
     setHistory(data || []);
   }
-    function handleNoticeImageChange(e) {
+async function handleNoticeImageChange(e) {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      setNoticeImageFile(file);
-      setNoticeImagePreview(URL.createObjectURL(file));
+      const compressed = await compressImage(file);
+      setNoticeImageFile(compressed);
+      setNoticeImagePreview(URL.createObjectURL(compressed));
     }
   }
   function handleNoticeFileChange(e) {
@@ -1340,11 +1341,12 @@ export default function Page() {
     fetchNotices();
     showToast(editingNoticeId ? "공지사항이 수정됐어요" : "공지사항이 등록됐어요");
   }
-    function handleCampaignPhotoChange(e) {
+   async function handleCampaignPhotoChange(e) {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      setCampaignFile(file);
-      setCampaignPreview(URL.createObjectURL(file));
+      const compressed = await compressImage(file);
+      setCampaignFile(compressed);
+      setCampaignPreview(URL.createObjectURL(compressed));
     }
   }
     async function submitInquiry(e) {
@@ -1430,11 +1432,12 @@ export default function Page() {
     fetchAllProfiles();
     showToast("별명이 저장됐어요");
   }
-    function handleCouponImageChange(e) {
+  async function handleCouponImageChange(e) {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      setCouponImageFile(file);
-      setCouponImagePreview(URL.createObjectURL(file));
+      const compressed = await compressImage(file);
+      setCouponImageFile(compressed);
+      setCouponImagePreview(URL.createObjectURL(compressed));
     }
   }
   async function issueCoupon(userId) {
@@ -1551,10 +1554,41 @@ export default function Page() {
       height: "100%",
     }).embed(addressSearchRef.current);
   }, [showAddressSearch]);
-    function handlePhotoChange(e) {
+    function compressImage(file, maxWidth = 1200, quality = 0.85) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" }));
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+    async function handlePhotoChange(e) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-    const combined = [...photoFiles, ...files].slice(0, 5);
+    showToast("사진을 준비하고 있어요...");
+    const compressed = await Promise.all(files.map((f) => compressImage(f)));
+    const combined = [...photoFiles, ...compressed].slice(0, 5);
     setPhotoFiles(combined);
     setPhotoPreviews(combined.map((f) => URL.createObjectURL(f)));
   }
