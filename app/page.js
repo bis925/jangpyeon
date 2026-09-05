@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabaseClient";
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -295,8 +295,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           </button>
         )}
       </div>
-      <button onClick={() => onHelpful(place.id)} className="text-xs font-bold transition-all duration-150 active:scale-95 hover:opacity-75 block w-full text-left truncate" style={{ color: CORAL }}>
-        도움이 됐어요 {place.helpful_count} · 눌러서 응원하기
+       <button onClick={() => onHelpful(place.id)} className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ background: CORAL_TINT, color: CORAL }}>
+        <Heart size={14} fill={CORAL} />
+        도움이 됐어요 {place.helpful_count}
       </button>
     </div>
   );
