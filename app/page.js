@@ -2731,12 +2731,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                              </div>
               ))}
             </div>
-            {visibleCount < filteredPlaces.length && (
-              <div ref={scrollSentinelRef} className="flex items-center justify-center py-6">
-                <div className="rounded-full animate-spin" style={{ width: 24, height: 24, border: `3px solid ${LINE}`, borderTopColor: TEAL }} />
-              </div>
-            )}
-            {filteredPlaces.length === 0 && (
+                         {filteredPlaces.length === 0 && (
                 <div className="col-span-2 text-center py-14">
                   <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
                     <MapPin size={26} color={TEAL} />
@@ -2753,9 +2748,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
               )}
             </div>
+            {visibleCount < filteredPlaces.length && (
+              <div ref={scrollSentinelRef} className="flex items-center justify-center py-6">
+                <div className="rounded-full animate-spin" style={{ width: 24, height: 24, border: `3px solid ${LINE}`, borderTopColor: TEAL }} />
+              </div>
+            )}
           </div>
         )}
-
         {/* ===================== 지도·검색 ===================== */}
         {tab === "map" && (
           <div>
