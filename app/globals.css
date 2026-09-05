@@ -38,7 +38,9 @@ body {
 .rich-text-content h1 { font-size: 1.5em; font-weight: 800; margin: 0.5em 0; }
 .rich-text-content h2 { font-size: 1.3em; font-weight: 800; margin: 0.5em 0; }
 .rich-text-content h3 { font-size: 1.15em; font-weight: 700; margin: 0.4em 0; }
-.rich-text-content p { margin: 0.4em 0; line-height: 1.6; }
+.rich-text-content p { margin: 0.6em 0; line-height: 1.7; }
+.rich-text-content p:first-child { margin-top: 0; }
+.rich-text-content p:last-child { margin-bottom: 0; }
 .rich-text-content ul, .rich-text-content ol { margin: 0.4em 0; padding-left: 1.5em; }
 .rich-text-content a { color: #0F6E62; text-decoration: underline; }
 .rich-text-content img { max-width: 100%; border-radius: 12px; margin: 0.5em 0; }
