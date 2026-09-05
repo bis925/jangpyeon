@@ -3087,8 +3087,14 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   <div className="text-xs mb-2" style={{ color: INK_SOFT }}>{new Date(n.created_at).toLocaleDateString("ko-KR")}</div>
                                     {isExpanded && (
                     <>
-                                                    {n.audio_url ? (
-                        <audio controls src={n.audio_url} className="w-full mb-3" style={{ height: 40 }} />
+                                                               {n.audio_url ? (
+                        <div className="rounded-xl p-3 mb-3" style={{ background: TEAL_TINT }}>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Headset size={14} color={TEAL_DARK} />
+                            <span className="text-xs font-bold" style={{ color: TEAL_DARK }}>음성으로 들어보세요</span>
+                          </div>
+                          <audio controls src={n.audio_url} className="w-full" style={{ height: 40 }} />
+                        </div>
                       ) : (
                         <button
                           onClick={() => speakNotice(n.id, n.title, n.content)}
