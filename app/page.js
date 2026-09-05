@@ -271,7 +271,7 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
-      <div className="flex items-center gap-1 mb-3">
+      <div className="flex items-center gap-1 mb-3 flex-wrap">
         {place.phone && (
           <a href={`tel:${place.phone}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL_TINT }} aria-label="전화 걸기">
             <Phone size={14} color={TEAL_DARK} />
