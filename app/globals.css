@@ -67,3 +67,74 @@ html, body {
   margin: 0 !important;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
+
+@keyframes coupon-fall {
+  0% { transform: translateY(-120vh) scale(0.8); opacity: 0; }
+  15% { opacity: 1; }
+  55% { transform: translateY(0) scale(1); }
+  62% { transform: translateY(-20px) scale(1.05); }
+  70% { transform: translateY(0) scale(1); }
+  85% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 0; }
+}
+@keyframes lid-pop {
+  0%, 55% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  70% { transform: translateY(-140px) rotate(-35deg); opacity: 1; }
+  100% { transform: translateY(-180px) rotate(-50deg); opacity: 0; }
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(70vh) rotate(540deg); opacity: 0; }
+}
+@keyframes text-pop {
+  0%, 60% { transform: scale(0); opacity: 0; }
+  75% { transform: scale(1.15); opacity: 1; }
+  85% { transform: scale(1); }
+  95% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.coupon-box-fall {
+  animation: coupon-fall 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.coupon-box-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+.coupon-box-body {
+  width: 220px;
+  height: 220px;
+  border-radius: 32px;
+  background: linear-gradient(135deg, #0F6E62, #0A4F46);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+.coupon-box-lid {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 100px;
+  animation: lid-pop 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  z-index: 2;
+}
+.confetti-piece {
+  position: absolute;
+  top: 45%;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  animation-name: confetti-fall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+.coupon-pop-text {
+  position: absolute;
+  bottom: 18%;
+  left: 0;
+  right: 0;
+  animation: text-pop 2.2s ease forwards;
+}
