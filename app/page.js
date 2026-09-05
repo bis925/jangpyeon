@@ -1002,6 +1002,34 @@ export default function Page() {
     setCompressionProgress(null);
     showToast(`압축 완료! 성공 ${totalDone}장, 실패 ${totalFailed}장`);
   }
+
+  async function setHomeLocation() {
+    if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
+    showToast("위치를 확인하고 있어요...");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        let addr = "내 동네";
+        if (window.kakao) {
+          const geocoder = new window.kakao.maps.services.Geocoder();
+          await new Promise((resolve) => {
+            geocoder.coord2Address(longitude, latitude, (result, status) => {
+              if (status === window.kakao.maps.services.Status.OK && result[0]) {
+                addr = result[0].address?.region_2depth_name + " " + (result[0].address?.region_3depth_name || "");
+              }
+              resolve();
+            });
+          });
+        }
+        const { error } = await supabase.from("profiles").update({ home_lat: latitude, home_lng: longitude, home_address: addr }).eq("id", session.user.id);
+        if (error) { showToast("설정 실패: " + error.message); return; }
+        setProfile((prev) => ({ ...prev, home_lat: latitude, home_lng: longitude, home_address: addr }));
+        showToast(`내 동네가 "${addr}"(으)로 설정됐어요!`);
+      },
+      () => showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }
   
   function reportPlace(place) {
     setReportingPlace(place);
@@ -1856,6 +1884,36 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       }
       finalBusinessHours.openHolidays = form.openHolidays;
     }
+
+    let placeLat = null, placeLng = null;
+    if (window.kakao) {
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      await new Promise((resolve) => {
+        geocoder.addressSearch(fullAddress, (result, status) => {
+          if (status === window.kakao.maps.services.Status.OK && result[0]) {
+            placeLat = parseFloat(result[0].y);
+            placeLng = parseFloat(result[0].x);
+          }
+          resolve();
+        });
+      });
+    }
+
+    const { data, error } = await supabase.rpc("register_place", {
+      p_name: form.name.trim(),
+      p_address: fullAddress,
+      p_category: form.category,
+      p_has_ramp: form.badges.ramp,
+      p_has_restroom: form.badges.door,
+      p_has_stroller_access: form.badges.stroller,
+      p_has_elevator: form.badges.lift,
+      p_keywords: form.keywords.trim() || null,
+      p_phone: form.phone.trim() || null,
+      p_business_hours: finalBusinessHours,
+      p_lat: placeLat,
+      p_lng: placeLng,
+    });
+    
     const { data, error } = await supabase.rpc("register_place", {
       p_name: form.name.trim(),
       p_address: fullAddress,
@@ -3052,7 +3110,25 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 );
               })}
             </div>
-                  
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>내 동네 설정</div>
+            <div className="rounded-2xl p-4 mb-6" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {profile?.home_address ? (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs mb-0.5" style={{ color: INK_SOFT }}>현재 설정된 동네</div>
+                    <div className="text-sm font-bold" style={{ color: INK }}>📍 {profile.home_address}</div>
+                  </div>
+                  <button onClick={setHomeLocation} className="rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>변경</button>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-xs mb-3" style={{ color: INK_SOFT }}>내 동네를 설정하면, 근처에 새 장소가 등록될 때 알림을 받을 수 있어요</div>
+                  <button onClick={setHomeLocation} className="w-full rounded-xl py-3 text-sm font-bold text-white" style={{ background: TEAL }}>현재 위치로 설정하기</button>
+                </div>
+              )}
+            </div>
+              
            <div id="point-history-section" className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 내역</div>
             <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {history.length === 0 && (
