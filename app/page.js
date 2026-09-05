@@ -195,26 +195,24 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           <span className="rounded-full px-4 py-1.5 text-sm font-extrabold" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}>영업 종료</span>
         </div>
       )}
-      <div className="flex items-center gap-2 mb-2 flex-wrap">
-        <div className="flex items-center gap-1 flex-wrap min-w-0 flex-1">
-          {isAdminUser && !isOwner && (
-            <>
-              <button onClick={(e) => { e.stopPropagation(); onAdminEdit(place); }} className="rounded-full p-1.5" style={{ background: PAPER }} aria-label="관리자 권한으로 수정">
-                <Pencil size={14} color={INK_SOFT} />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); onAdminDelete(place); }} className="rounded-full p-1.5" style={{ background: PAPER }} aria-label="관리자 권한으로 삭제">
-                <Trash2 size={14} color={CORAL} />
-              </button>
-            </>
-          )}
-          {openStatus === true && (
-            <div className="flex items-center gap-1 rounded-full px-2 py-1 flex-shrink-0" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
-              <div className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: "#22C55E" }} />
-              <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
-            </div>
-          )}
-        </div>
-        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 flex-shrink-0 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
+        <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+        {isAdminUser && !isOwner && (
+          <>
+            <button onClick={(e) => { e.stopPropagation(); onAdminEdit(place); }} className="rounded-full p-1.5" style={{ background: PAPER }} aria-label="관리자 권한으로 수정">
+              <Pencil size={14} color={INK_SOFT} />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onAdminDelete(place); }} className="rounded-full p-1.5" style={{ background: PAPER }} aria-label="관리자 권한으로 삭제">
+              <Trash2 size={14} color={CORAL} />
+            </button>
+          </>
+        )}
+        {openStatus === true && (
+          <div className="flex items-center gap-1 rounded-full px-2 py-1" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
+            <div className="rounded-full" style={{ width: 7, height: 7, background: "#22C55E" }} />
+            <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
+          </div>
+        )}
+        <button onClick={() => onToggleFavorite(place.id)} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER }} aria-label="즐겨찾기">
           <Star size={18} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
         </button>
       </div>
