@@ -264,9 +264,12 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
               <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
               <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
             </button>
-              <button onClick={(e) => { e.stopPropagation(); onConfirmInfo(place.id); }} className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: TEAL_TINT }}>
+                         <button onClick={(e) => { e.stopPropagation(); onConfirmInfo(place.id); }} className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: TEAL_TINT }}>
               <CheckCircle size={11} color={TEAL_DARK} />
               <span className="text-[10px] font-bold" style={{ color: TEAL_DARK }}>정보 확인했어요</span>
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onShowRecencyHelp(); }} className="rounded-full flex-shrink-0" aria-label="정보 최신성 안내">
+              <span className="flex items-center justify-center rounded-full text-[9px] font-extrabold" style={{ width: 15, height: 15, background: TEAL, color: "#fff" }}>?</span>
             </button>
           </div>
         );
