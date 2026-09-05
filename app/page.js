@@ -1321,7 +1321,7 @@ async function handleAvatarChange(e) {
     if (unusedCount > 0 && !hadUnusedBefore) {
       pendingCouponAnnounce.current = unusedCount;
       setShowCouponPop(true);
-      setTimeout(() => setShowCouponPop(false), 15000);
+      setTimeout(() => setShowCouponPop(false), 5000);
     }
   }
     async function fetchAllCoupons() {
