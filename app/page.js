@@ -2749,9 +2749,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                      <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer min-w-0">
                             <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
                              </div>
-              ))}
-            </div>
-                         {filteredPlaces.length === 0 && (
+                         ))}
+              {filteredPlaces.length === 0 && (
                 <div className="col-span-2 text-center py-14">
                   <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
                     <MapPin size={26} color={TEAL} />
