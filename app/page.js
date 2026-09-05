@@ -651,7 +651,8 @@ export default function Page() {
     const [allProfiles, setAllProfiles] = useState([]);
   const [memberSearch, setMemberSearch] = useState("");
   const [adjustDrafts, setAdjustDrafts] = useState({});
-    const [adjustLog, setAdjustLog] = useState([]);
+   const [adjustLog, setAdjustLog] = useState([]);
+  const [adjustLogPage, setAdjustLogPage] = useState(1);
     const [allReports, setAllReports] = useState([]);
   const [notifTitle, setNotifTitle] = useState("");
   const [notifBody, setNotifBody] = useState("");
@@ -3420,9 +3421,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </div>
 
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 조정 기록</div>
-            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+            <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {adjustLog.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>조정 기록이 없어요</div>}
-              {adjustLog.map((h) => (
+              {adjustLog.slice((adjustLogPage - 1) * 5, adjustLogPage * 5).map((h) => (
                 <div key={h.id} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
                   <div>
                     <div className="text-sm font-bold" style={{ color: INK }}>{h.profiles?.email || "(알 수 없음)"}</div>
@@ -3434,6 +3435,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
               ))}
             </div>
+            {adjustLog.length > 5 && (
+              <div className="flex items-center justify-center gap-1.5 mb-8">
+                {Array.from({ length: Math.ceil(adjustLog.length / 5) }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setAdjustLogPage(p)}
+                    className="rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150"
+                    style={{ width: 30, height: 30, background: p === adjustLogPage ? TEAL : PAPER, color: p === adjustLogPage ? "#fff" : INK_SOFT }}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            )}
 
                             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>장소 정보 신고 ({allReports.filter(r => r.status !== "resolved").length}건 대기중)</div>
                        <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
