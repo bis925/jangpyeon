@@ -2607,6 +2607,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       {/* ===== COUPON POP ANIMATION ===== */}
       {showCouponPop && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none overflow-hidden">
+           <div className="coupon-shockwave" />
           <div className="coupon-box-fall">
             <div className="coupon-box-wrap">
               <div className="coupon-box-lid">🎁</div>
