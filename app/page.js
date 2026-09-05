@@ -1540,6 +1540,9 @@ async function handleNoticeImageChange(e) {
       supabase.functions.invoke("text-to-speech", {
         body: { text: speechText, noticeId: savedNotice.id },
       }).then(async ({ data: ttsData, error: ttsError }) => {
+        if (ttsError) {
+          console.error("TTS 생성 실패:", ttsError, ttsData);
+        }
         if (!ttsError && ttsData?.audioUrl) {
           await supabase.from("notices").update({ audio_url: ttsData.audioUrl }).eq("id", savedNotice.id);
           fetchNotices();
