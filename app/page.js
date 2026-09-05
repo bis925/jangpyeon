@@ -2603,6 +2603,34 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </button>
         </div>
       )}
+
+      {/* ===== COUPON POP ANIMATION ===== */}
+      {showCouponPop && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none overflow-hidden">
+          <div className="coupon-box-fall">
+            <div className="coupon-box-wrap">
+              <div className="coupon-box-lid">🎁</div>
+              <div className="coupon-box-body">
+                <Gift size={90} color="#fff" />
+              </div>
+            </div>
+          </div>
+          {Array.from({ length: 24 }).map((_, i) => (
+            <div key={i} className="confetti-piece" style={{
+              left: `${Math.random() * 100}%`,
+              background: [TEAL, CORAL, YELLOW, "#fff"][i % 4],
+              animationDelay: `${1.1 + Math.random() * 0.4}s`,
+              animationDuration: `${1.2 + Math.random() * 0.8}s`,
+            }} />
+          ))}
+          <div className="coupon-pop-text">
+            <div className="font-extrabold text-2xl text-white text-center" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+              🎉 쿠폰이 발급됐어요!
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ===== TOAST ===== */}
       <div className="fixed left-1/2 z-50 pointer-events-none transition-all duration-300"
         style={{ bottom: toast ? 24 : 0, opacity: toast ? 1 : 0, transform: `translateX(-50%) translateY(${toast ? 0 : 10}px)` }}>
