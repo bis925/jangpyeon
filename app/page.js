@@ -653,6 +653,7 @@ export default function Page() {
   const [adjustDrafts, setAdjustDrafts] = useState({});
    const [adjustLog, setAdjustLog] = useState([]);
   const [adjustLogPage, setAdjustLogPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
     const [allReports, setAllReports] = useState([]);
   const [notifTitle, setNotifTitle] = useState("");
   const [notifBody, setNotifBody] = useState("");
@@ -3171,13 +3172,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               )}
             </div>
               
-           <div id="point-history-section" className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 내역</div>
-            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+             <div id="point-history-section" className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 내역</div>
+            <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {history.length === 0 && (
                 <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>아직 내역이 없어요</div>
               )}
-              {history.map((h, i) => (
-                <div key={h.id} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i !== history.length - 1 ? `1px solid ${LINE}` : "none" }}>
+              {history.slice((historyPage - 1) * 5, historyPage * 5).map((h, i, arr) => (
+                <div key={h.id} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i !== arr.length - 1 ? `1px solid ${LINE}` : "none" }}>
                   <div>
                     <div className="text-sm font-bold" style={{ color: INK }}>{h.note}</div>
                     <div className="text-[11px]" style={{ color: INK_SOFT }}>{new Date(h.created_at).toLocaleDateString("ko-KR")}</div>
@@ -3186,6 +3187,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
               ))}
             </div>
+            {history.length > 5 && (
+              <div className="flex items-center justify-center gap-1.5 mb-8">
+                {Array.from({ length: Math.ceil(history.length / 5) }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setHistoryPage(p)}
+                    className="rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150"
+                    style={{ width: 30, height: 30, background: p === historyPage ? TEAL : PAPER, color: p === historyPage ? "#fff" : INK_SOFT }}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            )}
                                                 <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 mt-8 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <span className="text-sm font-bold" style={{ color: INK }}>다크 모드</span>
               <button onClick={() => setIsDark(!isDark)} className="relative rounded-full transition-all duration-200" style={{ width: 46, height: 26, background: isDark ? TEAL : LINE }}>
