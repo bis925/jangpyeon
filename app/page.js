@@ -169,7 +169,7 @@ function isOpenNow(businessHours, holidays) {
   const openMinutes = openH * 60 + openM;
   const closeMinutes = closeH * 60 + closeM;
   return nowMinutes >= openMinutes && nowMinutes < closeMinutes;
-} ["공공기관", "음식점", "카페", "문화시설", "쇼핑"];
+}
 const ADMIN_EMAIL = "bis925@naver.com";
 
 /* ===================== 작은 컴포넌트 ===================== */
@@ -1649,42 +1649,28 @@ async function handleNoticeImageChange(e) {
     fetchAdjustLog();
     showToast("포인트가 조정됐어요");
   }
-  function showToast(message) {
-    setToast(message);
-    setTimeout(() => setToast((cur) => (cur === message ? null : cur)), 2200);
-  }
+function toggleFilter(key) {
+  setActiveFilters((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+}
+const filteredPlaces = useMemo(() => {
+  return places.filter((p) => {
+    const matchesQuery = query.trim() === "" || p.name.includes(query) || p.address.includes(query) || (p.keywords && p.keywords.includes(query));
+    const matchesFilter = activeFilters.length === 0 || activeFilters.every((f) => p[BADGE_META[f].field]);
+    return matchesQuery && matchesFilter;
+  });
+}, [places, query, activeFilters]);
+const visiblePlaces = useMemo(() => filteredPlaces.slice(0, visibleCount), [filteredPlaces, visibleCount]);
 
-  function toggleFilter(key) {
-    setActiveFilters((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
-  }
-
-  const filteredPlaces = useMemo(() => {
-    return places.filter((p) => {
-      const matchesQuery = query.trim() === "" || p.name.includes(query) || p.address.includes(query) || (p.keywords && p.keywords.includes(query));
-      const matchesFilter = activeFilters.length === 0 || activeFilters.every((f) => p[BADGE_META[f].field]);
-      return matchesQuery && matchesFilter;
-    });
-  }, [places, query, activeFilters]);
-
-  const visiblePlaces = useMemo(() => filteredPlaces.slice(0, visibleCount), [filteredPlaces, visibleCount]);
-
-  useEffect(() => {
-    setVisibleCount(20);
-  }, [query, activeFilters]);
-
-  useEffect(() => {
-    if (!scrollSentinelRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => prev + 20);
-        }
-      },
-      { rootMargin: "200px" }
-    );
-    observer.observe(scrollSentinelRef.current);
-    return () => observer.disconnect();
-  }, [tab, filteredPlaces.length]);
+// 무한 스크롤 이펙트는 여기로 이동
+useEffect(() => {
+  if (!scrollSentinelRef.current) return;
+  const observer = new IntersectionObserver(
+    (entries) => { if (entries[0].isIntersecting) setVisibleCount((prev) => prev + 20); },
+    { rootMargin: "200px" }
+  );
+  observer.observe(scrollSentinelRef.current);
+  return () => observer.disconnect();
+}, [tab, filteredPlaces.length]);
 
   async function toggleFavorite(id) {
     if (favorites.has(id)) {
