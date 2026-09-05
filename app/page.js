@@ -682,6 +682,7 @@ export default function Page() {
   const [showNicknamePrompt, setShowNicknamePrompt] = useState(false);
   const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
+  const [compressionProgress, setCompressionProgress] = useState(null);
   const [expandedNoticeAdminId, setExpandedNoticeAdminId] = useState(null);
   const [expandedReportId, setExpandedReportId] = useState(null);
   const [expandedInquiryAdminId, setExpandedInquiryAdminId] = useState(null);
@@ -935,6 +936,53 @@ export default function Page() {
     if (error) { showToast("처리 실패: " + error.message); return; }
     fetchPlaces();
     showToast("확인해주셔서 감사해요! 다른 분들에게 도움이 돼요");
+  }
+
+    async function runBulkCompression() {
+    if (!window.confirm("기존에 올라간 모든 사진을 압축합니다. 되돌릴 수 없어요. 계속할까요?")) return;
+
+    const buckets = [
+      { name: "place-photos", table: "place_photos", column: "photo_url", maxWidth: 1200 },
+      { name: "notice-attachments", table: "notices", column: "image_url", maxWidth: 1200 },
+      { name: "coupon-images", table: "coupons", column: "image_url", maxWidth: 1200 },
+      { name: "avatars", table: "profiles", column: "avatar_url", maxWidth: 600 },
+    ];
+
+    let totalDone = 0;
+    let totalFailed = 0;
+
+    for (const bucket of buckets) {
+      const { data: rows } = await supabase.from(bucket.table).select(`id, ${bucket.column}`).not(bucket.column, "is", null);
+      if (!rows) continue;
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const url = row[bucket.column];
+        if (!url) continue;
+
+        setCompressionProgress({ bucket: bucket.name, current: i + 1, total: rows.length });
+
+        try {
+          const cleanUrl = url.split("?")[0];
+          const pathParts = cleanUrl.split(`/${bucket.name}/`);
+          if (pathParts.length < 2) continue;
+          const filePath = pathParts[1];
+
+          const originalFile = await urlToFile(url, filePath.split("/").pop());
+          const compressedFile = await compressImage(originalFile, bucket.maxWidth, 0.85);
+
+          const { error: uploadError } = await supabase.storage.from(bucket.name).upload(filePath, compressedFile, { upsert: true, contentType: "image/jpeg" });
+          if (uploadError) { totalFailed++; continue; }
+
+          totalDone++;
+        } catch (err) {
+          totalFailed++;
+        }
+      }
+    }
+
+    setCompressionProgress(null);
+    showToast(`압축 완료! 성공 ${totalDone}장, 실패 ${totalFailed}장`);
   }
   
   function reportPlace(place) {
@@ -1609,6 +1657,13 @@ async function handleNoticeImageChange(e) {
       height: "100%",
     }).embed(addressSearchRef.current);
   }, [showAddressSearch]);
+
+  async function urlToFile(url, filename) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+  }
+  
     function compressImage(file, maxWidth = 1200, quality = 0.85) {
     return new Promise((resolve) => {
       const img = new Image();
@@ -3046,9 +3101,28 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <ShieldCheck size={22} color={TEAL} />
               </div>
               <div>
-                <h2 className="font-extrabold text-xl" style={{ color: INK }}>관리자</h2>
+                             <h2 className="font-extrabold text-xl" style={{ color: INK }}>관리자</h2>
                 <div className="text-xs" style={{ color: INK_SOFT }}>회원, 알림, 공지사항을 관리하세요</div>
               </div>
+            </div>
+
+            <div className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+              <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>🗜️ 기존 사진 일괄 압축</div>
+              <div className="text-xs mb-3" style={{ color: INK_SOFT }}>이미 올라간 사진들을 압축해서 저장공간과 로딩속도를 개선해요. 되돌릴 수 없으니 한 번만 실행하세요.</div>
+              {compressionProgress ? (
+                <div>
+                  <div className="text-xs font-bold mb-2" style={{ color: TEAL }}>
+                    {compressionProgress.bucket} 처리 중... ({compressionProgress.current}/{compressionProgress.total})
+                  </div>
+                  <div className="rounded-full overflow-hidden" style={{ background: PAPER, height: 8 }}>
+                    <div className="h-full rounded-full transition-all duration-200" style={{ width: `${(compressionProgress.current / compressionProgress.total) * 100}%`, background: TEAL }} />
+                  </div>
+                </div>
+              ) : (
+                <button onClick={runBulkCompression} className="rounded-xl px-4 py-2.5 text-xs font-bold text-white" style={{ background: TEAL }}>
+                  압축 시작하기
+                </button>
+              )}
             </div>
                       <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>알림 보내기</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
