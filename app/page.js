@@ -1812,7 +1812,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             <Star size={16} color={INK_SOFT} />
           </button>
           <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1" style={{ background: PAPER }}>
-          <span style={{ fontSize: `${10 * FONT_SCALES[fontScale] * 0.7}px`, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
         <button onClick={() => stepFontScale("down")} disabled={fontScale === "xsmall"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xsmall" ? 0.35 : 1 }} aria-label="글자 작게">
               <ZoomOut size={15} color={INK_SOFT} />
             </button>
@@ -1892,7 +1892,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             <button key={n.id} onClick={() => setTab(n.id)} className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-all duration-200 active:scale-95"
               style={{ color: active ? TEAL : INK_SOFT }}>
               <Icon size={17} />
-               <span style={{ fontSize: `${10 * FONT_SCALES[fontScale] * 0.7}px`, fontWeight: 700 }}>{n.label}</span>
+ <span style={{ fontSize: 9, fontWeight: 700, whiteSpace: "nowrap" }}>{n.label}</span>
             </button>
           );
         })}
