@@ -2451,7 +2451,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <Plus size={22} color={TEAL} />
                   </div>
                   <div>
-                                   <h2 className="font-extrabold text-xl" style={{ color: INK, fontFamily: DISPLAY_FONT }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
+                  <h2 className="font-extrabold text-xl" style={{ color: INK }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
                     <div className="text-xs" style={{ color: INK_SOFT }}>{isAdminEditingPlace ? "🛠️ 관리자 권한으로 신고된 정보를 수정하고 있어요" : editingPlaceId ? "정보를 최신으로 업데이트해주세요" : "접근성 정보를 등록하고 포인트를 받으세요"}</div>
                   </div>
                 </div>
