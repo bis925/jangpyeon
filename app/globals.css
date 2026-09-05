@@ -98,17 +98,37 @@ html, body {
 }
 
 .coupon-box-fall {
-  animation: coupon-fall 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards, coupon-idle 2s ease-in-out 2.2s infinite;
+  animation: coupon-fall-v2 5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
-@keyframes coupon-idle {
-  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-  50% { transform: translateY(-8px) scale(1.02) rotate(2deg); }
+@keyframes coupon-fall-v2 {
+  0% { transform: translateY(-100vh) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  35% { transform: translateY(0) scale(1); }
+  41% { transform: translateY(10px) scaleX(1.25) scaleY(0.8); }
+  47% { transform: translateY(-15px) scaleX(0.92) scaleY(1.08); }
+  53%, 88% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 0; }
 }
-@keyframes shockwave {
-  0%, 54% { transform: scale(0); opacity: 0; }
-  58% { transform: scale(0.3); opacity: 0.8; }
-  75% { transform: scale(2.2); opacity: 0; }
-  100% { transform: scale(2.2); opacity: 0; }
+.coupon-pop-text-v2 {
+  animation: text-pop-v2 5s ease forwards;
+}
+@keyframes text-pop-v2 {
+  0%, 33% { transform: scale(0); opacity: 0; }
+  45% { transform: scale(1.15); opacity: 1; }
+  53%, 88% { transform: scale(1); opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes confetti-burst-v2 {
+  0%, 34% { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 0; }
+  42% { transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) rotate(90deg) scale(1); opacity: 1; }
+  75% { opacity: 1; }
+  100% { transform: translate(var(--tx), calc(var(--ty) + 300px)) rotate(var(--rot)); opacity: 0; }
+}
+.confetti-piece-v2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  animation: confetti-burst-v2 3.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 .coupon-shockwave {
   position: absolute;
