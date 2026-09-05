@@ -1540,8 +1540,14 @@ async function handleNoticeImageChange(e) {
       supabase.functions.invoke("text-to-speech", {
         body: { text: speechText, noticeId: savedNotice.id },
       }).then(async ({ data: ttsData, error: ttsError }) => {
-        if (ttsError) {
+          if (ttsError) {
           console.error("TTS 생성 실패:", ttsError, ttsData);
+          try {
+            const errBody = await ttsError.context.json();
+            showToast("음성 생성 실패: " + (errBody.error || "알 수 없는 오류"));
+          } catch (e) {
+            showToast("음성 생성 실패: " + ttsError.message);
+          }
         }
         if (!ttsError && ttsData?.audioUrl) {
           await supabase.from("notices").update({ audio_url: ttsData.audioUrl }).eq("id", savedNotice.id);
