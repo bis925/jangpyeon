@@ -3017,9 +3017,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 return (
                   <div key={i} className="flex items-center justify-between px-4 transition-all duration-200" style={{ paddingTop: isFirst ? 20 : 14, paddingBottom: isFirst ? 20 : 14, borderBottom: i !== pointRanking.length - 1 ? `1px solid ${LINE}` : "none", background: isFirst ? "linear-gradient(90deg, #FFF9E6, transparent)" : "transparent" }}>
                     <div className="flex items-center gap-3 min-w-0">
-                      {isFirst ? (
+                             {isFirst ? (
                         <div className="flex items-center justify-center flex-shrink-0 relative" style={{ width: 48, height: 48 }}>
                           <div style={{ fontSize: 40, lineHeight: 1, filter: "drop-shadow(0 3px 4px rgba(255,180,0,0.4))" }}>👑</div>
+                          <div className="absolute flex items-center justify-center rounded-full font-extrabold" style={{ bottom: -4, right: -4, width: 20, height: 20, background: "#FFD700", color: "#fff", fontSize: 11, boxShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>1</div>
                         </div>
                       ) : (
                         <div className="flex items-center justify-center rounded-full font-extrabold flex-shrink-0" style={{ width: isTop3 ? 32 : 26, height: isTop3 ? 32 : 26, background: isTop3 ? medalGradients[i] : PAPER, color: isTop3 ? "#fff" : INK_SOFT, fontSize: isTop3 ? 15 : 12, boxShadow: isTop3 ? "0 2px 6px rgba(0,0,0,0.2)" : "none" }}>
