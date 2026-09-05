@@ -41,7 +41,10 @@ body {
 .rich-text-content p { margin: 0.6em 0; line-height: 1.7; }
 .rich-text-content p:first-child { margin-top: 0; }
 .rich-text-content p:last-child { margin-bottom: 0; }
-.rich-text-content ul, .rich-text-content ol { margin: 0.4em 0; padding-left: 1.5em; }
+.rich-text-content ul, .rich-text-content ol { margin: 0.6em 0; padding-left: 1.5em; list-style-position: outside; }
+.rich-text-content ul { list-style-type: disc; }
+.rich-text-content ol { list-style-type: decimal; }
+.rich-text-content li { margin: 0.2em 0; }
 .rich-text-content a { color: #0F6E62; text-decoration: underline; }
 .rich-text-content img { max-width: 100%; border-radius: 12px; margin: 0.5em 0; }
 .ql-editor { min-height: 150px; font-size: 14px; }
