@@ -12,7 +12,7 @@ import {
 
 /* ===================== 글자 크기 훅 ===================== */
 const FONT_SCALES = { xsmall: 0.8, small: 0.9, normal: 1, large: 1.15, xlarge: 1.3 };
-const FONT_SCALE_LABELS = { xsmall: "매우 작게", small: "작게", normal: "보통", large: "크게", xlarge: "매우 크게" };
+const FONT_SCALE_LABELS = { xsmall: "매우 작게", small: "작게", normal: "보통", large: "크게", xlarge:<div className="flex gap-2 mb-6"> "매우 크게" };
 function useFontScale() {
   const [scale, setScale] = useState("normal");
   useEffect(() => {
@@ -2567,41 +2567,39 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </button>
             )}
                  {campaigns.length > 0 ? (
-                <div className="flex gap-2 mb-6">
-                <div
-                  onClick={() => {
-                    const c = campaigns[campaignIndex];
-                    if (c.notice_id) {
-                      setSelectedNoticeId(c.notice_id);
-                      setExpandedNoticeId(c.notice_id);
-                      setTab("notice");
-                      setTimeout(() => {
-                        document.getElementById(`notice-${c.notice_id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                      }, 100);
-                    } else if (c.link_url) {
-                      window.open(c.link_url, "_blank");
-                    }
-                  }}
-                  className="relative rounded-2xl overflow-hidden flex-1 min-w-0"
-                  style={{ aspectRatio: "3 / 1", background: PAPER, cursor: (campaigns[campaignIndex].notice_id || campaigns[campaignIndex].link_url) ? "pointer" : "default" }}
-                >
-                  <img src={campaigns[campaignIndex].image_url} alt={campaigns[campaignIndex].title || "캠페인"} className="w-full h-full object-cover" />
-                  {campaigns[campaignIndex].title && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}>
-                      <div className="text-white font-extrabold text-sm">{campaigns[campaignIndex].title}</div>
-                    </div>
-                  )}
-                </div>
+                          <div
+                onClick={() => {
+                  const c = campaigns[campaignIndex];
+                  if (c.notice_id) {
+                    setSelectedNoticeId(c.notice_id);
+                    setExpandedNoticeId(c.notice_id);
+                    setTab("notice");
+                    setTimeout(() => {
+                      document.getElementById(`notice-${c.notice_id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 100);
+                  } else if (c.link_url) {
+                    window.open(c.link_url, "_blank");
+                  }
+                }}
+                className="relative rounded-2xl overflow-hidden mb-6"
+                style={{ aspectRatio: "3 / 1", background: PAPER, cursor: (campaigns[campaignIndex].notice_id || campaigns[campaignIndex].link_url) ? "pointer" : "default" }}
+              >
+                <img src={campaigns[campaignIndex].image_url} alt={campaigns[campaignIndex].title || "캠페인"} className="w-full h-full object-cover" />
+                {campaigns[campaignIndex].title && (
+                  <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}>
+                    <div className="text-white font-extrabold text-sm">{campaigns[campaignIndex].title}</div>
+                  </div>
+                )}
                 {campaigns.length > 1 && (
-                  <div className="flex flex-col gap-1.5 flex-shrink-0" style={{ width: 44 }}>
+                  <div className="absolute top-2 right-2 flex flex-col gap-1" style={{ width: 32 }}>
                     {campaigns.slice(0, 4).map((c, i) => (
                       <button
                         key={i}
-                        onClick={() => setCampaignIndex(i)}
-                        className="rounded-lg overflow-hidden flex-1 transition-all duration-200"
-                        style={{ border: i === campaignIndex ? `2px solid ${CORAL}` : "2px solid transparent", opacity: i === campaignIndex ? 1 : 0.55 }}
+                        onClick={(e) => { e.stopPropagation(); setCampaignIndex(i); }}
+                        className="rounded-md overflow-hidden transition-all duration-200"
+                        style={{ height: 22, border: i === campaignIndex ? `2px solid #fff` : "2px solid rgba(255,255,255,0.4)", boxShadow: "0 1px 4px rgba(0,0,0,0.3)" }}
                       >
-                        <img src={c.image_url} alt="" className="w-full h-full object-cover" />
+                        <img src={c.image_url} alt="" className="w-full h-full object-cover" style={{ opacity: i === campaignIndex ? 1 : 0.6 }} />
                       </button>
                     ))}
                   </div>
