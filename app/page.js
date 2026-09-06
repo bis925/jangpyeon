@@ -3360,13 +3360,17 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             )}
 
-                        <button
+                          <button
               onClick={sendSOSAlert}
               disabled={sendingSOS}
-              className="w-full flex items-center justify-center gap-2 rounded-2xl py-4 mb-4 font-extrabold text-white transition-all duration-200 active:scale-[0.98]"
-              style={{ background: CORAL, opacity: sendingSOS ? 0.7 : 1 }}
+              className="w-full flex items-center justify-center gap-3 rounded-2xl py-5 mb-4 font-extrabold text-white transition-all duration-200 active:scale-[0.98] sos-button-pulse"
+              style={{ background: `linear-gradient(120deg, ${CORAL}, #E8442A)`, opacity: sendingSOS ? 0.7 : 1, boxShadow: "0 4px 16px rgba(240,96,61,0.4)" }}
             >
-              🆘 {sendingSOS ? "위치 전송 중..." : "도움이 필요해요 (보호자에게 위치 알리기)"}
+              <span style={{ fontSize: 26 }}>🆘</span>
+              <div className="text-left">
+                <div style={{ fontSize: 16 }}>{sendingSOS ? "위치 전송 중..." : "도움이 필요해요"}</div>
+                <div style={{ fontSize: 11, opacity: 0.85, fontWeight: 600 }}>보호자에게 즉시 위치를 알려드려요</div>
+              </div>
             </button>
                 <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
