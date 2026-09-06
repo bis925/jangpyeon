@@ -2089,7 +2089,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
   return (
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
           {/* ===== NAVBAR ===== */}
-<div className="z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, fontSize: `${16 * FONT_SCALES[fontScale] * 0.7}px` }}>
+<div className="z-10" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, fontSize: `${16 * FONT_SCALES[fontScale] * 0.7}px` }}>
+        <div className="max-w-5xl mx-auto flex">
                <div ref={logoAreaRef} className="flex items-center pl-5 sm:pl-8 flex-shrink-0">
           <LogoMark size={40} />
                      <span style={{ fontFamily: DISPLAY_FONT, fontSize: `${24 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
@@ -2112,7 +2113,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <ZoomIn size={15} color={INK_SOFT} />
             </button>
           </div>
-               <div className="hidden sm:flex items-center gap-1 rounded-full p-1 sm:absolute sm:left-1/2" style={{ background: PAPER, transform: `translateX(calc(-50% + ${menuOffset}px))` }}>
+    <div className="hidden sm:flex items-center gap-1 rounded-full p-1 sm:absolute sm:left-1/2 sm:-translate-x-1/2" style={{ background: PAPER }}>
             {NAV.map((n) => {
               const Icon = n.icon;
               const active = tab === n.id;
@@ -2174,8 +2175,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </button>
         </div>
         </div>
+        </div>
       </div>
-           {/* ===== MOBILE TABS ===== */}
+             {/* ===== MOBILE TABS ===== */}
       <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
         {NAV.map((n) => {
           const Icon = n.icon;
