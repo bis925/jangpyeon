@@ -189,3 +189,6 @@ html, body {
   75%, 88% { transform: scale(1) rotate(0deg); opacity: 1; }
   100% { transform: scale(1) rotate(0deg); opacity: 0; }
 }
+html {
+  scrollbar-gutter: stable;
+}
