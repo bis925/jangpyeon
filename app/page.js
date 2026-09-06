@@ -3048,10 +3048,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className="fixed sm:hidden z-40 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90"
-          style={{ bottom: 78, right: 16, width: 44, height: 44, background: TEAL, boxShadow: "0 4px 14px rgba(0,0,0,0.25)" }}
+          style={{ bottom: 84, right: 16, width: 58, height: 58, background: TEAL, boxShadow: "0 4px 16px rgba(0,0,0,0.3)" }}
           aria-label="맨 위로"
         >
-          <ChevronRight size={20} color="#fff" style={{ transform: "rotate(-90deg)" }} />
+          <ChevronRight size={28} color="#fff" style={{ transform: "rotate(-90deg)" }} />
         </button>
       )}
 
