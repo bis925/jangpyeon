@@ -648,20 +648,18 @@ export default function Page() {
 
     const plainText = htmlContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     const rawText = `${title}. ${plainText}`;
-    const cleaned = rawText.replace(/[^\uAC00-\uD7A3\s.,!?0-9]/g, "").replace(/\s+/g, " ").trim();
-    const text = cleaned.replace(/([.!?])/g, "$1 , ,");
+    const text = rawText.replace(/[^\uAC00-\uD7A3\s.,!?0-9]/g, "").replace(/\s+/g, " ").trim();
     setSpeakingNoticeId(noticeId);
-
     if (typeof window !== "undefined" && window.Capacitor) {
       const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
-      await TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.82, pitch: 1.05, volume: 1.0, category: "ambient" });
+      await TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.72, pitch: 1.0, volume: 1.0, category: "ambient" });
       setSpeakingNoticeId(null);
     } else if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = "ko-KR";
-      utter.rate = 0.82;
-      utter.pitch = 1.05;
+      utter.rate = 0.72;
+      utter.pitch = 1.0;
       const voices = window.speechSynthesis.getVoices();
       const koreanVoice = voices.find((v) => v.lang === "ko-KR" && /female|여성|유나|Yuna|Sora|소라/i.test(v.name)) || voices.find((v) => v.lang === "ko-KR");
       if (koreanVoice) utter.voice = koreanVoice;
@@ -681,18 +679,17 @@ export default function Page() {
       setSpeakingFaqId(null);
       return;
     }
-    const cleaned = text.replace(/([.!?])/g, "$1 , ,");
-    setSpeakingFaqId(faqId);
+      setSpeakingFaqId(faqId);
     if (typeof window !== "undefined" && window.Capacitor) {
       const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
-      await TextToSpeech.speak({ text: cleaned, lang: "ko-KR", rate: 0.82, pitch: 1.05, volume: 1.0, category: "ambient" });
+      await TextToSpeech.speak({ text, lang: "ko-KR", rate: 0.72, pitch: 1.0, volume: 1.0, category: "ambient" });
       setSpeakingFaqId(null);
     } else if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(cleaned);
+      const utter = new SpeechSynthesisUtterance(text);
       utter.lang = "ko-KR";
-      utter.rate = 0.82;
-      utter.pitch = 1.05;
+      utter.rate = 0.72;
+      utter.pitch = 1.0;
       const voices = window.speechSynthesis.getVoices();
       const koreanVoice = voices.find((v) => v.lang === "ko-KR" && /female|여성|유나|Yuna|Sora|소라/i.test(v.name)) || voices.find((v) => v.lang === "ko-KR");
       if (koreanVoice) utter.voice = koreanVoice;
