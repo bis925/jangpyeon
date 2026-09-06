@@ -3691,19 +3691,19 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               }}
             >
                  <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10" style={{ maxWidth: showThemePicker ? "calc(100% - 32px)" : "70%", overflowX: showThemePicker ? "auto" : "visible", background: showThemePicker ? "rgba(0,0,0,0.25)" : "transparent", borderRadius: 999, padding: showThemePicker ? "4px 6px" : 0 }}>
-                <button
+                               <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
-                  style={{ width: 32, height: 32, background: "rgba(255,255,255,0.25)" }}
+                  style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
                   aria-label="배경 꾸미기"
                 >
-                  <Palette size={16} color="#fff" />
+                  <Palette size={20} color="#fff" />
                 </button>
-                {showThemePicker && (
+                     {showThemePicker && (
                   <>
                     <input type="file" accept="image/*" onChange={uploadCardBackground} className="hidden" id="card-bg-upload" />
-                    <label htmlFor="card-bg-upload" className="flex items-center justify-center rounded-full flex-shrink-0 cursor-pointer transition-all duration-150 active:scale-90" style={{ width: 28, height: 28, background: "rgba(255,255,255,0.25)" }} aria-label="사진으로 꾸미기">
-                      <Camera size={14} color="#fff" />
+                    <label htmlFor="card-bg-upload" className="flex items-center justify-center rounded-full flex-shrink-0 cursor-pointer transition-all duration-150 active:scale-90" style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }} aria-label="사진으로 꾸미기">
+                      <Camera size={20} color="#fff" />
                     </label>
                     {Object.entries(CARD_THEMES).map(([key, theme]) => (
                       <button
@@ -3711,9 +3711,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                         onClick={() => changeCardTheme(key)}
                         className="rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
                         style={{
-                          width: 24, height: 24,
+                          width: 40, height: 40,
                           background: theme.gradient,
-                          border: (profile?.card_theme || "default") === key ? "2.5px solid #fff" : "1.5px solid rgba(255,255,255,0.5)",
+                          border: (profile?.card_theme || "default") === key ? "3px solid #fff" : "2px solid rgba(255,255,255,0.5)",
                         }}
                         aria-label={theme.label}
                       />
