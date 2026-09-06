@@ -918,6 +918,23 @@ const viewingReviewsPlaceRef = useRef(null);
   
   useEffect(() => {
     if (typeof window === "undefined" || !window.Capacitor) return;
+    let stateSubPromise;
+    import("@capacitor/app").then(({ App }) => {
+      stateSubPromise = App.addListener("appStateChange", ({ isActive }) => {
+        if (!isActive) {
+          import("@capacitor-community/text-to-speech").then(({ TextToSpeech }) => {
+            TextToSpeech.stop();
+          });
+          setSpeakingNoticeId(null);
+          setSpeakingFaqId(null);
+        }
+      });
+    });
+    return () => { if (stateSubPromise) stateSubPromise.then((s) => s.remove()); };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.Capacitor) return;
     let subPromise;
     import("@capacitor/app").then(({ App }) => {
       subPromise = App.addListener("backButton", () => {
