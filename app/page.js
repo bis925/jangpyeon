@@ -321,11 +321,26 @@ function TierBar({ points }) {
   const pct = Math.min(100, (points / 5000) * 100);
   return (
     <div>
-      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: LINE }}>
-        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${TEAL}, ${CORAL})` }} />
+      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.3)" }}>
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#fff" }} />
       </div>
-      <div className="flex justify-between mt-2 text-[11px] font-extrabold" style={{ color: TEAL_DARK }}>
-        {TIERS.map((t) => <span key={t.label} style={{ fontFamily: MONO_FONT }}>{t.min}</span>)}
+      <div className="flex justify-between mt-2.5">
+        {TIERS.map((t) => {
+          const reached = points >= t.min;
+          return (
+            <span
+              key={t.label}
+              className="rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+              style={{
+                fontFamily: MONO_FONT,
+                background: reached ? "#fff" : "rgba(255,255,255,0.25)",
+                color: reached ? TEAL_DARK : "#fff",
+              }}
+            >
+              {t.min}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
