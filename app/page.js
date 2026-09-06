@@ -87,13 +87,14 @@ const CARD_THEMES = {
 };
 
 const TIERS = [
-  { label: "아기병아리", emoji: "🐤", min: 0 },
-  { label: "아기토끼", emoji: "🐰", min: 500 },
-  { label: "아기여우", emoji: "🦊", min: 1500 },
-  { label: "아기사자", emoji: "🦁", min: 3000 },
-  { label: "날개곰", emoji: "🐻", min: 4000 },
-  { label: "황금독수리", emoji: "🦅", min: 5000 },
+  { label: "아기병아리", emoji: "🐤", min: 0, ringColor: null, glow: false },
+  { label: "아기토끼", emoji: "🐰", min: 500, ringColor: "#C0C0C0", glow: false },
+  { label: "아기여우", emoji: "🦊", min: 1500, ringColor: "#CD7F32", glow: false },
+  { label: "아기사자", emoji: "🦁", min: 3000, ringColor: "#4A90D9", glow: true },
+  { label: "날개곰", emoji: "🐻", min: 4000, ringColor: "#9B59B6", glow: true },
+  { label: "황금독수리", emoji: "🦅", min: 5000, ringColor: "#FFD700", glow: true },
 ];
+
 function currentTier(points) {
   let tier = TIERS[0];
   for (const t of TIERS) if (points >= t.min) tier = t;
