@@ -3860,13 +3860,39 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <ShieldCheck size={22} color={TEAL} />
               </div>
               <div>
-                                            <h2 className="font-extrabold text-xl" style={{ color: INK }}>관리자</h2>
+                                                                   <h2 className="font-extrabold text-xl" style={{ color: INK }}>관리자</h2>
                 <div className="text-xs" style={{ color: INK_SOFT }}>회원, 알림, 공지사항을 관리하세요</div>
               </div>
             </div>
 
+            <div className="hidden sm:grid grid-cols-3 lg:grid-cols-6 gap-2.5 mb-8">
+              {[
+                { id: "admin-ranking", label: "순위 보상", icon: ShieldCheck, color: "#E8A800", bg: "#FFF3D6" },
+                { id: "admin-members", label: "회원 관리", icon: User, color: TEAL_DARK, bg: TEAL_TINT },
+                { id: "admin-notif", label: "알림 보내기", icon: Bell, color: CORAL, bg: CORAL_TINT },
+                { id: "admin-campaign", label: "캠페인 배너", icon: Camera, color: TEAL_DARK, bg: TEAL_TINT },
+                { id: "admin-notice-write", label: "공지사항", icon: Megaphone, color: CORAL, bg: CORAL_TINT },
+                { id: "admin-faq", label: "FAQ 관리", icon: Headset, color: TEAL_DARK, bg: TEAL_TINT },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                    className="flex flex-col items-center gap-2 rounded-2xl py-4 px-2 transition-all duration-200 active:scale-95 hover:shadow-md"
+                    style={{ background: CARD, border: `1px solid ${LINE}` }}
+                  >
+                    <div className="flex items-center justify-center rounded-xl" style={{ width: 40, height: 40, background: item.bg }}>
+                      <Icon size={19} color={item.color} />
+                    </div>
+                    <span className="text-xs font-bold" style={{ color: INK }}>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-              <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>🏆 이달의 순위 보상</div>
+           <div id="admin-ranking" className="font-extrabold text-sm mb-1" style={{ color: INK }}>🏆 이달의 순위 보상</div>
               <div className="text-xs mb-3" style={{ color: INK_SOFT }}>지난달 TOP5를 확인하고, 각 순위에 맞는 쿠폰을 발급하세요 (1~3등: 치킨 쿠폰, 4~5등: 커피 쿠폰)</div>
               {!monthlyWinners ? (
                 <button onClick={loadMonthlyWinners} disabled={loadingWinners} className="rounded-xl px-4 py-2.5 text-xs font-bold text-white" style={{ background: TEAL, opacity: loadingWinners ? 0.6 : 1 }}>
@@ -3944,7 +3970,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </div>
 
 
-                      <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>알림 보내기</div>
+                    <div id="admin-notif" className="font-extrabold text-sm mb-3" style={{ color: INK }}>알림 보내기</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <input value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} placeholder="알림 제목 (예: 12월 이벤트 시작!)"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
@@ -3977,7 +4003,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 모든 사용자에게 발송
               </button>
             </div>
-            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
+           <div id="admin-members" className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
             <input value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} placeholder="이메일 또는 닉네임으로 검색"
               className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
             <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
@@ -4157,7 +4183,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               })}
             </div>
 
-            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>캠페인 배너 관리</div>
+       <div id="admin-campaign" className="font-extrabold text-sm mb-3" style={{ color: INK }}>캠페인 배너 관리</div>
             <form onSubmit={submitCampaign} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                      <input value={campaignForm.title} onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })} placeholder="배너 제목 (선택)"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
@@ -4216,7 +4242,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 ))}
               </div>
             )}
-                      <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>{editingNoticeId ? "공지사항 수정" : "공지사항 작성"}</div>
+                  <div id="admin-notice-write" className="font-extrabold text-sm mb-3" style={{ color: INK }}>{editingNoticeId ? "공지사항 수정" : "공지사항 작성"}</div>
             <form onSubmit={submitNotice} className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                            <input value={noticeForm.title} onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })} placeholder="공지 제목"
                 className="w-full rounded-xl px-4 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
@@ -4349,7 +4375,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               })}
             </div>
 
-            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>자주 묻는 질문(FAQ) 관리</div>
+           <div id="admin-faq" className="font-extrabold text-sm mb-3" style={{ color: INK }}>자주 묻는 질문(FAQ) 관리</div>
             <div className="rounded-2xl p-4 mb-4" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <input value={newFaqQuestion} onChange={(e) => setNewFaqQuestion(e.target.value)} placeholder="질문 입력"
                 className="w-full rounded-xl px-3 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
