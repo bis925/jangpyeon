@@ -1888,7 +1888,7 @@ async function handleAvatarChange(e) {
   }
     async function fetchAllProfiles() {
     if (session.user.email !== ADMIN_EMAIL) return;
-    const { data } = await supabase.from("profiles").select("*").order("points", { ascending: false });
+    const { data } = await supabase.from("profiles").select("*, inviter:invited_by(email, nickname)").order("points", { ascending: false });
     setAllProfiles(data || []);
   }
     async function fetchAdjustLog() {
@@ -4463,9 +4463,16 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
                 .map((p) => (
                                <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
-                  <button onClick={() => setExpandedMemberId(expandedMemberId === p.id ? null : p.id)} className="w-full flex items-center justify-between">
+                                   <button onClick={() => setExpandedMemberId(expandedMemberId === p.id ? null : p.id)} className="w-full flex items-center justify-between">
                     <div className="text-left min-w-0">
-                      <div className="text-sm font-bold truncate" style={{ color: INK }}>{p.email || "(이메일 없음)"}</div>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="text-sm font-bold truncate" style={{ color: INK }}>{p.email || "(이메일 없음)"}</div>
+                        {p.invited_by && (
+                          <span className="text-[9px] font-bold rounded-full px-1.5 py-0.5 flex-shrink-0" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                            👫 초대가입
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs truncate" style={{ color: INK_SOFT }}>{p.admin_note ? `📌 ${p.admin_note} · ` : ""}{p.nickname} · {currentTier(p.points).label}</div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -4473,8 +4480,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                       <ChevronRight size={16} color={INK_SOFT} style={{ transform: expandedMemberId === p.id ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                     </div>
                   </button>
-                  {expandedMemberId === p.id && (
+                                  {expandedMemberId === p.id && (
                   <div className="mt-3">
+                  {p.inviter && (
+                    <div className="text-xs mb-2 rounded-lg px-2.5 py-1.5" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                      👫 초대자: {p.inviter.nickname || p.inviter.email}
+                    </div>
+                  )}
                   <div className="flex gap-2 mt-2">
                     <input value={adminNoteDrafts[p.id] !== undefined ? adminNoteDrafts[p.id] : (p.admin_note || "")} onChange={(e) => setAdminNoteDrafts({ ...adminNoteDrafts, [p.id]: e.target.value })} placeholder="별명/메모 (예: 카페 사장님, 아파트 경비아저씨)"
                       className="flex-1 rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
