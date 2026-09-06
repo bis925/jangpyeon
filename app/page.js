@@ -3259,8 +3259,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                       </div>
               </div>
               <div className="flex flex-col items-center text-center pt-5 mb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-                <div className="flex items-center gap-2">
-                  <span style={{ fontSize: 24 }}>🪙</span>
+                         <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 26, height: 26, background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.5)" }}>
+                    <span style={{ fontSize: 13, fontWeight: 800, fontFamily: MONO_FONT }}>P</span>
+                  </div>
                   <div className="flex items-baseline gap-1">
                     <span style={{ fontFamily: MONO_FONT, fontSize: 36, fontWeight: 800, textShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>{points.toLocaleString()}</span>
                     <span style={{ fontFamily: MONO_FONT, fontSize: 18, fontWeight: 700, opacity: 0.85 }}>P</span>
