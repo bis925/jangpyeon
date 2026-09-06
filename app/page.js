@@ -1368,6 +1368,15 @@ const viewingReviewsPlaceRef = useRef(null);
     showToast("배경 사진이 변경됐어요!");
   }
 
+    function getMyInviteLink() {
+    return `https://jangpyeon.kr/?invite=${session.user.id}`;
+  }
+
+  function copyInviteLink() {
+    navigator.clipboard.writeText(getMyInviteLink());
+    showToast("초대 링크가 복사됐어요!");
+  }
+
     async function fetchGuardians() {
     const { data, error } = await supabase.rpc("get_my_guardians");
     if (!error) setGuardians(data || []);
@@ -1630,6 +1639,15 @@ async function handleAvatarChange(e) {
     return () => clearInterval(interval);
   }, [session, mySessionToken]);
   
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const inviteId = params.get("invite");
+    if (inviteId) {
+      localStorage.setItem("jangpyeon_invite_from", inviteId);
+    }
+  }, []);
+
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -1780,6 +1798,16 @@ async function handleAvatarChange(e) {
     setAvatarUrl(data?.avatar_url || null);
     if (data && !data.nickname && !localStorage.getItem("jangpyeon_nickname_prompt_dismissed")) {
       setShowNicknamePrompt(true);
+    }
+
+    const inviteFrom = localStorage.getItem("jangpyeon_invite_from");
+    if (inviteFrom && data && !data.invited_by) {
+      const { error } = await supabase.rpc("reward_invite", { p_new_user_id: session.user.id, p_inviter_id: inviteFrom });
+      localStorage.removeItem("jangpyeon_invite_from");
+      if (!error) {
+        showToast("친구 초대로 가입해서 +5P를 받았어요!");
+        setTimeout(() => fetchProfile(), 500);
+      }
     }
   }
   async function fetchPlaces() {
@@ -4061,7 +4089,17 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               })}
             </div>
 
-                   <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>🆘 보호자 관리</div>
+                         <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>👫 친구 초대하기</div>
+            <div className="rounded-2xl p-4 mb-6" style={{ border: `1px solid ${LINE}`, background: TEAL_TINT }}>
+              <div className="text-xs mb-3" style={{ color: TEAL_DARK }}>
+                친구가 내 초대 링크로 가입하면, <b>나는 +10P</b>, <b>친구는 +5P</b>를 받아요!
+              </div>
+              <button onClick={copyInviteLink} className="w-full flex items-center justify-center gap-2 rounded-full py-3 font-extrabold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                <MessageCircle size={16} /> 초대 링크 복사하기
+              </button>
+            </div>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>🆘 보호자 관리</div>
             <div className="rounded-2xl p-4 mb-6" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <div className="text-xs mb-3" style={{ color: INK_SOFT }}>도움이 필요할 때, 아래 등록한 분들께 현재 위치를 알려드려요</div>
               <div className="flex gap-2 mb-3">
