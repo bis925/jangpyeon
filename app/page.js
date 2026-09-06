@@ -866,6 +866,8 @@ const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => { viewingReviewsPlaceRef.current = viewingReviewsPlace; }, [viewingReviewsPlace]);
   const showFAQRef = useRef(false);
   useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
+  const showFavoritesOnlyRef = useRef(false);
+  useEffect(() => { showFavoritesOnlyRef.current = showFavoritesOnly; }, [showFavoritesOnly]);
   const didSwipe = useRef(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
@@ -924,6 +926,8 @@ const viewingReviewsPlaceRef = useRef(null);
         if (previewImagesRef.current.length > 0) {
           setPreviewImages([]);
           setImageScale(1);
+        } else if (showFavoritesOnlyRef.current) {
+          setShowFavoritesOnly(false);
         } else if (showFAQRef.current) {
           setShowFAQ(false);
           if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
