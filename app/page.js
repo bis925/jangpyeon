@@ -3889,12 +3889,17 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <Headset size={18} />
               카카오톡으로 상담하기
             </a>
-       <button onClick={() => setShowFAQ(true)} className="w-full flex items-center justify-between rounded-2xl p-4 mb-3 mt-8 transition-all duration-200 active:scale-[0.98]" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-              <div className="flex items-center gap-2">
-                <Headset size={16} color={TEAL_DARK} />
-                <span className="font-extrabold text-sm" style={{ color: INK }}>자주 묻는 질문 (FAQ)</span>
+     <button onClick={() => setShowFAQ(true)} className="w-full flex items-center justify-between rounded-2xl p-5 mb-3 mt-8 transition-all duration-200 active:scale-[0.98]" style={{ background: TEAL_TINT, border: `2px solid ${TEAL}` }}>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 40, height: 40, background: TEAL }}>
+                  <Headset size={20} color="#fff" />
+                </div>
+                <div className="text-left">
+                  <div className="font-extrabold text-base" style={{ color: TEAL_DARK }}>자주 묻는 질문 (FAQ)</div>
+                  <div className="text-xs" style={{ color: INK_SOFT }}>궁금한 점을 빠르게 찾아보세요</div>
+                </div>
               </div>
-              <ChevronRight size={16} color={INK_SOFT} />
+              <ChevronRight size={20} color={TEAL_DARK} />
             </button>
             <div className="flex items-center justify-between mb-3">
               <span className="font-extrabold text-sm" style={{ color: INK }}>1:1 문의</span>
