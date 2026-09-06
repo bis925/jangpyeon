@@ -3340,7 +3340,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
 
       {showScrollTop && (
         
-          href="http://pf.kakao.com/_xkuexaX/chat"
+          <a href="http://pf.kakao.com/_xkuexaX/chat"
           target="_blank"
           rel="noopener noreferrer"
           className="fixed sm:hidden z-40 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90"
