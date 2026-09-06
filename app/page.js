@@ -740,6 +740,7 @@ export default function Page() {
   const [showNicknamePrompt, setShowNicknamePrompt] = useState(false);
   const [speakingNoticeId, setSpeakingNoticeId] = useState(null);
   const [playingAudioId, setPlayingAudioId] = useState(null);
+  const [showRankingPolicy, setShowRankingPolicy] = useState(false);
   const audioRefs = useRef({});
   const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
@@ -2626,6 +2627,42 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         </div>
       )}
 
+      {/* ===== RANKING POLICY POPUP ===== */}
+      {showRankingPolicy && (
+        <div onClick={() => setShowRankingPolicy(false)} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col" style={{ background: CARD, maxHeight: "80vh" }}>
+            <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${LINE}` }}>
+              <span className="font-extrabold text-base" style={{ color: INK }}>🏆 이달의 포인트 랭킹 이용 안내</span>
+              <button onClick={() => setShowRankingPolicy(false)} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
+                <X size={20} color={INK_SOFT} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 py-5 text-sm" style={{ color: INK }}>
+              <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>1. 집계 기준</div>
+              <div className="mb-4" style={{ color: INK_SOFT }}>
+                매월 1일 00:00부터 해당 월 말일까지, 그 달에 새로 적립된 포인트만을 기준으로 순위를 산정해요. 이전 달까지 누적된 포인트는 반영되지 않으며, 매달 1일에 자동으로 초기화돼요.
+              </div>
+              <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>2. 순위 결정 방식</div>
+              <div className="mb-4" style={{ color: INK_SOFT }}>
+                해당 월 적립 포인트가 많은 순서대로 상위 5명을 표시해요. 포인트가 같다면, 그 달에 먼저 그 포인트에 도달한 분이 상위로 표시돼요.
+              </div>
+              <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>3. 포인트 적립 및 관리 원칙</div>
+              <div className="mb-4" style={{ color: INK_SOFT }}>
+                포인트는 정상적인 서비스 이용(장소 등록, 정보 확인, 도움이 됐어요 응답 등)을 통해서만 적립돼요. 중복 계정, 허위 정보 등록, 자동화 프로그램 등 비정상적인 방법으로 포인트를 취득한 사실이 확인되면, 사전 통지 없이 포인트 및 순위가 조정되거나 삭제될 수 있어요.
+              </div>
+              <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>4. 개인정보 표시</div>
+              <div className="mb-4" style={{ color: INK_SOFT }}>
+                랭킹에는 이메일 주소 일부(앞 3자리)만 마스킹되어 표시되며, 전체 이메일은 공개되지 않아요. 랭킹 노출을 원하지 않으시면 1:1 문의로 제외를 요청하실 수 있어요.
+              </div>
+              <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>5. 기타</div>
+              <div style={{ color: INK_SOFT }}>
+                본 기준은 서비스 개선을 위해 사전 공지 후 변경될 수 있어요. 궁금하신 점은 1:1 문의 또는 카카오톡 채널로 언제든 문의해주세요.
+              </div>
+            </div>
+            <div className="p-4 flex-shrink-0" style={{ borderTop: `1px solid ${LINE}` }}>
+              <button onClick={() => setShowRankingPolicy(false)} className="w-full rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
+                확인했어요
+
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -3315,7 +3352,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <span className="font-extrabold text-sm" style={{ color: INK }}>🏆 이달의 포인트 랭킹</span>
               <span className="rounded-full px-2 py-0.5 text-[9px] font-extrabold text-white" style={{ background: CORAL }}>● LIVE</span>
             </div>
-            <div className="text-[11px] mb-3" style={{ color: INK_SOFT }}>* {new Date().getMonth() + 1}월 한 달간 모은 포인트 기준이며, 매달 1일에 초기화돼요. 포인트가 같으면 먼저 모으신 분이 순위에 반영돼요</div>
+            <div className="text-[11px] mb-3" style={{ color: INK_SOFT }}>
+              * {new Date().getMonth() + 1}월 한 달간 모은 포인트 기준이며, 매달 1일에 초기화돼요. 포인트가 같으면 먼저 모으신 분이 순위에 반영돼요{" "}
+              <button onClick={() => setShowRankingPolicy(true)} className="underline font-bold" style={{ color: TEAL }}>이용 안내 보기</button>
+            </div>
             <div className="rounded-2xl overflow-hidden mb-6" style={{ border: `1px solid ${LINE}`, background: CARD, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               {pointRanking.length === 0 && (
                 <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>아직 랭킹 정보가 없어요</div>
