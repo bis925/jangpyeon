@@ -3451,13 +3451,23 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => speakNotice(n.id, n.title, n.content)}
-                          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 mb-3 text-xs font-bold transition-all duration-150"
-                          style={{ background: speakingNoticeId === n.id ? CORAL_TINT : TEAL_TINT, color: speakingNoticeId === n.id ? CORAL : TEAL_DARK }}
-                        >
-                          <Headset size={13} /> {speakingNoticeId === n.id ? "음성 종료" : "음성으로 듣기"}
-                        </button>
+                                            <div className="rounded-xl p-4 mb-3" style={{ background: TEAL_TINT }}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Headset size={16} color={TEAL_DARK} />
+                            <span className="text-sm font-bold" style={{ color: TEAL_DARK }}>음성으로 들어보세요</span>
+                          </div>
+                          <button
+                            onClick={() => speakNotice(n.id, n.title, n.content)}
+                            className="flex items-center justify-center gap-2 w-full rounded-full py-3 font-extrabold text-white transition-all duration-200 active:scale-95"
+                            style={{ background: speakingNoticeId === n.id ? CORAL : TEAL }}
+                          >
+                            {speakingNoticeId === n.id ? (
+                              <>⏸️ 음성 멈추기</>
+                            ) : (
+                              <>▶️ 음성으로 듣기</>
+                            )}
+                          </button>
+                        </div>
                       )}
                       {n.image_url && (
                         <img src={n.image_url} alt={n.title} className="w-full rounded-xl mb-3" />
