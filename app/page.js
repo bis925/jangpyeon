@@ -743,6 +743,7 @@ export default function Page() {
   const [showRankingPolicy, setShowRankingPolicy] = useState(false);
   const [monthlyWinners, setMonthlyWinners] = useState(null);
   const [loadingWinners, setLoadingWinners] = useState(false);
+  const [rankingCouponResponses, setRankingCouponResponses] = useState(null);
   const audioRefs = useRef({});
   const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
@@ -1366,6 +1367,12 @@ async function handleAvatarChange(e) {
     }
   }, [session, profile]);
 
+  async function fetchRankingCouponResponses() {
+    const { data, error } = await supabase.from("coupons").select("id, title, response_status").eq("is_ranking_coupon", true).order("created_at", { ascending: false });
+    if (error) { showToast("불러오기 실패: " + error.message); return; }
+    setRankingCouponResponses(data || []);
+  }
+  
     async function loadMonthlyWinners() {
     setLoadingWinners(true);
     const { data, error } = await supabase.rpc("get_last_month_top5");
@@ -3651,9 +3658,34 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                       </div>
                     );
                   })}
-                  <button onClick={() => setMonthlyWinners(null)} className="text-xs font-bold mt-3" style={{ color: INK_SOFT }}>다시 불러오기</button>
+                                    <button onClick={() => setMonthlyWinners(null)} className="text-xs font-bold mt-3" style={{ color: INK_SOFT }}>다시 불러오기</button>
                 </div>
               )}
+              <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${LINE}` }}>
+                <button onClick={fetchRankingCouponResponses} className="text-xs font-bold" style={{ color: TEAL }}>발급된 쿠폰 응답 현황 보기</button>
+                {rankingCouponResponses && (
+                  <div className="mt-3">
+                    {rankingCouponResponses.length === 0 ? (
+                      <div className="text-xs" style={{ color: INK_SOFT }}>아직 발급된 순위 보상 쿠폰이 없어요</div>
+                    ) : (
+                      rankingCouponResponses.map((c) => (
+                        <div key={c.id} className="flex items-center justify-between py-2" style={{ borderBottom: `1px solid ${LINE}` }}>
+                          <div className="text-xs truncate" style={{ color: INK }}>{c.title}</div>
+                          <span
+                            className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0 ml-2"
+                            style={{
+                              background: c.response_status === "accepted" ? TEAL_TINT : c.response_status === "declined" ? CORAL_TINT : PAPER,
+                              color: c.response_status === "accepted" ? TEAL_DARK : c.response_status === "declined" ? CORAL : INK_SOFT,
+                            }}
+                          >
+                            {c.response_status === "accepted" ? "✅ 받겠다고 함" : c.response_status === "declined" ? "❌ 거부함" : "⏳ 응답 대기중"}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
 
