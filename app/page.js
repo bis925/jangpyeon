@@ -3865,7 +3865,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             </div>
 
-            <div className="hidden sm:grid grid-cols-3 lg:grid-cols-6 gap-2.5 mb-8">
+                    <div className="hidden sm:grid grid-cols-3 lg:grid-cols-6 gap-2.5 mb-8 sticky z-30" style={{ top: 12, background: PAPER, paddingTop: 8, paddingBottom: 8 }}>
               {[
                 { id: "admin-ranking", label: "순위 보상", icon: ShieldCheck, color: "#E8A800", bg: "#FFF3D6" },
                 { id: "admin-members", label: "회원 관리", icon: User, color: TEAL_DARK, bg: TEAL_TINT },
