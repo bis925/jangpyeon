@@ -2279,10 +2279,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
             <span style={{ fontSize: `${11 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, fontWeight: 700, color: myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT }}>쿠폰</span>
           </button>
-          <button onClick={() => setShowFavoritesOnly(true)} className="flex sm:hidden rounded-full p-2 flex-shrink-0 mr-2 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
-            <Star size={16} color={INK_SOFT} />
-          </button>
-          <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1" style={{ background: PAPER }}>
+                   <div className="flex sm:hidden items-center gap-0.5 rounded-full pl-2.5 pr-1 py-1" style={{ background: PAPER }}>
             <span style={{ fontSize: `${10 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.6 : 1)}px`, fontWeight: 700, color: INK_SOFT }} className="mr-0.5">글자크기</span>
             <button onClick={() => stepFontScale("down")} disabled={fontScale === "xsmall"} className="rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ opacity: fontScale === "xsmall" ? 0.35 : 1 }} aria-label="글자 작게">
               <ZoomOut size={15} color={INK_SOFT} />
@@ -2324,8 +2321,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </button>
           </div>
         </div>
-        <div className="flex sm:hidden items-center justify-end gap-2 px-5 pb-3">
-                             <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("point-history-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: CORAL_TINT }}>
+    <div className="flex sm:hidden items-center justify-end gap-2 px-5 pb-3">
+                             <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
+            <Star size={16} color={INK_SOFT} />
+          </button>
+          <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("point-history-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className="flex items-center gap-1 rounded-full pl-2 pr-3 py-1.5 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: CORAL_TINT }}>
             <span style={{ fontSize: `${14 * FONT_SCALES[fontScale] * 0.7}px` }}>🪙</span>
             <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: `${12 * FONT_SCALES[fontScale] * 0.7}px` }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
           </button>
