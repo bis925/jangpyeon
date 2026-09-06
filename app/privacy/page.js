@@ -18,14 +18,20 @@ export default function PrivacyPage() {
       <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>2. 개인정보의 수집 방법</h2>
       <p>이메일 로그인(매직링크) 절차 중 이용자가 직접 입력함으로써 수집됩니다.</p>
 
-      <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>3. 개인정보의 이용 목적</h2>
+           <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>3. 개인정보의 이용 목적</h2>
       <ul>
         <li>회원 식별 및 로그인 처리</li>
         <li>포인트 적립 및 등급 관리</li>
         <li>공지사항, 이벤트 안내</li>
         <li>1:1 문의 응대</li>
       </ul>
-
+      <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>4. 프로필 배경 사진 등 이용자 업로드 콘텐츠</h2>
+      <p>이용자는 마이페이지 프로필 카드의 배경으로 본인이 소유하거나 이용 권한이 있는 사진만 업로드해야 합니다. 해당 사진은 본인 계정에서만 확인 가능하며 다른 이용자에게 공개되지 않습니다. 다만 다음에 해당하는 콘텐츠는 업로드할 수 없으며, 확인 시 사전 통지 없이 삭제될 수 있습니다.</p>
+      <ul>
+        <li>타인의 저작권, 초상권 등을 침해하는 사진</li>
+        <li>음란물, 폭력적이거나 혐오스러운 내용을 포함한 사진</li>
+        <li>불법적인 내용을 포함하거나 관련 법령에 위반되는 사진</li>
+      </ul>
       <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>4. 개인정보의 보유 및 이용 기간</h2>
       <p>회원 탈퇴 시 또는 법령에 따른 보관 기간이 경과할 때까지 보유하며, 이후 지체 없이 파기합니다.</p>
 
