@@ -2877,11 +2877,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               return (
                 <div key={faq.id} className="rounded-2xl mb-3 overflow-hidden" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                   <button
-                    onClick={() => {
+                                      onClick={() => {
                       const nowExpanded = !isExpanded;
                       setExpandedFaqId(nowExpanded ? faq.id : null);
                       if (nowExpanded && faqVoiceOn) {
-                        speakFaqAnswer(faq.id, faq.answer);
+                        speakFaqAnswer(faq.id, `${faq.question}. ${faq.answer}`);
                       }
                     }}
                     className="w-full flex items-center justify-between gap-2 px-4 py-3.5 text-left"
@@ -2892,8 +2892,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   {isExpanded && (
                     <div className="px-4 pb-4">
                       <div className="text-sm mb-3" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{faq.answer}</div>
-                      <button
-                        onClick={() => speakFaqAnswer(faq.id, faq.answer)}
+                                    <button
+                        onClick={() => speakFaqAnswer(faq.id, `${faq.question}. ${faq.answer}`)}
                         className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold"
                         style={{ background: isSpeaking ? CORAL_TINT : TEAL_TINT, color: isSpeaking ? CORAL : TEAL_DARK }}
                       >
