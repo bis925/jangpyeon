@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabaseClient";
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle,
+    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle, Palette,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -840,7 +840,8 @@ export default function Page() {
   const [noticeAdminPage, setNoticeAdminPage] = useState(1);
   const [campaignAdminPage, setCampaignAdminPage] = useState(1);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [sessionConflict, setSessionConflict] = useState(null);
+    const [sessionConflict, setSessionConflict] = useState(null);
+  const [showThemePicker, setShowThemePicker] = useState(false);
   const [mySessionToken, setMySessionToken] = useState(null);
   
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
@@ -3661,7 +3662,15 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         {/* ===================== 마이페이지 ===================== */}
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
-                <div className="rounded-2xl p-6 mb-5 text-white" style={{ background: CARD_THEMES[profile?.card_theme || "default"].gradient }}>
+                         <div className="rounded-2xl p-6 mb-5 text-white relative" style={{ background: CARD_THEMES[profile?.card_theme || "default"].gradient }}>
+              <button
+                onClick={() => setShowThemePicker(!showThemePicker)}
+                className="absolute top-4 right-4 flex items-center justify-center rounded-full transition-all duration-150 active:scale-90"
+                style={{ width: 32, height: 32, background: "rgba(255,255,255,0.2)" }}
+                aria-label="배경 색상 변경"
+              >
+                <Palette size={16} color="#fff" />
+              </button>
                                             <div className="flex flex-col items-center text-center mb-5">
                 <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
                               <label htmlFor="avatar-upload" className="w-28 h-28 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-4" style={{ background: "rgba(255,255,255,0.15)", border: "3.5px solid rgba(255,255,255,0.5)", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
@@ -3719,22 +3728,24 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
                 <div className="text-[11px] mt-0.5" style={{ opacity: 0.7 }}>보유 포인트</div>
               </div>
-              <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
-                {Object.entries(CARD_THEMES).map(([key, theme]) => (
-                  <button
-                    key={key}
-                    onClick={() => changeCardTheme(key)}
-                    className="rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
-                    style={{
-                      width: 26, height: 26,
-                      background: theme.gradient,
-                      border: (profile?.card_theme || "default") === key ? "3px solid #fff" : "2px solid rgba(255,255,255,0.4)",
-                      boxShadow: (profile?.card_theme || "default") === key ? "0 0 0 2px rgba(0,0,0,0.15)" : "none",
-                    }}
-                    aria-label={theme.label}
-                  />
-                ))}
-              </div>
+              {showThemePicker && (
+                <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+                  {Object.entries(CARD_THEMES).map(([key, theme]) => (
+                    <button
+                      key={key}
+                      onClick={() => changeCardTheme(key)}
+                      className="rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                      style={{
+                        width: 26, height: 26,
+                        background: theme.gradient,
+                        border: (profile?.card_theme || "default") === key ? "3px solid #fff" : "2px solid rgba(255,255,255,0.4)",
+                        boxShadow: (profile?.card_theme || "default") === key ? "0 0 0 2px rgba(0,0,0,0.15)" : "none",
+                      }}
+                      aria-label={theme.label}
+                    />
+                  ))}
+                </div>
+              )}
               {next ? (
                 <div className="rounded-xl px-4 py-3 mb-4" style={{ background: "rgba(255,255,255,0.18)" }}>
                   <div className="flex items-center justify-between">
