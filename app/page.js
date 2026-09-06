@@ -514,8 +514,33 @@ function LoginScreen({ onSent }) {
               >
                 {loading ? "보내는 중..." : "이메일로 로그인 링크 받기"}
               </button>
-              {errorMsg && <p className="text-xs mt-3" style={{ color: CORAL }}>{errorMsg}</p>}
+                          {errorMsg && <p className="text-xs mt-3" style={{ color: CORAL }}>{errorMsg}</p>}
             </form>
+          )}
+                                 {!sent && (
+            <>
+              <div className="flex items-center gap-3 my-5">
+                <div className="flex-1 h-px" style={{ background: LINE }} />
+                <span className="text-xs" style={{ color: INK_SOFT }}>또는</span>
+                <div className="flex-1 h-px" style={{ background: LINE }} />
+              </div>
+              <button
+                onClick={signInWithGoogle}
+                className="w-full flex items-center justify-center gap-2 rounded-full font-bold transition-all duration-200 active:scale-[0.98] py-3.5 sm:py-3.5"
+                style={{ background: "#fff", border: `2px solid ${TEAL}`, color: INK, boxShadow: "0 2px 10px rgba(15,110,98,0.15)" }}
+              >
+                <svg width="20" height="20" viewBox="0 0 18 18" className="flex-shrink-0">
+                  <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" />
+                  <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.85.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z" />
+                  <path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z" />
+                  <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
+                </svg>
+                <span className="text-base sm:text-sm">구글로 계속하기</span>
+              </button>
+              <p className="text-xs sm:hidden mt-2.5 font-bold" style={{ color: TEAL_DARK }}>
+                📱 지메일로 로그인 시 바로 로그인이 가능합니다
+              </p>
+            </>
           )}
                   <p className="text-xs mt-6 mb-4" style={{ color: INK_SOFT }}>
             비밀번호 없이, 메일로 온 링크만 누르면 로그인돼요.
@@ -1380,6 +1405,14 @@ const viewingReviewsPlaceRef = useRef(null);
     showToast("배경 사진이 변경됐어요!");
   }
 
+  async function signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: "https://jangpyeon.kr/" },
+    });
+    if (error) { showToast("구글 로그인 실패: " + error.message); }
+  }
+  
   async function deleteMyAccount() {
     const { error } = await supabase.rpc("delete_my_account");
     if (error) { showToast("탈퇴 실패: " + error.message); return; }
