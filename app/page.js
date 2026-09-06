@@ -741,6 +741,8 @@ export default function Page() {
   const [speakingNoticeId, setSpeakingNoticeId] = useState(null);
   const [playingAudioId, setPlayingAudioId] = useState(null);
   const [showRankingPolicy, setShowRankingPolicy] = useState(false);
+  const [monthlyWinners, setMonthlyWinners] = useState(null);
+  const [loadingWinners, setLoadingWinners] = useState(false);
   const audioRefs = useRef({});
   const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
@@ -1363,6 +1365,28 @@ async function handleAvatarChange(e) {
       fetchAllCoupons();
     }
   }, [session, profile]);
+
+    async function loadMonthlyWinners() {
+    setLoadingWinners(true);
+    const { data, error } = await supabase.rpc("get_last_month_top5");
+    setLoadingWinners(false);
+    if (error) { showToast("불러오기 실패: " + error.message); return; }
+    setMonthlyWinners(data || []);
+  }
+
+  async function issueRankingCoupon(userId, rank) {
+    const isChicken = rank <= 3;
+    const title = isChicken ? `🏆 ${rank}등 축하 치킨 쿠폰` : `🏆 ${rank}등 축하 커피 쿠폰`;
+    const description = `지난달 이달의 포인트 랭킹 ${rank}등을 축하드려요! 담당자가 곧 실제 쿠폰(기프티콘)을 전달해드릴게요.`;
+    const { error } = await supabase.rpc("admin_issue_coupon", {
+      p_user_id: userId,
+      p_title: title,
+      p_description: description,
+      p_expires_at: null,
+    });
+    if (error) { showToast("발급 실패: " + error.message); return; }
+    showToast(`${rank}등에게 쿠폰을 발급했어요!`);
+  }
 
   async function fetchPointRanking() {
     const { data, error } = await supabase.rpc("get_monthly_point_ranking");
@@ -3560,9 +3584,43 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <ShieldCheck size={22} color={TEAL} />
               </div>
               <div>
-                             <h2 className="font-extrabold text-xl" style={{ color: INK }}>관리자</h2>
+                                            <h2 className="font-extrabold text-xl" style={{ color: INK }}>관리자</h2>
                 <div className="text-xs" style={{ color: INK_SOFT }}>회원, 알림, 공지사항을 관리하세요</div>
               </div>
+            </div>
+
+            <div className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+              <div className="font-extrabold text-sm mb-1" style={{ color: INK }}>🏆 이달의 순위 보상</div>
+              <div className="text-xs mb-3" style={{ color: INK_SOFT }}>지난달 TOP5를 확인하고, 각 순위에 맞는 쿠폰을 발급하세요 (1~3등: 치킨 쿠폰, 4~5등: 커피 쿠폰)</div>
+              {!monthlyWinners ? (
+                <button onClick={loadMonthlyWinners} disabled={loadingWinners} className="rounded-xl px-4 py-2.5 text-xs font-bold text-white" style={{ background: TEAL, opacity: loadingWinners ? 0.6 : 1 }}>
+                  {loadingWinners ? "불러오는 중..." : "지난달 TOP5 확인하기"}
+                </button>
+              ) : monthlyWinners.length === 0 ? (
+                <div className="text-xs" style={{ color: INK_SOFT }}>지난달에는 포인트를 모은 분이 없어요</div>
+              ) : (
+                <div>
+                  {monthlyWinners.map((w, i) => {
+                    const rank = i + 1;
+                    const isChicken = rank <= 3;
+                    return (
+                      <div key={w.user_id} className="flex items-center justify-between py-2.5" style={{ borderBottom: i !== monthlyWinners.length - 1 ? `1px solid ${LINE}` : "none" }}>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="flex items-center justify-center rounded-full font-extrabold text-xs flex-shrink-0" style={{ width: 24, height: 24, background: isChicken ? "#FFF3D6" : TEAL_TINT, color: isChicken ? "#B8860B" : TEAL_DARK }}>{rank}</span>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold truncate" style={{ color: INK }}>{w.email}</div>
+                            <div className="text-[10px]" style={{ color: INK_SOFT }}>{w.total_points.toLocaleString()}P · {isChicken ? "치킨 쿠폰" : "커피 쿠폰"}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => issueRankingCoupon(w.user_id, rank)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: CORAL }}>
+                          발급
+                        </button>
+                      </div>
+                    );
+                  })}
+                  <button onClick={() => setMonthlyWinners(null)} className="text-xs font-bold mt-3" style={{ color: INK_SOFT }}>다시 불러오기</button>
+                </div>
+              )}
             </div>
 
 
