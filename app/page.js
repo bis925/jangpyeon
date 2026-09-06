@@ -3719,16 +3719,28 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
                                             <div className="flex flex-col items-center text-center mb-5">
                 <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
-                              <label htmlFor="avatar-upload" className="w-28 h-28 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-4" style={{ background: "rgba(255,255,255,0.15)", border: "3.5px solid rgba(255,255,255,0.5)", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
+                              <div className="relative mb-4" style={{ width: 112, height: 112 }}>
+                  {tier.ringColor && (
+                    <div
+                      className={tier.glow ? "avatar-ring-glow" : ""}
+                      style={{
+                        position: "absolute", inset: -6, borderRadius: "9999px",
+                        background: `conic-gradient(${tier.ringColor}, ${tier.ringColor}88, ${tier.ringColor})`,
+                        padding: 4,
+                      }}
+                    />
+                  )}
+                  <label htmlFor="avatar-upload" className="w-28 h-28 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)", border: "3.5px solid rgba(255,255,255,0.5)", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="프로필 사진" className="w-full h-full object-cover" />
                   ) : (
                     <User size={36} />
                   )}
-                  <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center py-1.5" style={{ background: "rgba(0,0,0,0.5)" }}>
+                           <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center py-1.5" style={{ background: "rgba(0,0,0,0.5)" }}>
                     <Camera size={14} color="#fff" />
                   </div>
                 </label>
+                </div>
                 {editingNickname ? (
                   <div className="flex items-center gap-1.5 mb-2">
                     <input
