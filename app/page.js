@@ -3865,7 +3865,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             </div>
 
-                    <div className="hidden sm:grid grid-cols-3 lg:grid-cols-6 gap-2.5 mb-8 sticky z-30" style={{ top: 12, background: PAPER, paddingTop: 8, paddingBottom: 8 }}>
+                               <div className="hidden sm:flex flex-col gap-2 fixed z-30" style={{ top: 100, right: 24, width: 130 }}>
               {[
                 { id: "admin-ranking", label: "순위 보상", icon: ShieldCheck, color: "#E8A800", bg: "#FFF3D6" },
                 { id: "admin-members", label: "회원 관리", icon: User, color: TEAL_DARK, bg: TEAL_TINT },
@@ -3879,11 +3879,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   <button
                     key={item.id}
                     onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                    className="flex flex-col items-center gap-2 rounded-2xl py-4 px-2 transition-all duration-200 active:scale-95 hover:shadow-md"
-                    style={{ background: CARD, border: `1px solid ${LINE}` }}
+                    className="flex items-center gap-2.5 rounded-2xl py-3 px-3 transition-all duration-200 active:scale-95 hover:shadow-md"
+                    style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
                   >
-                    <div className="flex items-center justify-center rounded-xl" style={{ width: 40, height: 40, background: item.bg }}>
-                      <Icon size={19} color={item.color} />
+                    <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 34, height: 34, background: item.bg }}>
+                      <Icon size={16} color={item.color} />
                     </div>
                     <span className="text-xs font-bold" style={{ color: INK }}>{item.label}</span>
                   </button>
