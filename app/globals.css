@@ -192,3 +192,12 @@ html, body {
 html {
   scrollbar-gutter: stable;
 }
+
+@keyframes coin-spin {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.15); }
+}
+.coin-spin {
+  display: inline-block;
+  animation: coin-spin 2s ease-in-out infinite;
+}
