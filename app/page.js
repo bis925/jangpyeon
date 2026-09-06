@@ -822,6 +822,7 @@ export default function Page() {
   const [newFaqQuestion, setNewFaqQuestion] = useState("");
   const [newFaqAnswer, setNewFaqAnswer] = useState("");
   const [faqAdminPage, setFaqAdminPage] = useState(1);
+  const [noticeAdminPage, setNoticeAdminPage] = useState(1);
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -4235,13 +4236,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               )}
             </form>
 
-            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>등록된 공지 목록</div>
-            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+                  <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>등록된 공지 목록</div>
+            <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {notices.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>공지사항이 없어요</div>}
-              {notices.map((n) => {
+              {notices.filter((_, idx) => idx >= (noticeAdminPage - 1) * 5 && idx < noticeAdminPage * 5).map((n, i, arr) => {
                 const isExpandedAdmin = expandedNoticeAdminId === n.id;
                 return (
-                <div key={n.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                <div key={n.id} className="px-4 py-3" style={{ borderBottom: i !== arr.length - 1 ? `1px solid ${LINE}` : "none" }}>
                   <button onClick={() => setExpandedNoticeAdminId(isExpandedAdmin ? null : n.id)} className="w-full flex items-center justify-between gap-2 text-left">
                     <div className="text-sm font-bold truncate" style={{ color: INK }}>{n.title}</div>
                     <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpandedAdmin ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
@@ -4259,6 +4260,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 );
               })}
             </div>
+            {notices.length > 5 && (
+              <div className="flex items-center justify-center gap-1.5 mb-8">
+                {Array.from({ length: Math.ceil(notices.length / 5) }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setNoticeAdminPage(p)}
+                    className="rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150"
+                    style={{ width: 30, height: 30, background: p === noticeAdminPage ? TEAL : PAPER, color: p === noticeAdminPage ? "#fff" : INK_SOFT }}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            )}
 
                <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
             <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
