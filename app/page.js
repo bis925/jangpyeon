@@ -1590,10 +1590,10 @@ async function handleAvatarChange(e) {
     }
   }
 
-  function cancelReplaceSession() {
+  async function cancelReplaceSession() {
     setSessionConflict(null);
     localStorage.removeItem("jangpyeon_session_token");
-    supabase.auth.signOut({ scope: "local" });
+    await supabase.auth.signOut({ scope: "local" });
     window.location.href = "/";
   }
   
