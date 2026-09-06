@@ -113,7 +113,15 @@ function renderRichText(html) {
   return <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원"];
+const CATEGORIES = ["공공기관", "음식점",const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원"];
+const CATEGORY_MARKERS = {
+  공공기관: { emoji: "🏛️", color: "#4A90D9" },
+  음식점: { emoji: "🍽️", color: "#F0603D" },
+  카페: { emoji: "☕", color: "#B08A5A" },
+  문화시설: { emoji: "🎭", color: "#9B59B6" },
+  쇼핑: { emoji: "🛍️", color: "#E8A800" },
+  병원: { emoji: "🏥", color: "#E74C3C" },
+}; "카페", "문화시설", "쇼핑", "병원"];
 const WEEKDAYS = [
   { key: "mon", label: "월" }, { key: "tue", label: "화" }, { key: "wed", label: "수" },
   { key: "thu", label: "목" }, { key: "fri", label: "금" }, { key: "sat", label: "토" }, { key: "sun", label: "일" },
@@ -1030,9 +1038,9 @@ const viewingReviewsPlaceRef = useRef(null);
     const geocoder = new kakao.maps.services.Geocoder();
     const filtered = mapCategory ? places.filter((p) => p.category === mapCategory) : places;
 
-       function addMarker(placeId, lat, lng, name) {
+              function addMarker(placeId, lat, lng, name, category) {
       const position = new kakao.maps.LatLng(lat, lng);
-      const marker = new kakao.maps.Marker({ position, map });
+      const marker = new kakao.maps.Marker({ position, map, image: createCategoryMarkerImage(kakao, category) });
       const infowindow = new kakao.maps.InfoWindow({ content: `<div style="padding:6px 10px;font-size:12px;">${name}</div>` });
       kakao.maps.event.addListener(marker, "click", () => infowindow.open(map, marker));
       markersRef.current[placeId] = { marker, infowindow, position };
@@ -1049,11 +1057,11 @@ const viewingReviewsPlaceRef = useRef(null);
 
     filtered.forEach((place) => {
       if (place.lat && place.lng) {
-        addMarker(place.id, place.lat, place.lng, place.name);
+        addMarker(place.id, place.lat, place.lng, place.name, place.category);
       } else if (place.address) {
         geocoder.addressSearch(place.address, (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
-            addMarker(place.id, parseFloat(result[0].y), parseFloat(result[0].x), place.name);
+            addMarker(place.id, parseFloat(result[0].y), parseFloat(result[0].x), place.name, place.category);
           }
         });
       }
@@ -1072,9 +1080,9 @@ const viewingReviewsPlaceRef = useRef(null);
     const geocoder = new kakao.maps.services.Geocoder();
     const filtered = mapCategory ? places.filter((p) => p.category === mapCategory) : places;
 
-    function addMarker(placeId, lat, lng, name) {
+    function addMarker(placeId, lat, lng, name, category) {
       const position = new kakao.maps.LatLng(lat, lng);
-      const marker = new kakao.maps.Marker({ position, map });
+      const marker = new kakao.maps.Marker({ position, map, image: createCategoryMarkerImage(kakao, category) });
       const infowindow = new kakao.maps.InfoWindow({ content: `<div style="padding:6px 10px;font-size:12px;">${name}</div>` });
       kakao.maps.event.addListener(marker, "click", () => infowindow.open(map, marker));
       fullscreenMarkersRef.current[placeId] = { marker, infowindow, position };
@@ -1082,11 +1090,11 @@ const viewingReviewsPlaceRef = useRef(null);
 
     filtered.forEach((place) => {
       if (place.lat && place.lng) {
-        addMarker(place.id, place.lat, place.lng, place.name);
+        addMarker(place.id, place.lat, place.lng, place.name, place.category);
       } else if (place.address) {
         geocoder.addressSearch(place.address, (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
-            addMarker(place.id, parseFloat(result[0].y), parseFloat(result[0].x), place.name);
+            addMarker(place.id, parseFloat(result[0].y), parseFloat(result[0].x), place.name, place.category);
           }
         });
       }
@@ -1500,6 +1508,23 @@ async function handleAvatarChange(e) {
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }
+
+  function createCategoryMarkerImage(kakao, category) {
+    const meta = CATEGORY_MARKERS[category] || { emoji: "📍", color: "#0F6E62" };
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52">
+        <path d="M20 0C9 0 0 9 0 20c0 15 20 32 20 32s20-17 20-32C40 9 31 0 20 0z" fill="${meta.color}" stroke="#fff" stroke-width="2"/>
+        <circle cx="20" cy="19" r="14" fill="#fff"/>
+        <text x="20" y="25" font-size="16" text-anchor="middle">${meta.emoji}</text>
+      </svg>
+    `;
+    return new kakao.maps.MarkerImage(
+      "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg))),
+      new kakao.maps.Size(40, 52),
+      { offset: new kakao.maps.Point(20, 52) }
+    );
+  }
+  
   function focusOnPlace(placeId) {
     const entry = markersRef.current[placeId];
     if (!entry || !mapInstanceRef.current) return;
