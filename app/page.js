@@ -3966,7 +3966,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <button
+                       <button
                     key={item.id}
                     onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
                     className="flex items-center gap-2.5 rounded-2xl py-3 px-3 transition-all duration-200 active:scale-95 hover:shadow-md"
@@ -3979,6 +3979,16 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   </button>
                 );
               })}
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="flex items-center gap-2.5 rounded-2xl py-3 px-3 transition-all duration-200 active:scale-95 hover:shadow-md"
+                style={{ background: TEAL, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+              >
+                <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 34, height: 34, background: "rgba(255,255,255,0.2)" }}>
+                  <ChevronRight size={16} color="#fff" style={{ transform: "rotate(-90deg)" }} />
+                </div>
+                <span className="text-xs font-bold text-white">맨 위로</span>
+              </button>
             </div>
 
             <div className="rounded-2xl p-4 mb-8" style={{ background: CARD, border: `1px solid ${LINE}` }}>
