@@ -2598,6 +2598,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
 {/* ===== NAVBAR ===== */}
 <div className="z-10 flex relative" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, fontSize: `${16 * FONT_SCALES[fontScale] * 0.7}px` }}>
   <div ref={logoAreaRef} className="flex-1 flex items-center pl-5 sm:pl-8 relative" style={{ overflow: "visible" }}>
+          <div className="relative" style={{ overflow: "visible" }}>
             <LogoMark size={40} />
             {getTodaySpecialEvent()?.type === "christmas" && (
               <span style={{ position: "absolute", top: -10, left: -4, fontSize: 18 }}>🎅</span>
@@ -2704,7 +2705,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </button>
         </div>
         </div>
-
+</div>
              {/* ===== MOBILE TABS ===== */}
       <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
         {NAV.map((n) => {
