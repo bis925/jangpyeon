@@ -2090,7 +2090,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
           {/* ===== NAVBAR ===== */}
 <div className="z-10" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, fontSize: `${16 * FONT_SCALES[fontScale] * 0.7}px` }}>
-          <div className="max-w-5xl mx-auto flex relative">
+              <div className="max-w-6xl mx-auto flex relative">
                <div ref={logoAreaRef} className="flex items-center pl-5 sm:pl-8 flex-shrink-0">
           <LogoMark size={40} />
                      <span style={{ fontFamily: DISPLAY_FONT, fontSize: `${24 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
