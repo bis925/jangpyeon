@@ -744,6 +744,10 @@ export default function Page() {
   const [monthlyWinners, setMonthlyWinners] = useState(null);
   const [loadingWinners, setLoadingWinners] = useState(false);
   const [rankingCouponResponses, setRankingCouponResponses] = useState(null);
+  const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
   const audioRefs = useRef({});
   const [nicknamePromptDraft, setNicknamePromptDraft] = useState("");
   const [pointRanking, setPointRanking] = useState([]);
@@ -1367,8 +1371,12 @@ async function handleAvatarChange(e) {
     }
   }, [session, profile]);
 
-  async function fetchRankingCouponResponses() {
-    const { data, error } = await supabase.from("coupons").select("id, title, response_status").eq("is_ranking_coupon", true).order("created_at", { ascending: false });
+  async function fetchRankingCouponResponses(monthStr) {
+    const targetMonth = monthStr || responseMonthFilter;
+    const [year, month] = targetMonth.split("-").map(Number);
+    const startDate = new Date(year, month - 1, 1).toISOString();
+    const endDate = new Date(year, month, 1).toISOString();
+    const { data, error } = await supabase.from("coupons").select("id, title, response_status, created_at").eq("is_ranking_coupon", true).gte("created_at", startDate).lt("created_at", endDate).order("created_at", { ascending: false });
     if (error) { showToast("불러오기 실패: " + error.message); return; }
     setRankingCouponResponses(data || []);
   }
@@ -3670,8 +3678,27 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                                     <button onClick={() => setMonthlyWinners(null)} className="text-xs font-bold mt-3" style={{ color: INK_SOFT }}>다시 불러오기</button>
                 </div>
               )}
-              <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${LINE}` }}>
-                <button onClick={fetchRankingCouponResponses} className="text-xs font-bold" style={{ color: TEAL }}>발급된 쿠폰 응답 현황 보기</button>
+                           <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${LINE}` }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <button onClick={() => fetchRankingCouponResponses()} className="text-xs font-bold" style={{ color: TEAL }}>발급된 쿠폰 응답 현황 보기</button>
+                  {rankingCouponResponses && (
+                    <select
+                      value={responseMonthFilter}
+                      onChange={(e) => { setResponseMonthFilter(e.target.value); fetchRankingCouponResponses(e.target.value); }}
+                      className="rounded-lg px-2 py-1 text-xs outline-none"
+                      style={{ border: `1.4px solid ${LINE}`, color: INK }}
+                    >
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const d = new Date();
+                        d.setDate(1);
+                        d.setMonth(d.getMonth() - i);
+                        const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                        const label = `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
+                        return <option key={value} value={value}>{label}</option>;
+                      })}
+                    </select>
+                  )}
+                </div>
                 {rankingCouponResponses && (
                   <div className="mt-3">
                     {rankingCouponResponses.length === 0 ? (
