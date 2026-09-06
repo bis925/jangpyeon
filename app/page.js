@@ -3682,7 +3682,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         {/* ===================== 마이페이지 ===================== */}
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
-            <div
+                  <div
+              onClick={() => { if (showThemePicker) setShowThemePicker(false); }}
               className="rounded-2xl p-6 mb-5 text-white relative overflow-hidden"
               style={{
                 background: profile?.card_theme === "photo" && profile?.card_background_url
@@ -3690,7 +3691,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   : CARD_THEMES[profile?.card_theme || "default"].gradient,
               }}
             >
-                 <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10" style={{ maxWidth: showThemePicker ? "calc(100% - 32px)" : "70%", overflowX: showThemePicker ? "auto" : "visible", background: showThemePicker ? "rgba(0,0,0,0.25)" : "transparent", borderRadius: 999, padding: showThemePicker ? "4px 6px" : 0 }}>
+                              <div onClick={(e) => e.stopPropagation()} className="absolute top-4 right-4 flex items-center gap-1.5 z-10" style={{ maxWidth: showThemePicker ? "calc(100% - 32px)" : "70%", overflowX: showThemePicker ? "auto" : "visible", background: showThemePicker ? "rgba(0,0,0,0.25)" : "transparent", borderRadius: 999, padding: showThemePicker ? "4px 6px" : 0 }}>
                                <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
