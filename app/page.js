@@ -843,6 +843,9 @@ export default function Page() {
   const [showScrollTop, setShowScrollTop] = useState(false);
     const [sessionConflict, setSessionConflict] = useState(null);
   const [showThemePicker, setShowThemePicker] = useState(false);
+  const [guardians, setGuardians] = useState([]);
+  const [newGuardianEmail, setNewGuardianEmail] = useState("");
+  const [sendingSOS, setSendingSOS] = useState(false);
   const [mySessionToken, setMySessionToken] = useState(null);
   
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
@@ -1314,6 +1317,69 @@ const viewingReviewsPlaceRef = useRef(null);
     setProfile((prev) => ({ ...prev, card_background_url: newUrl, card_theme: "photo" }));
     showToast("배경 사진이 변경됐어요!");
   }
+
+    async function fetchGuardians() {
+    const { data, error } = await supabase.rpc("get_my_guardians");
+    if (!error) setGuardians(data || []);
+  }
+
+  async function addGuardian() {
+    if (!newGuardianEmail.trim()) { showToast("이메일을 입력해주세요"); return; }
+    const { error } = await supabase.rpc("add_guardian", { p_guardian_email: newGuardianEmail.trim() });
+    if (error) { showToast("등록 실패: " + error.message); return; }
+    setNewGuardianEmail("");
+    fetchGuardians();
+    showToast("보호자가 등록됐어요!");
+  }
+
+  async function removeGuardianFn(id) {
+    if (!window.confirm("이 보호자를 삭제하시겠어요?")) return;
+    const { error } = await supabase.rpc("remove_guardian", { p_guardian_id: id });
+    if (error) { showToast("삭제 실패: " + error.message); return; }
+    fetchGuardians();
+    showToast("삭제됐어요");
+  }
+
+  async function sendSOSAlert() {
+    if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
+    if (!window.confirm("등록된 보호자에게 현재 위치와 함께 도움 요청 알림을 보낼까요?")) return;
+    setSendingSOS(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const { data: guardianList } = await supabase.rpc("get_my_guardian_user_ids");
+        if (!guardianList || guardianList.length === 0) {
+          setSendingSOS(false);
+          showToast("등록된 보호자가 없어요. 마이페이지에서 먼저 보호자를 등록해주세요");
+          return;
+        }
+        const userIds = guardianList.map((g) => g.guardian_user_id);
+        const mapLink = `https://map.kakao.com/link/map/${latitude},${longitude}`;
+        const nickname = profile?.nickname || session.user.email;
+        try {
+          await fetch("https://xyyewfqfurtrzfonplat.supabase.co/functions/v1/swift-endpoint", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({
+              title: "🆘 긴급 도움 요청",
+              body: `${nickname}님이 도움이 필요해요. 위치: ${mapLink}`,
+              userIds,
+              target: "home",
+            }),
+          });
+          showToast("보호자에게 위치를 전송했어요!");
+        } catch (err) {
+          showToast("전송에 실패했어요, 다시 시도해주세요");
+        }
+        setSendingSOS(false);
+      },
+      () => { setSendingSOS(false); showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"); },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }
   
    async function changeCardTheme(themeKey) {
     const { error } = await supabase.from("profiles").update({ card_theme: themeKey }).eq("id", session.user.id);
@@ -1525,6 +1591,7 @@ async function handleAvatarChange(e) {
       fetchMyCoupons();
       fetchPointRanking();
       fetchFaqs();
+      fetchGuardians();
     }
   }, [session]);
 
@@ -3293,6 +3360,14 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
             )}
 
+                        <button
+              onClick={sendSOSAlert}
+              disabled={sendingSOS}
+              className="w-full flex items-center justify-center gap-2 rounded-2xl py-4 mb-4 font-extrabold text-white transition-all duration-200 active:scale-[0.98]"
+              style={{ background: CORAL, opacity: sendingSOS ? 0.7 : 1 }}
+            >
+              🆘 {sendingSOS ? "위치 전송 중..." : "도움이 필요해요 (보호자에게 위치 알리기)"}
+            </button>
                 <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-extrabold text-sm truncate" style={{ color: INK }}>등록된 장소 {filteredPlaces.length}곳</span>
@@ -3873,6 +3948,33 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   </div>
                 );
               })}
+            </div>
+
+                   <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>🆘 보호자 관리</div>
+            <div className="rounded-2xl p-4 mb-6" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs mb-3" style={{ color: INK_SOFT }}>도움이 필요할 때, 아래 등록한 분들께 현재 위치를 알려드려요</div>
+              <div className="flex gap-2 mb-3">
+                <input value={newGuardianEmail} onChange={(e) => setNewGuardianEmail(e.target.value)} placeholder="보호자 이메일 입력"
+                  className="flex-1 rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, minWidth: 0 }} />
+                <button onClick={addGuardian} className="rounded-xl px-4 py-2.5 text-sm font-bold text-white flex-shrink-0" style={{ background: TEAL }}>추가</button>
+              </div>
+              {guardians.length === 0 ? (
+                <div className="text-center py-4 text-xs" style={{ color: INK_SOFT }}>등록된 보호자가 없어요</div>
+              ) : (
+                <div>
+                  {guardians.map((g) => (
+                    <div key={g.id} className="flex items-center justify-between py-2" style={{ borderBottom: `1px solid ${LINE}` }}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm truncate" style={{ color: INK }}>{g.guardian_email}</span>
+                        <span className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: g.status === "accepted" ? TEAL_TINT : PAPER, color: g.status === "accepted" ? TEAL_DARK : INK_SOFT }}>
+                          {g.status === "accepted" ? "연결됨" : "가입 대기중"}
+                        </span>
+                      </div>
+                      <button onClick={() => removeGuardianFn(g.id)} className="text-xs font-bold flex-shrink-0 ml-2" style={{ color: CORAL }}>삭제</button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>내 동네 설정</div>
