@@ -4277,9 +4277,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 className="w-full rounded-xl px-3 py-2.5 mb-2 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
               <button onClick={addFaq} className="w-full rounded-xl py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>+ 질문 추가하기</button>
             </div>
-                       <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+                                           <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {faqs.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>등록된 질문이 없어요</div>}
-              {faqs.slice((faqAdminPage - 1) * 5, faqAdminPage * 5).map((faq, i, arr) => (
+              {faqs.filter((_, idx) => idx >= (faqAdminPage - 1) * 5 && idx < faqAdminPage * 5).map((faq, i, arr) => (
                 <div key={faq.id} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i !== arr.length - 1 ? `1px solid ${LINE}` : "none" }}>
                   <span className="text-sm truncate" style={{ color: INK }}>{faq.question}</span>
                   <button onClick={() => deleteFaq(faq.id)} className="text-xs font-bold flex-shrink-0 ml-2" style={{ color: CORAL }}>삭제</button>
