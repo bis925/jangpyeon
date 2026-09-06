@@ -1295,6 +1295,21 @@ const viewingReviewsPlaceRef = useRef(null);
     setShowNicknamePrompt(false);
   }
 
+  async function uploadCardBackground(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const compressed = await compressImage(file, 800, 0.85);
+    const filePath = `${session.user.id}/card-bg-${Date.now()}.jpg`;
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, compressed, { upsert: true });
+    if (uploadError) { showToast("업로드 실패: " + uploadError.message); return; }
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    const newUrl = urlData.publicUrl + "?t=" + Date.now();
+    const { error } = await supabase.from("profiles").update({ card_background_url: newUrl, card_theme: "photo" }).eq("id", session.user.id);
+    if (error) { showToast("저장 실패: " + error.message); return; }
+    setProfile((prev) => ({ ...prev, card_background_url: newUrl, card_theme: "photo" }));
+    showToast("배경 사진이 변경됐어요!");
+  }
+  
    async function changeCardTheme(themeKey) {
     const { error } = await supabase.from("profiles").update({ card_theme: themeKey }).eq("id", session.user.id);
     if (error) { showToast("변경 실패: " + error.message); return; }
@@ -3662,15 +3677,45 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         {/* ===================== 마이페이지 ===================== */}
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
-                         <div className="rounded-2xl p-6 mb-5 text-white relative" style={{ background: CARD_THEMES[profile?.card_theme || "default"].gradient }}>
-              <button
-                onClick={() => setShowThemePicker(!showThemePicker)}
-                className="absolute top-4 right-4 flex items-center justify-center rounded-full transition-all duration-150 active:scale-90"
-                style={{ width: 32, height: 32, background: "rgba(255,255,255,0.2)" }}
-                aria-label="배경 색상 변경"
-              >
-                <Palette size={16} color="#fff" />
-              </button>
+            <div
+              className="rounded-2xl p-6 mb-5 text-white relative overflow-hidden"
+              style={{
+                background: profile?.card_theme === "photo" && profile?.card_background_url
+                  ? `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${profile.card_background_url}) center/cover`
+                  : CARD_THEMES[profile?.card_theme || "default"].gradient,
+              }}
+            >
+              <div className="absolute top-4 right-4 flex items-center gap-1.5" style={{ maxWidth: "70%", overflowX: showThemePicker ? "auto" : "visible" }}>
+                <button
+                  onClick={() => setShowThemePicker(!showThemePicker)}
+                  className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                  style={{ width: 32, height: 32, background: "rgba(255,255,255,0.25)" }}
+                  aria-label="배경 꾸미기"
+                >
+                  <Palette size={16} color="#fff" />
+                </button>
+                {showThemePicker && (
+                  <>
+                    <input type="file" accept="image/*" onChange={uploadCardBackground} className="hidden" id="card-bg-upload" />
+                    <label htmlFor="card-bg-upload" className="flex items-center justify-center rounded-full flex-shrink-0 cursor-pointer transition-all duration-150 active:scale-90" style={{ width: 28, height: 28, background: "rgba(255,255,255,0.25)" }} aria-label="사진으로 꾸미기">
+                      <Camera size={14} color="#fff" />
+                    </label>
+                    {Object.entries(CARD_THEMES).map(([key, theme]) => (
+                      <button
+                        key={key}
+                        onClick={() => changeCardTheme(key)}
+                        className="rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                        style={{
+                          width: 24, height: 24,
+                          background: theme.gradient,
+                          border: (profile?.card_theme || "default") === key ? "2.5px solid #fff" : "1.5px solid rgba(255,255,255,0.5)",
+                        }}
+                        aria-label={theme.label}
+                      />
+                    ))}
+                  </>
+                )}
+              </div>
                                             <div className="flex flex-col items-center text-center mb-5">
                 <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
                               <label htmlFor="avatar-upload" className="w-28 h-28 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-4" style={{ background: "rgba(255,255,255,0.15)", border: "3.5px solid rgba(255,255,255,0.5)", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
@@ -3728,24 +3773,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
                 <div className="text-[11px] mt-0.5" style={{ opacity: 0.7 }}>보유 포인트</div>
               </div>
-              {showThemePicker && (
-                <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
-                  {Object.entries(CARD_THEMES).map(([key, theme]) => (
-                    <button
-                      key={key}
-                      onClick={() => changeCardTheme(key)}
-                      className="rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
-                      style={{
-                        width: 26, height: 26,
-                        background: theme.gradient,
-                        border: (profile?.card_theme || "default") === key ? "3px solid #fff" : "2px solid rgba(255,255,255,0.4)",
-                        boxShadow: (profile?.card_theme || "default") === key ? "0 0 0 2px rgba(0,0,0,0.15)" : "none",
-                      }}
-                      aria-label={theme.label}
-                    />
-                  ))}
-                </div>
-              )}
+
               {next ? (
                 <div className="rounded-xl px-4 py-3 mb-4" style={{ background: "rgba(255,255,255,0.18)" }}>
                   <div className="flex items-center justify-between">
