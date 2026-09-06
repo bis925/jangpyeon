@@ -700,6 +700,34 @@ export default function Page() {
       window.speechSynthesis.speak(utter);
     }
   }
+
+    async function fetchFaqs() {
+    const { data } = await supabase.from("faqs").select("*").order("display_order", { ascending: true });
+    setFaqs(data || []);
+  }
+
+  async function addFaq() {
+    if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) { showToast("질문과 답변을 모두 입력해주세요"); return; }
+    const maxOrder = faqs.length > 0 ? Math.max(...faqs.map((f) => f.display_order)) : 0;
+    const { error } = await supabase.from("faqs").insert({
+      question: newFaqQuestion.trim(),
+      answer: newFaqAnswer.trim(),
+      display_order: maxOrder + 1,
+    });
+    if (error) { showToast("추가 실패: " + error.message); return; }
+    setNewFaqQuestion("");
+    setNewFaqAnswer("");
+    fetchFaqs();
+    showToast("FAQ가 추가됐어요!");
+  }
+
+  async function deleteFaq(id) {
+    if (!window.confirm("이 질문을 삭제하시겠어요?")) return;
+    const { error } = await supabase.from("faqs").delete().eq("id", id);
+    if (error) { showToast("삭제 실패: " + error.message); return; }
+    fetchFaqs();
+    showToast("삭제됐어요");
+  }
   
   function showToast(message) {
     setToast(message);
@@ -793,6 +821,9 @@ export default function Page() {
   const [faqVoiceOn, setFaqVoiceOn] = useState(false);
   const [expandedFaqId, setExpandedFaqId] = useState(null);
   const [speakingFaqId, setSpeakingFaqId] = useState(null);
+  const [faqs, setFaqs] = useState([]);
+  const [newFaqQuestion, setNewFaqQuestion] = useState("");
+  const [newFaqAnswer, setNewFaqAnswer] = useState("");
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -1395,6 +1426,7 @@ async function handleAvatarChange(e) {
       fetchCampaigns();
       fetchMyCoupons();
       fetchPointRanking();
+      fetchFaqs();
     }
   }, [session]);
 
@@ -2825,29 +2857,32 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </div>
 
           <div className="flex-1 overflow-y-auto px-5 py-5">
-            {FAQ_LIST.map((faq, i) => {
-              const isExpanded = expandedFaqId === i;
-              const isSpeaking = speakingFaqId === i;
+            {faqs.length === 0 && (
+              <div className="text-center py-12 text-sm" style={{ color: INK_SOFT }}>아직 등록된 질문이 없어요</div>
+            )}
+            {faqs.map((faq) => {
+              const isExpanded = expandedFaqId === faq.id;
+              const isSpeaking = speakingFaqId === faq.id;
               return (
-                <div key={i} className="rounded-2xl mb-3 overflow-hidden" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+                <div key={faq.id} className="rounded-2xl mb-3 overflow-hidden" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                   <button
                     onClick={() => {
                       const nowExpanded = !isExpanded;
-                      setExpandedFaqId(nowExpanded ? i : null);
+                      setExpandedFaqId(nowExpanded ? faq.id : null);
                       if (nowExpanded && faqVoiceOn) {
-                        speakFaqAnswer(i, faq.a);
+                        speakFaqAnswer(faq.id, faq.answer);
                       }
                     }}
                     className="w-full flex items-center justify-between gap-2 px-4 py-3.5 text-left"
                   >
-                    <span className="text-sm font-bold" style={{ color: INK }}>{faq.q}</span>
+                    <span className="text-sm font-bold" style={{ color: INK }}>{faq.question}</span>
                     <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </button>
                   {isExpanded && (
                     <div className="px-4 pb-4">
-                      <div className="text-sm mb-3" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{faq.a}</div>
+                      <div className="text-sm mb-3" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{faq.answer}</div>
                       <button
-                        onClick={() => speakFaqAnswer(i, faq.a)}
+                        onClick={() => speakFaqAnswer(faq.id, faq.answer)}
                         className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold"
                         style={{ background: isSpeaking ? CORAL_TINT : TEAL_TINT, color: isSpeaking ? CORAL : TEAL_DARK }}
                       >
@@ -4186,8 +4221,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               })}
             </div>
 
-            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
-                <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+               <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {allInquiries.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>문의가 없어요</div>}
               {allInquiries.map((q) => {
                 const isExpandedInquiry = expandedInquiryAdminId === q.id;
@@ -4221,6 +4256,24 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
                 );
               })}
+            </div>
+
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>자주 묻는 질문(FAQ) 관리</div>
+            <div className="rounded-2xl p-4 mb-4" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <input value={newFaqQuestion} onChange={(e) => setNewFaqQuestion(e.target.value)} placeholder="질문 입력"
+                className="w-full rounded-xl px-3 py-2.5 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <textarea value={newFaqAnswer} onChange={(e) => setNewFaqAnswer(e.target.value)} placeholder="답변 입력" rows={3}
+                className="w-full rounded-xl px-3 py-2.5 mb-2 text-sm outline-none resize-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+              <button onClick={addFaq} className="w-full rounded-xl py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>+ 질문 추가하기</button>
+            </div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {faqs.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>등록된 질문이 없어요</div>}
+              {faqs.map((faq, i) => (
+                <div key={faq.id} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: i !== faqs.length - 1 ? `1px solid ${LINE}` : "none" }}>
+                  <span className="text-sm truncate" style={{ color: INK }}>{faq.question}</span>
+                  <button onClick={() => deleteFaq(faq.id)} className="text-xs font-bold flex-shrink-0 ml-2" style={{ color: CORAL }}>삭제</button>
+                </div>
+              ))}
             </div>
           </div>
         )}
