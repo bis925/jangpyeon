@@ -2715,10 +2715,12 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <div className="font-extrabold mb-2 flex items-center gap-1.5" style={{ color: CORAL }}>
                   🎁 순위 보상(쿠폰) 안내
                 </div>
-                <div style={{ color: INK }}>
+                          <div style={{ color: INK }}>
                   매달 1~3등에게는 <b>치킨 쿠폰</b>, 4~5등에게는 <b>커피 쿠폰</b>이 지급돼요.
                   <br /><br />
-                  <b>쿠폰을 원하지 않으시면 거부하실 수 있어요.</b> 거부하셔도 <b>포인트는 차감되지 않고 그대로 유지</b>돼요.
+                  <b>쿠폰을 받으시면, 해당 월에 모으신 포인트가 차감</b>돼요.
+                  <br /><br />
+                  <b>쿠폰을 원하지 않으시면 거부하실 수 있어요.</b> 거부하시면 <b>포인트는 차감되지 않고 그대로 유지</b>돼요.
                 </div>
               </div>
               <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>4. 개인정보 표시</div>
