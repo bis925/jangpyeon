@@ -66,22 +66,43 @@ export default function PrivacyPage() {
           <li>불법적인 내용을 포함하거나 관련 법령에 위반되는 사진</li>
         </ul>
       </div>
-      <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>4. 개인정보의 보유 및 이용 기간</h2>
-      <p>회원 탈퇴 시 또는 법령에 따른 보관 기간이 경과할 때까지 보유하며, 이후 지체 없이 파기합니다.</p>
+       <div style={{ background: "#fff", border: `1px solid ${LINE}`, borderRadius: 16, padding: 24, marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 999, background: TEAL_TINT, color: TEAL, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>5</span>
+          <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: INK }}>개인정보의 보유 및 이용 기간</h2>
+        </div>
+        <p style={{ margin: 0, color: INK_SOFT, fontSize: 14 }}>회원 탈퇴 시 또는 법령에 따른 보관 기간이 경과할 때까지 보유하며, 이후 지체 없이 파기합니다.</p>
+      </div>
 
-      <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>5. 개인정보 처리 위탁</h2>
-      <p>서비스 운영을 위해 아래와 같이 개인정보 처리를 위탁하고 있습니다.</p>
-      <ul>
-        <li>Supabase (데이터베이스 및 인증 서비스 운영)</li>
-        <li>카카오 (지도 표시, 카카오톡 공유 및 상담 기능)</li>
-        <li>Daum (주소 검색 기능)</li>
-      </ul>
+      <div style={{ background: "#fff", border: `1px solid ${LINE}`, borderRadius: 16, padding: 24, marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 999, background: TEAL_TINT, color: TEAL, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>6</span>
+          <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: INK }}>개인정보 처리 위탁</h2>
+        </div>
+        <p style={{ margin: "0 0 8px", color: INK_SOFT, fontSize: 14 }}>서비스 운영을 위해 아래와 같이 개인정보 처리를 위탁하고 있습니다.</p>
+        <ul style={{ margin: 0, paddingLeft: 20, color: INK_SOFT, fontSize: 14 }}>
+          <li>Supabase (데이터베이스 및 인증 서비스 운영)</li>
+          <li>카카오 (지도 표시, 카카오톡 공유 및 상담 기능)</li>
+          <li>Daum (주소 검색 기능)</li>
+        </ul>
+      </div>
 
-      <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>6. 이용자의 권리</h2>
-      <p>이용자는 언제든지 본인의 개인정보를 조회, 수정, 삭제할 수 있으며, 회원 탈퇴를 통해 개인정보 이용에 대한 동의를 철회할 수 있습니다.</p>
+      <div style={{ background: "#fff", border: `1px solid ${LINE}`, borderRadius: 16, padding: 24, marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 999, background: TEAL_TINT, color: TEAL, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>7</span>
+          <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: INK }}>이용자의 권리</h2>
+        </div>
+        <p style={{ margin: 0, color: INK_SOFT, fontSize: 14 }}>이용자는 언제든지 본인의 개인정보를 조회, 수정, 삭제할 수 있으며, 회원 탈퇴를 통해 개인정보 이용에 대한 동의를 철회할 수 있습니다.</p>
+      </div>
 
-      <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 32, marginBottom: 8 }}>7. 개인정보 보호책임자</h2>
-      <p>서비스명: 장편<br />문의: 카카오톡 채널 "장편" 또는 앱 내 1:1 문의</p>
+      <div style={{ background: TEAL_TINT, borderRadius: 16, padding: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 999, background: "#fff", color: TEAL, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>8</span>
+          <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: INK }}>개인정보 보호책임자</h2>
+        </div>
+        <p style={{ margin: 0, color: INK, fontSize: 14 }}>서비스명: 장편<br />문의: 카카오톡 채널 "장편" 또는 앱 내 1:1 문의</p>
+      </div>
+      </div>
     </div>
   );
 }
