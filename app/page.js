@@ -824,6 +824,7 @@ export default function Page() {
   const [faqAdminPage, setFaqAdminPage] = useState(1);
   const [noticeAdminPage, setNoticeAdminPage] = useState(1);
   const [campaignAdminPage, setCampaignAdminPage] = useState(1);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -1427,6 +1428,14 @@ async function handleAvatarChange(e) {
     return () => window.removeEventListener("resize", updateMenuOffset);
   }, []);
 
+  useEffect(() => {
+    function handleScroll() {
+      setShowScrollTop(window.scrollY > 400);
+    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+  
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -3033,6 +3042,19 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </div>
         </div>
       )}
+
+      {/* ===== SCROLL TO TOP ===== */}
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed sm:hidden z-40 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90"
+          style={{ bottom: 78, right: 16, width: 44, height: 44, background: TEAL, boxShadow: "0 4px 14px rgba(0,0,0,0.25)" }}
+          aria-label="맨 위로"
+        >
+          <ChevronRight size={20} color="#fff" style={{ transform: "rotate(-90deg)" }} />
+        </button>
+      )}
+
       {/* ===== TOAST ===== */}
       <div className="fixed left-1/2 z-50 pointer-events-none transition-all duration-300"
         style={{ bottom: toast ? 24 : 0, opacity: toast ? 1 : 0, transform: `translateX(-50%) translateY(${toast ? 0 : 10}px)` }}>
