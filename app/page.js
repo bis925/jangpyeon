@@ -324,7 +324,7 @@ function TierBar({ points }) {
       <div className="h-2.5 rounded-full overflow-hidden" style={{ background: LINE }}>
         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${TEAL}, ${CORAL})` }} />
       </div>
-      <div className="flex justify-between mt-2 text-[10px]" style={{ color: INK_SOFT }}>
+      <div className="flex justify-between mt-2 text-[11px] font-bold" style={{ color: INK }}>
         {TIERS.map((t) => <span key={t.label} style={{ fontFamily: MONO_FONT }}>{t.min}</span>)}
       </div>
     </div>
