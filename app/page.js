@@ -2176,6 +2176,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         </div>
         </div>
         </div>
+   </div>
              {/* ===== MOBILE TABS ===== */}
       <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
         {NAV.map((n) => {
