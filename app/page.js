@@ -1381,10 +1381,10 @@ async function handleAvatarChange(e) {
     setMonthlyWinners(data || []);
   }
 
-  async function issueRankingCoupon(userId, rank) {
+  async function issueRankingCoupon(userId, rank, pointsEarned) {
     const isChicken = rank <= 3;
     const title = isChicken ? `🏆 ${rank}등 축하 치킨 쿠폰` : `🏆 ${rank}등 축하 커피 쿠폰`;
-    const description = `지난달 이달의 포인트 랭킹 ${rank}등을 축하드려요! 받으시려면 아래 "받을게요" 버튼을 눌러주세요. 원하지 않으시면 "괜찮아요"를 눌러주셔도 포인트는 그대로 유지돼요.`;
+    const description = `지난달 이달의 포인트 랭킹 ${rank}등을 축하드려요! 받으시려면 아래 "받을게요" 버튼을 눌러주세요 (해당 월 포인트 ${pointsEarned}P가 차감돼요). 원하지 않으시면 "괜찮아요"를 눌러주셔도 포인트는 그대로 유지돼요.`;
     const { error } = await supabase.rpc("admin_issue_coupon", {
       p_user_id: userId,
       p_title: title,
@@ -1394,7 +1394,7 @@ async function handleAvatarChange(e) {
     if (error) { showToast("발급 실패: " + error.message); return; }
 
     const { data: latestCoupon } = await supabase.from("coupons").select("id").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).single();
-    if (latestCoupon) await supabase.from("coupons").update({ is_ranking_coupon: true }).eq("id", latestCoupon.id);
+    if (latestCoupon) await supabase.from("coupons").update({ is_ranking_coupon: true, points_at_stake: pointsEarned }).eq("id", latestCoupon.id);
 
     showToast(`${rank}등에게 쿠폰을 발급했어요!`);
   }
@@ -1419,10 +1419,17 @@ async function handleAvatarChange(e) {
     const withPhoto = (data || []).map((p) => ({ ...p, photo_urls: (p.place_photos || []).map((ph) => ph.photo_url), photo_url: p.place_photos?.[0]?.photo_url || null }));
     setPlaces(withPhoto);
   }
-    async function respondToRankingCoupon(couponId, response) {
-    const { error } = await supabase.from("coupons").update({ response_status: response }).eq("id", couponId);
-    if (error) { showToast("처리 실패: " + error.message); return; }
-    showToast(response === "accepted" ? "감사해요! 곧 쿠폰을 보내드릴게요" : "알겠어요, 포인트는 그대로 유지돼요");
+      async function respondToRankingCoupon(couponId, response) {
+    if (response === "accepted") {
+      const { error } = await supabase.rpc("accept_ranking_coupon", { p_coupon_id: couponId });
+      if (error) { showToast("처리 실패: " + error.message); return; }
+      showToast("감사해요! 곧 쿠폰을 보내드릴게요");
+      fetchProfile();
+    } else {
+      const { error } = await supabase.from("coupons").update({ response_status: response }).eq("id", couponId);
+      if (error) { showToast("처리 실패: " + error.message); return; }
+      showToast("알겠어요, 포인트는 그대로 유지돼요");
+    }
     fetchMyCoupons();
     setViewingCoupon(null);
   }
@@ -3652,7 +3659,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                             <div className="text-[10px]" style={{ color: INK_SOFT }}>{w.total_points.toLocaleString()}P · {isChicken ? "치킨 쿠폰" : "커피 쿠폰"}</div>
                           </div>
                         </div>
-                        <button onClick={() => issueRankingCoupon(w.user_id, rank)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: CORAL }}>
+                                               <button onClick={() => issueRankingCoupon(w.user_id, rank, w.total_points)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-white flex-shrink-0" style={{ background: CORAL }}>
                           발급
                         </button>
                       </div>
