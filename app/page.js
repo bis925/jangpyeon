@@ -799,6 +799,9 @@ export default function Page() {
   const [notifNoticeId, setNotifNoticeId] = useState("");
   const [adminNoteDrafts, setAdminNoteDrafts] = useState({});
   const mapContainerRef = useRef(null);
+  const fullscreenMapContainerRef = useRef(null);
+  const fullscreenMapInstanceRef = useRef(null);
+  const fullscreenMarkersRef = useRef({});
     const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
@@ -846,6 +849,7 @@ export default function Page() {
   const [guardians, setGuardians] = useState([]);
   const [newGuardianEmail, setNewGuardianEmail] = useState("");
   const [sendingSOS, setSendingSOS] = useState(false);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [mySessionToken, setMySessionToken] = useState(null);
   
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
@@ -890,8 +894,10 @@ const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => { viewingReviewsPlaceRef.current = viewingReviewsPlace; }, [viewingReviewsPlace]);
   const showFAQRef = useRef(false);
   useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
-  const showFavoritesOnlyRef = useRef(false);
+   const showFavoritesOnlyRef = useRef(false);
   useEffect(() => { showFavoritesOnlyRef.current = showFavoritesOnly; }, [showFavoritesOnly]);
+  const isMapFullscreenRef = useRef(false);
+  useEffect(() => { isMapFullscreenRef.current = isMapFullscreen; }, [isMapFullscreen]);
   const didSwipe = useRef(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
@@ -964,9 +970,11 @@ const viewingReviewsPlaceRef = useRef(null);
     let subPromise;
     import("@capacitor/app").then(({ App }) => {
       subPromise = App.addListener("backButton", () => {
-        if (previewImagesRef.current.length > 0) {
+               if (previewImagesRef.current.length > 0) {
           setPreviewImages([]);
           setImageScale(1);
+        } else if (isMapFullscreenRef.current) {
+          setIsMapFullscreen(false);
         } else if (showFavoritesOnlyRef.current) {
           setShowFavoritesOnly(false);
         } else if (showFAQRef.current) {
@@ -1051,6 +1059,37 @@ const viewingReviewsPlaceRef = useRef(null);
     });
   }, [tab, kakaoLoaded, mapCategory, places]);
 
+  useEffect(() => {
+    if (!isMapFullscreen || !kakaoLoaded || !fullscreenMapContainerRef.current) return;
+    const kakao = window.kakao;
+    const center = myLocation ? new kakao.maps.LatLng(myLocation.lat, myLocation.lng) : new kakao.maps.LatLng(37.5665, 126.9780);
+    const map = new kakao.maps.Map(fullscreenMapContainerRef.current, { center, level: myLocation ? 4 : 6 });
+    fullscreenMapInstanceRef.current = map;
+    fullscreenMarkersRef.current = {};
+    const geocoder = new kakao.maps.services.Geocoder();
+    const filtered = mapCategory ? places.filter((p) => p.category === mapCategory) : places;
+
+    function addMarker(placeId, lat, lng, name) {
+      const position = new kakao.maps.LatLng(lat, lng);
+      const marker = new kakao.maps.Marker({ position, map });
+      const infowindow = new kakao.maps.InfoWindow({ content: `<div style="padding:6px 10px;font-size:12px;">${name}</div>` });
+      kakao.maps.event.addListener(marker, "click", () => infowindow.open(map, marker));
+      fullscreenMarkersRef.current[placeId] = { marker, infowindow, position };
+    }
+
+    filtered.forEach((place) => {
+      if (place.lat && place.lng) {
+        addMarker(place.id, place.lat, place.lng, place.name);
+      } else if (place.address) {
+        geocoder.addressSearch(place.address, (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            addMarker(place.id, parseFloat(result[0].y), parseFloat(result[0].x), place.name);
+          }
+        });
+      }
+    });
+  }, [isMapFullscreen, kakaoLoaded, mapCategory, places, myLocation]);
+  
   useEffect(() => {
     if (campaigns.length <= 1) return;
     const timer = setInterval(() => {
@@ -3137,6 +3176,22 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         </div>
       )}
 
+      {/* ===== FULLSCREEN MAP ===== */}
+      {isMapFullscreen && (
+        <div className="fixed inset-0 z-[70] flex flex-col" style={{ background: "#fff" }}>
+          <div className="sticky top-0 flex items-center justify-between px-5 py-3.5" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
+            <span className="font-extrabold text-sm" style={{ color: INK }}>지도 크게 보기</span>
+            <button onClick={() => setIsMapFullscreen(false)} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
+              <X size={20} color={INK_SOFT} />
+            </button>
+          </div>
+          <div ref={fullscreenMapContainerRef} className="flex-1 w-full" />
+          <button onClick={locateMe} className="absolute bottom-6 right-5 rounded-full p-3 shadow-md transition-all duration-200 active:scale-90" style={{ background: "#fff", border: `1px solid ${LINE}` }} aria-label="내 위치 찾기">
+            <LocateFixed size={20} color={TEAL} />
+          </button>
+        </div>
+      )}
+
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -3415,11 +3470,14 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         {/* ===================== 지도·검색 ===================== */}
         {tab === "map" && (
           <div>
-            <div className="relative mb-6">
-              <div ref={mapContainerRef} className="w-full h-72 rounded-2xl overflow-hidden" style={{ background: PAPER, border: `1px solid ${LINE}` }} />
-              <button onClick={locateMe} className="absolute bottom-3 right-3 rounded-full p-2.5 shadow-md transition-all duration-200 active:scale-90" style={{ background: "#fff", border: `1px solid ${LINE}` }} aria-label="내 위치 찾기">
+                       <div className="relative mb-6">
+              <div ref={mapContainerRef} onClick={() => setIsMapFullscreen(true)} className="w-full h-72 rounded-2xl overflow-hidden cursor-pointer" style={{ background: PAPER, border: `1px solid ${LINE}` }} />
+              <button onClick={(e) => { e.stopPropagation(); locateMe(); }} className="absolute bottom-3 right-3 rounded-full p-2.5 shadow-md transition-all duration-200 active:scale-90" style={{ background: "#fff", border: `1px solid ${LINE}` }} aria-label="내 위치 찾기">
                 <LocateFixed size={18} color={TEAL} />
               </button>
+              <div className="absolute top-3 left-3 rounded-full px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 pointer-events-none" style={{ background: "rgba(255,255,255,0.9)", color: INK }}>
+                <ZoomIn size={13} /> 탭하여 크게 보기
+              </div>
             </div>
             <select value={mapCategory || ""} onChange={(e) => setMapCategory(e.target.value || null)} className="w-full rounded-xl px-4 py-3 mb-5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
               <option value="">전체 카테고리</option>
