@@ -850,6 +850,7 @@ export default function Page() {
   const [newGuardianEmail, setNewGuardianEmail] = useState("");
   const [sendingSOS, setSendingSOS] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [fullscreenCenter, setFullscreenCenter] = useState(null);
   const [mySessionToken, setMySessionToken] = useState(null);
   
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
@@ -1062,8 +1063,10 @@ const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => {
     if (!isMapFullscreen || !kakaoLoaded || !fullscreenMapContainerRef.current) return;
     const kakao = window.kakao;
-    const center = myLocation ? new kakao.maps.LatLng(myLocation.lat, myLocation.lng) : new kakao.maps.LatLng(37.5665, 126.9780);
-    const map = new kakao.maps.Map(fullscreenMapContainerRef.current, { center, level: myLocation ? 4 : 6 });
+    const center = fullscreenCenter
+      ? new kakao.maps.LatLng(fullscreenCenter.lat, fullscreenCenter.lng)
+      : (myLocation ? new kakao.maps.LatLng(myLocation.lat, myLocation.lng) : new kakao.maps.LatLng(37.5665, 126.9780));
+    const map = new kakao.maps.Map(fullscreenMapContainerRef.current, { center, level: fullscreenCenter?.level || (myLocation ? 4 : 6) });
     fullscreenMapInstanceRef.current = map;
     fullscreenMarkersRef.current = {};
     const geocoder = new kakao.maps.services.Geocoder();
@@ -3471,7 +3474,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         {tab === "map" && (
           <div>
                        <div className="relative mb-6">
-              <div ref={mapContainerRef} onClick={() => setIsMapFullscreen(true)} className="w-full h-72 rounded-2xl overflow-hidden cursor-pointer" style={{ background: PAPER, border: `1px solid ${LINE}` }} />
+                        <div ref={mapContainerRef} onClick={() => {
+                if (mapInstanceRef.current) {
+                  const center = mapInstanceRef.current.getCenter();
+                  setFullscreenCenter({ lat: center.getLat(), lng: center.getLng(), level: mapInstanceRef.current.getLevel() });
+                }
+                setIsMapFullscreen(true);
+              }} className="w-full h-72 rounded-2xl overflow-hidden cursor-pointer" style={{ background: PAPER, border: `1px solid ${LINE}` }} />
               <button onClick={(e) => { e.stopPropagation(); locateMe(); }} className="absolute bottom-3 right-3 rounded-full p-2.5 shadow-md transition-all duration-200 active:scale-90" style={{ background: "#fff", border: `1px solid ${LINE}` }} aria-label="내 위치 찾기">
                 <LocateFixed size={18} color={TEAL} />
               </button>
