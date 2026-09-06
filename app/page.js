@@ -394,7 +394,7 @@ function TierBar({ points }) {
 }
 
 /* ===================== 로그인 화면 ===================== */
-function LoginScreen({ onSent }) {
+function LoginScreen({ onSent, signInWithGoogle }) {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
@@ -2600,11 +2600,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
     }
   }
 
-  if (authLoading) {
+if (authLoading) {
     return <div className="min-h-screen flex items-center justify-center" style={{ background: PAPER }}><LogoMark size={40} /></div>;
   }
   if (!session) {
-    return <LoginScreen />;
+    return <LoginScreen signInWithGoogle={signInWithGoogle} />;
   }
 
   const points = profile?.points ?? 0;
