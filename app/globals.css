@@ -201,3 +201,11 @@ html {
   display: inline-block;
   animation: coin-spin 2s ease-in-out infinite;
 }
+
+@keyframes ring-glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px currentColor) brightness(1); transform: rotate(0deg); }
+  50% { filter: drop-shadow(0 0 10px currentColor) brightness(1.3); transform: rotate(180deg); }
+}
+.avatar-ring-glow {
+  animation: ring-glow-pulse 3s ease-in-out infinite;
+}
