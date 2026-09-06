@@ -862,8 +862,10 @@ export default function Page() {
   const [showSwipeHint, setShowSwipeHint] = useState(false);
   useEffect(() => { previewImagesRef.current = previewImages; }, [previewImages]);
   useEffect(() => { tabRef.current = tab; }, [tab]);
-  const viewingReviewsPlaceRef = useRef(null);
+const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => { viewingReviewsPlaceRef.current = viewingReviewsPlace; }, [viewingReviewsPlace]);
+  const showFAQRef = useRef(false);
+  useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
   const didSwipe = useRef(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
@@ -922,6 +924,10 @@ export default function Page() {
         if (previewImagesRef.current.length > 0) {
           setPreviewImages([]);
           setImageScale(1);
+        } else if (showFAQRef.current) {
+          setShowFAQ(false);
+          if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
+          setSpeakingFaqId(null);
         } else if (viewingReviewsPlaceRef.current) {
           setViewingReviewsPlace(null);
         } else if (tabRef.current !== "home") {
