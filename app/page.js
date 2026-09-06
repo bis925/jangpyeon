@@ -128,6 +128,19 @@ function useKoreanHolidays() {
   return holidays;
 }
 
+const FAQ_LIST = [
+  { q: "장편은 어떤 서비스인가요?", a: "장편은 휠체어 이용자, 유모차를 끄는 부모님, 지팡이를 짚는 어르신 등 이동에 불편을 느끼는 분들을 위한 접근성 정보 지도 서비스예요. 휠체어 출입 가능 여부, 장애인 화장실 유무 등을 지도에서 확인하고 함께 기록해나가요." },
+  { q: "포인트는 어떻게 모으나요?", a: "새로운 장소를 등록하면 포인트를 받아요. 내가 등록한 장소가 도움이 됐어요를 받으면 추가 포인트를 받고, 오래된 정보를 방문해서 정보 확인했어요를 눌러도 포인트를 받을 수 있어요." },
+  { q: "닉네임은 어떻게 바꾸나요?", a: "마이페이지에서 닉네임 옆의 연필 아이콘을 눌러 언제든지 바꾸실 수 있어요." },
+  { q: "이달의 포인트 랭킹은 무엇인가요?", a: "매달 1일부터 그 달 마지막 날까지 모은 포인트를 기준으로 순위를 매기는 기능이에요. 매달 1일에 자동으로 초기화되며, 1등부터 3등까지는 치킨 쿠폰, 4등부터 5등까지는 커피 쿠폰을 받으실 수 있어요." },
+  { q: "쿠폰을 받으면 포인트가 줄어드나요?", a: "네, 순위 보상 쿠폰을 받으시면 해당 월에 모으신 포인트가 차감돼요. 쿠폰이 필요 없으시다면 거부하실 수 있고, 거부하시면 포인트는 그대로 유지돼요." },
+  { q: "영업중, 영업종료는 어떻게 표시되나요?", a: "장소를 등록할 때 영업시간을 함께 등록하시면, 지도와 목록에서 그 장소가 지금 영업중인지 영업이 끝났는지 자동으로 표시돼요." },
+  { q: "즐겨찾기한 장소를 친구에게 공유할 수 있나요?", a: "네, 즐겨찾기 화면에서 공유 버튼을 누르면 링크가 만들어져요. 이 링크를 받은 친구는 로그인 없이도 바로 지도를 볼 수 있어요." },
+  { q: "근처에 새 장소가 등록되면 알림이 오나요?", a: "마이페이지에서 내 동네를 설정하시면, 반경 3킬로미터 이내에 새 장소가 등록될 때 자동으로 알림을 받으실 수 있어요. 알림이 필요 없으시면 언제든지 꺼두실 수 있어요." },
+  { q: "정보가 오래됐는지 어떻게 알 수 있나요?", a: "각 장소 카드에 등록일이나 최근 확인일이 색깔과 함께 표시돼요. 초록색은 최근 정보, 노란색은 조금 지난 정보, 빨간색은 오래된 정보를 의미해요." },
+  { q: "글자 크기나 다크모드를 바꿀 수 있나요?", a: "마이페이지에서 다크모드를 켜고 끌 수 있고, 상단의 글자 크기 버튼으로 다섯 단계로 조절하실 수 있어요." },
+];
+
 function maskEmail(email) {
   if (!email) return "익명";
   const atIndex = email.indexOf("@");
@@ -656,6 +669,38 @@ export default function Page() {
       window.speechSynthesis.speak(utter);
     }
   }
+
+  async function speakFaqAnswer(faqId, text) {
+    if (speakingFaqId === faqId) {
+      if (typeof window !== "undefined" && window.Capacitor) {
+        const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
+        TextToSpeech.stop();
+      } else if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      setSpeakingFaqId(null);
+      return;
+    }
+    const cleaned = text.replace(/([.!?])/g, "$1 , ,");
+    setSpeakingFaqId(faqId);
+    if (typeof window !== "undefined" && window.Capacitor) {
+      const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
+      await TextToSpeech.speak({ text: cleaned, lang: "ko-KR", rate: 0.82, pitch: 1.05, volume: 1.0, category: "ambient" });
+      setSpeakingFaqId(null);
+    } else if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(cleaned);
+      utter.lang = "ko-KR";
+      utter.rate = 0.82;
+      utter.pitch = 1.05;
+      const voices = window.speechSynthesis.getVoices();
+      const koreanVoice = voices.find((v) => v.lang === "ko-KR" && /female|여성|유나|Yuna|Sora|소라/i.test(v.name)) || voices.find((v) => v.lang === "ko-KR");
+      if (koreanVoice) utter.voice = koreanVoice;
+      utter.onend = () => setSpeakingFaqId(null);
+      window.speechSynthesis.speak(utter);
+    }
+  }
+  
   function showToast(message) {
     setToast(message);
     setTimeout(() => setToast(null), 10000);
@@ -744,6 +789,10 @@ export default function Page() {
   const [monthlyWinners, setMonthlyWinners] = useState(null);
   const [loadingWinners, setLoadingWinners] = useState(false);
   const [rankingCouponResponses, setRankingCouponResponses] = useState(null);
+    const [showFAQ, setShowFAQ] = useState(false);
+  const [faqVoiceOn, setFaqVoiceOn] = useState(false);
+  const [expandedFaqId, setExpandedFaqId] = useState(null);
+  const [speakingFaqId, setSpeakingFaqId] = useState(null);
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -2748,6 +2797,71 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </div>
         </div>
       )}
+      {/* ===== FAQ POPUP ===== */}
+      {showFAQ && (
+        <div className="fixed inset-0 z-50 flex flex-col" style={{ background: PAPER }}>
+          <div className="sticky top-0 flex items-center justify-between px-5 py-4" style={{ background: CARD, borderBottom: `1px solid ${LINE}` }}>
+            <div className="flex items-center gap-2">
+              <Headset size={18} color={TEAL_DARK} />
+              <span className="font-extrabold text-base" style={{ color: INK }}>자주 묻는 질문</span>
+            </div>
+            <button onClick={() => { setShowFAQ(false); setExpandedFaqId(null); if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel(); setSpeakingFaqId(null); }} className="rounded-full p-1.5 hover:bg-black/5" aria-label="닫기">
+              <X size={20} color={INK_SOFT} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between px-5 py-3" style={{ background: TEAL_TINT }}>
+            <div>
+              <div className="text-sm font-extrabold" style={{ color: TEAL_DARK }}>🔊 음성으로 답변 듣기</div>
+              <div className="text-xs" style={{ color: INK_SOFT }}>켜두시면 질문을 누를 때 자동으로 답변을 읽어드려요</div>
+            </div>
+            <button
+              onClick={() => setFaqVoiceOn(!faqVoiceOn)}
+              className="relative rounded-full transition-all duration-200 flex-shrink-0"
+              style={{ width: 48, height: 28, background: faqVoiceOn ? TEAL : LINE }}
+            >
+              <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: faqVoiceOn ? 23 : 3 }} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-5 py-5">
+            {FAQ_LIST.map((faq, i) => {
+              const isExpanded = expandedFaqId === i;
+              const isSpeaking = speakingFaqId === i;
+              return (
+                <div key={i} className="rounded-2xl mb-3 overflow-hidden" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+                  <button
+                    onClick={() => {
+                      const nowExpanded = !isExpanded;
+                      setExpandedFaqId(nowExpanded ? i : null);
+                      if (nowExpanded && faqVoiceOn) {
+                        speakFaqAnswer(i, faq.a);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between gap-2 px-4 py-3.5 text-left"
+                  >
+                    <span className="text-sm font-bold" style={{ color: INK }}>{faq.q}</span>
+                    <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
+                  {isExpanded && (
+                    <div className="px-4 pb-4">
+                      <div className="text-sm mb-3" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{faq.a}</div>
+                      <button
+                        onClick={() => speakFaqAnswer(i, faq.a)}
+                        className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold"
+                        style={{ background: isSpeaking ? CORAL_TINT : TEAL_TINT, color: isSpeaking ? CORAL : TEAL_DARK }}
+                      >
+                        <Headset size={13} /> {isSpeaking ? "음성 종료" : "음성으로 듣기"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -3587,7 +3701,14 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <Headset size={18} />
               카카오톡으로 상담하기
             </a>
-            <div className="flex items-center justify-between mb-3 mt-8">
+       <button onClick={() => setShowFAQ(true)} className="w-full flex items-center justify-between rounded-2xl p-4 mb-3 mt-8 transition-all duration-200 active:scale-[0.98]" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+              <div className="flex items-center gap-2">
+                <Headset size={16} color={TEAL_DARK} />
+                <span className="font-extrabold text-sm" style={{ color: INK }}>자주 묻는 질문 (FAQ)</span>
+              </div>
+              <ChevronRight size={16} color={INK_SOFT} />
+            </button>
+            <div className="flex items-center justify-between mb-3">
               <span className="font-extrabold text-sm" style={{ color: INK }}>1:1 문의</span>
               <button onClick={() => setShowInquiryForm(!showInquiryForm)} className="text-xs font-bold" style={{ color: TEAL }}>
                 {showInquiryForm ? "닫기" : "+ 문의하기"}
