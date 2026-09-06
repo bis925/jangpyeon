@@ -209,3 +209,10 @@ html {
 .avatar-ring-glow {
   animation: ring-glow-pulse 3s ease-in-out infinite;
 }
+@keyframes sos-pulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(240,96,61,0.4); }
+  50% { box-shadow: 0 4px 24px rgba(240,96,61,0.7); }
+}
+.sos-button-pulse {
+  animation: sos-pulse 2s ease-in-out infinite;
+}
