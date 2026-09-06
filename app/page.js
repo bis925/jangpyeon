@@ -825,6 +825,9 @@ export default function Page() {
   const [noticeAdminPage, setNoticeAdminPage] = useState(1);
   const [campaignAdminPage, setCampaignAdminPage] = useState(1);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [sessionConflict, setSessionConflict] = useState(null);
+  const [mySessionToken, setMySessionToken] = useState(null);
+  
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -1435,6 +1438,21 @@ async function handleAvatarChange(e) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!session || !mySessionToken) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase.rpc("validate_session", { p_session_token: mySessionToken });
+      if (data === false) {
+        window.speechSynthesis?.cancel();
+        alert("다른 기기에서 로그인되어 자동으로 로그아웃됩니다.");
+        localStorage.removeItem("jangpyeon_session_token");
+        await supabase.auth.signOut({ scope: "local" });
+        window.location.href = "/";
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [session, mySessionToken]);
   
   /* --- 인증 상태 감지 --- */
   useEffect(() => {
@@ -1453,6 +1471,7 @@ async function handleAvatarChange(e) {
   /* --- 로그인 후 데이터 불러오기 --- */
   useEffect(() => {
     if (session) {
+      checkDeviceSession();
       fetchProfile();
       fetchPlaces();
       fetchFavorites();
@@ -1529,6 +1548,53 @@ async function handleAvatarChange(e) {
     if (error) { console.error("랭킹 불러오기 실패:", error); return; }
     const mapped = (data || []).map((r) => ({ email: r.email, points: r.total_points }));
     setPointRanking(mapped);
+  }
+  async function checkDeviceSession() {
+    const deviceType = (typeof window !== "undefined" && window.Capacitor) ? "mobile" : "pc";
+    const deviceLabel = deviceType === "mobile" ? "모바일 앱" : "PC 브라우저";
+
+    let token = localStorage.getItem("jangpyeon_session_token");
+    if (!token) {
+      token = crypto.randomUUID();
+      localStorage.setItem("jangpyeon_session_token", token);
+    }
+    setMySessionToken(token);
+
+    const isValid = await supabase.rpc("validate_session", { p_session_token: token });
+    if (isValid.data) return;
+
+    const { data, error } = await supabase.rpc("check_and_register_session", {
+      p_device_type: deviceType,
+      p_device_label: deviceLabel,
+      p_session_token: token,
+    });
+    if (error) return;
+    const result = data?.[0];
+    if (result?.needs_confirmation) {
+      setSessionConflict({ deviceType, deviceLabel, existingSessionId: result.existing_session_id, existingLabel: result.existing_device_label, token });
+    }
+  }
+
+  async function confirmReplaceSession() {
+    if (!sessionConflict) return;
+    const { error } = await supabase.rpc("force_replace_session", {
+      p_old_session_id: sessionConflict.existingSessionId,
+      p_device_type: sessionConflict.deviceType,
+      p_device_label: sessionConflict.deviceLabel,
+      p_session_token: sessionConflict.token,
+    });
+    if (!error) {
+      setMySessionToken(sessionConflict.token);
+      setSessionConflict(null);
+      showToast("이 기기로 로그인됐어요");
+    }
+  }
+
+  function cancelReplaceSession() {
+    setSessionConflict(null);
+    localStorage.removeItem("jangpyeon_session_token");
+    supabase.auth.signOut({ scope: "local" });
+    window.location.href = "/";
   }
   
   async function fetchProfile() {
@@ -2933,6 +2999,30 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* ===== SESSION CONFLICT POPUP ===== */}
+      {sessionConflict && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.6)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: CORAL_TINT }}>
+              <ShieldCheck size={26} color={CORAL} />
+            </div>
+            <div className="font-extrabold text-base mb-2" style={{ color: INK }}>이미 다른 기기에서 로그인되어 있어요</div>
+            <div className="text-sm mb-6" style={{ color: INK_SOFT }}>
+              현재 <b>{sessionConflict.existingLabel}</b>에서 로그인 중이에요.<br />
+              이 기기({sessionConflict.deviceLabel})로 계속하시면, 기존 기기는 자동으로 로그아웃돼요.
+            </div>
+            <div className="flex gap-2">
+              <button onClick={cancelReplaceSession} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                취소
+              </button>
+              <button onClick={confirmReplaceSession} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: CORAL }}>
+                이 기기로 계속하기
+              </button>
+            </div>
           </div>
         </div>
       )}
