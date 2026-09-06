@@ -3214,20 +3214,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
             <div className="rounded-2xl p-6 mb-5 text-white" style={{ background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})` }}>
-                        <div className="flex flex-col items-center text-center mb-5">
+                                            <div className="flex flex-col items-center text-center mb-5">
                 <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
-                              <label htmlFor="avatar-upload" className="w-24 h-24 rounded-3xl flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-3" style={{ background: "rgba(255,255,255,0.2)", border: "3px solid rgba(255,255,255,0.3)" }}>
+                              <label htmlFor="avatar-upload" className="w-28 h-28 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-4" style={{ background: "rgba(255,255,255,0.15)", border: "3.5px solid rgba(255,255,255,0.5)", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="프로필 사진" className="w-full h-full object-cover" />
                   ) : (
-                    <User size={32} />
+                    <User size={36} />
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.35)", opacity: 0 }} onMouseEnter={(e) => e.currentTarget.style.opacity = 1} onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
-                    <Camera size={20} color="#fff" />
+                  <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center py-1.5" style={{ background: "rgba(0,0,0,0.5)" }}>
+                    <Camera size={14} color="#fff" />
                   </div>
                 </label>
                 {editingNickname ? (
-                  <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="flex items-center gap-1.5 mb-2">
                     <input
                       value={nicknameDraft}
                       onChange={(e) => setNicknameDraft(e.target.value)}
@@ -3243,14 +3243,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 ) : (
                   <button
                     onClick={() => { setNicknameDraft(profile?.nickname || ""); setEditingNickname(true); }}
-                    className="flex items-center gap-1.5 mb-1.5"
+                    className="flex items-center gap-1.5 mb-2"
                   >
-                    <span className="font-extrabold text-base">{profile?.nickname || "닉네임 설정하기"}</span>
-                    <Pencil size={13} color="rgba(255,255,255,0.7)" />
+                    <span className="font-extrabold text-lg">{profile?.nickname || "닉네임 설정하기"}</span>
+                    <Pencil size={14} color="rgba(255,255,255,0.7)" />
                   </button>
                 )}
-                <div className="text-xs opacity-70 mb-2">{session.user.email}</div>
-                      <div className="inline-block text-[11px] rounded-full px-2.5 py-1" style={{ background: "rgba(255,255,255,0.18)" }}>{tier.emoji} {tier.label}</div>
+                <div className="flex items-center gap-1.5 mb-3" style={{ opacity: 0.75 }}>
+                  <Mail size={12} />
+                  <span className="text-xs">{session.user.email}</span>
+                </div>
+                      <div className="inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-3 py-1" style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.3)" }}>
+                        <span className="flex items-center justify-center rounded-full" style={{ width: 20, height: 20, background: "rgba(255,255,255,0.25)", fontSize: 12 }}>{tier.emoji}</span>
+                        <span className="text-xs font-extrabold">{tier.label}</span>
+                      </div>
               </div>
    <div className="flex items-center gap-2 mb-1">
   <span style={{ fontSize: 28 }}>🪙</span>
