@@ -823,6 +823,7 @@ export default function Page() {
   const [newFaqAnswer, setNewFaqAnswer] = useState("");
   const [faqAdminPage, setFaqAdminPage] = useState(1);
   const [noticeAdminPage, setNoticeAdminPage] = useState(1);
+  const [campaignAdminPage, setCampaignAdminPage] = useState(1);
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
