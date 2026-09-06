@@ -3690,7 +3690,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   : CARD_THEMES[profile?.card_theme || "default"].gradient,
               }}
             >
-              <div className="absolute top-4 right-4 flex items-center gap-1.5" style={{ maxWidth: "70%", overflowX: showThemePicker ? "auto" : "visible" }}>
+                 <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10" style={{ maxWidth: showThemePicker ? "calc(100% - 32px)" : "70%", overflowX: showThemePicker ? "auto" : "visible", background: showThemePicker ? "rgba(0,0,0,0.25)" : "transparent", borderRadius: 999, padding: showThemePicker ? "4px 6px" : 0 }}>
                 <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
