@@ -3356,9 +3356,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <span className="font-extrabold text-sm" style={{ color: INK }}>🏆 이달의 포인트 랭킹</span>
               <span className="rounded-full px-2 py-0.5 text-[9px] font-extrabold text-white" style={{ background: CORAL }}>● LIVE</span>
             </div>
-            <div className="text-[11px] mb-3" style={{ color: INK_SOFT }}>
-              * {new Date().getMonth() + 1}월 한 달간 모은 포인트 기준이며, 매달 1일에 초기화돼요. 포인트가 같으면 먼저 모으신 분이 순위에 반영돼요{" "}
-              <button onClick={() => setShowRankingPolicy(true)} className="underline font-bold" style={{ color: TEAL }}>이용 안내 보기</button>
+                <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="text-[11px]" style={{ color: INK_SOFT }}>
+                * {new Date().getMonth() + 1}월 한 달간 모은 포인트 기준, 매달 1일 초기화
+              </div>
+              <button onClick={() => setShowRankingPolicy(true)} className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold flex-shrink-0" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                <ShieldCheck size={12} /> 이용 안내
+              </button>
             </div>
             <div className="rounded-2xl overflow-hidden mb-6" style={{ border: `1px solid ${LINE}`, background: CARD, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
               {pointRanking.length === 0 && (
