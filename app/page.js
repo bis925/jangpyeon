@@ -2897,16 +2897,26 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <span className="text-sm font-bold" style={{ color: INK }}>{faq.question}</span>
                     <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </button>
-                  {isExpanded && (
+                          {isExpanded && (
                     <div className="px-4 pb-4">
                       <div className="text-sm mb-3" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{faq.answer}</div>
-                                    <button
-                                           onClick={() => speakFaqAnswer(faq.id, `${faq.question.replace(/[?!.]+$/, "")}. ${faq.answer}`)}
-                        className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold"
-                        style={{ background: isSpeaking ? CORAL_TINT : TEAL_TINT, color: isSpeaking ? CORAL : TEAL_DARK }}
-                      >
-                        <Headset size={13} /> {isSpeaking ? "음성 종료" : "음성으로 듣기"}
-                      </button>
+                      <div className="rounded-xl p-3" style={{ background: TEAL_TINT }}>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Headset size={14} color={TEAL_DARK} />
+                          <span className="text-xs font-bold" style={{ color: TEAL_DARK }}>음성으로 들어보세요</span>
+                        </div>
+                        <button
+                          onClick={() => speakFaqAnswer(faq.id, `${faq.question.replace(/[?!.]+$/, "")}. ${faq.answer}`)}
+                          className="flex items-center justify-center gap-2 w-full rounded-full py-2.5 font-extrabold text-white transition-all duration-200 active:scale-95"
+                          style={{ background: isSpeaking ? CORAL : TEAL }}
+                        >
+                          {isSpeaking ? (
+                            <>⏸️ 음성 멈추기</>
+                          ) : (
+                            <>▶️ 음성으로 듣기</>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
