@@ -859,6 +859,7 @@ export default function Page() {
   const [sendingSOS, setSendingSOS] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [fullscreenCenter, setFullscreenCenter] = useState(null);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [mySessionToken, setMySessionToken] = useState(null);
   
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
@@ -1368,6 +1369,13 @@ const viewingReviewsPlaceRef = useRef(null);
     showToast("배경 사진이 변경됐어요!");
   }
 
+  async function deleteMyAccount() {
+    const { error } = await supabase.rpc("delete_my_account");
+    if (error) { showToast("탈퇴 실패: " + error.message); return; }
+    localStorage.clear();
+    window.location.href = "/";
+  }
+  
     function getMyInviteLink() {
     return `https://jangpyeon.kr/?invite=${session.user.id}`;
   }
@@ -3257,6 +3265,29 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         </div>
       )}
 
+      {/* ===== DELETE ACCOUNT POPUP ===== */}
+      {showDeleteAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: CORAL_TINT }}>
+              <Trash2 size={26} color={CORAL} />
+            </div>
+            <div className="font-extrabold text-base mb-2" style={{ color: INK }}>정말 탈퇴하시겠어요?</div>
+            <div className="text-sm mb-6" style={{ color: INK_SOFT }}>
+              탈퇴하시면 포인트, 등록한 장소, 즐겨찾기 등<br />모든 정보가 삭제되며 되돌릴 수 없어요.
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowDeleteAccount(false)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                취소
+              </button>
+              <button onClick={deleteMyAccount} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: CORAL }}>
+                탈퇴하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -4298,6 +4329,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <a href="/privacy" className="text-xs" style={{ color: INK_SOFT, textDecoration: "underline" }}>
                 개인정보처리방침
               </a>
+              <div className="mt-3">
+                <button onClick={() => setShowDeleteAccount(true)} className="text-xs" style={{ color: INK_SOFT, textDecoration: "underline" }}>
+                  회원 탈퇴
+                </button>
+              </div>
             </div>
           </div>
         )}
