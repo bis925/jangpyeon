@@ -3259,8 +3259,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                       </div>
               </div>
               <div className="flex flex-col items-center text-center pt-5 mb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-                         <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 26, height: 26, background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.5)" }}>
+                                      <div className="flex items-center gap-2">
+                  <span className="flex sm:hidden coin-spin" style={{ fontSize: 24 }}>🪙</span>
+                  <div className="hidden sm:flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 26, height: 26, background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.5)" }}>
                     <span style={{ fontSize: 13, fontWeight: 800, fontFamily: MONO_FONT }}>P</span>
                   </div>
                   <div className="flex items-baseline gap-1">
