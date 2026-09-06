@@ -1888,7 +1888,16 @@ async function handleAvatarChange(e) {
   }
     async function fetchAllProfiles() {
     if (session.user.email !== ADMIN_EMAIL) return;
-    const { data } = await supabase.from("profiles").select("*, inviter:invited_by(email, nickname)").order("points", { ascending: false });
+    const { data } = await supabase.from("profiles").select("*").order("points", { ascending: false });
+    if (data) {
+      const inviterIds = [...new Set(data.filter((p) => p.invited_by).map((p) => p.invited_by))];
+      if (inviterIds.length > 0) {
+        const { data: inviters } = await supabase.from("profiles").select("id, email, nickname").in("id", inviterIds);
+        const inviterMap = {};
+        (inviters || []).forEach((i) => { inviterMap[i.id] = i; });
+        data.forEach((p) => { p.inviter = p.invited_by ? inviterMap[p.invited_by] : null; });
+      }
+    }
     setAllProfiles(data || []);
   }
     async function fetchAdjustLog() {
