@@ -1377,7 +1377,7 @@ async function handleAvatarChange(e) {
   async function issueRankingCoupon(userId, rank) {
     const isChicken = rank <= 3;
     const title = isChicken ? `🏆 ${rank}등 축하 치킨 쿠폰` : `🏆 ${rank}등 축하 커피 쿠폰`;
-    const description = `지난달 이달의 포인트 랭킹 ${rank}등을 축하드려요! 담당자가 곧 실제 쿠폰(기프티콘)을 전달해드릴게요.`;
+    const description = `지난달 이달의 포인트 랭킹 ${rank}등을 축하드려요! 받으시려면 아래 "받을게요" 버튼을 눌러주세요. 원하지 않으시면 "괜찮아요"를 눌러주셔도 포인트는 그대로 유지돼요.`;
     const { error } = await supabase.rpc("admin_issue_coupon", {
       p_user_id: userId,
       p_title: title,
@@ -1385,6 +1385,10 @@ async function handleAvatarChange(e) {
       p_expires_at: null,
     });
     if (error) { showToast("발급 실패: " + error.message); return; }
+
+    const { data: latestCoupon } = await supabase.from("coupons").select("id").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).single();
+    if (latestCoupon) await supabase.from("coupons").update({ is_ranking_coupon: true }).eq("id", latestCoupon.id);
+
     showToast(`${rank}등에게 쿠폰을 발급했어요!`);
   }
 
@@ -1407,6 +1411,13 @@ async function handleAvatarChange(e) {
     const { data } = await supabase.from("places").select("*, place_photos(photo_url)").eq("status", "approved").order("created_at", { ascending: false });
     const withPhoto = (data || []).map((p) => ({ ...p, photo_urls: (p.place_photos || []).map((ph) => ph.photo_url), photo_url: p.place_photos?.[0]?.photo_url || null }));
     setPlaces(withPhoto);
+  }
+    async function respondToRankingCoupon(couponId, response) {
+    const { error } = await supabase.from("coupons").update({ response_status: response }).eq("id", couponId);
+    if (error) { showToast("처리 실패: " + error.message); return; }
+    showToast(response === "accepted" ? "감사해요! 곧 쿠폰을 보내드릴게요" : "알겠어요, 포인트는 그대로 유지돼요");
+    fetchMyCoupons();
+    setViewingCoupon(null);
   }
   async function fetchMyCoupons() {
     const { data } = await supabase.from("coupons").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
@@ -2331,16 +2342,27 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               {viewingCoupon.expires_at && (
                 <div className="text-xs mb-4" style={{ color: INK_SOFT }}>유효기간: {new Date(viewingCoupon.expires_at).toLocaleDateString("ko-KR")}까지</div>
               )}
-              <div className="flex gap-2">
-                <button onClick={() => setViewingCoupon(null)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
-                  닫기
-                </button>
-                {viewingCoupon.status === "unused" && (
-                                  <button onClick={() => openUseCouponConfirm(viewingCoupon.id)} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
-                    사용하기
+                    {viewingCoupon.is_ranking_coupon && !viewingCoupon.response_status ? (
+                <div className="flex gap-2">
+                  <button onClick={() => respondToRankingCoupon(viewingCoupon.id, "declined")} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                    괜찮아요
                   </button>
-                )}
-              </div>
+                  <button onClick={() => respondToRankingCoupon(viewingCoupon.id, "accepted")} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                    받을게요
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <button onClick={() => setViewingCoupon(null)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                    닫기
+                  </button>
+                  {viewingCoupon.status === "unused" && (
+                                    <button onClick={() => openUseCouponConfirm(viewingCoupon.id)} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                      사용하기
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
