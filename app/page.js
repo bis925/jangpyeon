@@ -2105,12 +2105,12 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
     <div style={{ fontFamily: BODY_FONT, background: PAPER, minHeight: "100vh" }}>
 
 {/* ===== NAVBAR ===== */}
-<div className="z-10 flex" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, fontSize: `${16 * FONT_SCALES[fontScale] * 0.7}px` }}>
+<div className="z-10 flex relative" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, fontSize: `${16 * FONT_SCALES[fontScale] * 0.7}px` }}>
         <div ref={logoAreaRef} className="flex-1 flex items-center pl-5 sm:pl-8">
           <LogoMark size={40} />
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: `${24 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
         </div>
-        <div className="hidden sm:flex items-center gap-1 rounded-full p-1 flex-shrink-0 my-3.5" style={{ background: PAPER }}>
+        <div className="hidden sm:flex items-center gap-1 rounded-full p-1 flex-shrink-0 my-3.5 sm:absolute sm:left-1/2 sm:-translate-x-1/2" style={{ background: PAPER }}>
           {NAV.map((n) => {
             const Icon = n.icon;
             const active = tab === n.id;
