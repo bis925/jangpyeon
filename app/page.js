@@ -3258,14 +3258,17 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                         <span className="text-xs font-extrabold">{tier.label}</span>
                       </div>
               </div>
-   <div className="flex items-center gap-2 mb-1">
-  <span style={{ fontSize: 28 }}>🪙</span>
-  <div className="flex items-baseline gap-1">
-    <span style={{ fontFamily: MONO_FONT, fontSize: 38, fontWeight: 800, textShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>{points.toLocaleString()}</span>
-    <span style={{ fontFamily: MONO_FONT, fontSize: 20, fontWeight: 700, opacity: 0.85 }}>P</span>
-  </div>
-</div>
-                       {next ? (
+              <div className="flex flex-col items-center text-center pt-5 mb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+                <div className="flex items-center gap-2">
+                  <span style={{ fontSize: 24 }}>🪙</span>
+                  <div className="flex items-baseline gap-1">
+                    <span style={{ fontFamily: MONO_FONT, fontSize: 36, fontWeight: 800, textShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>{points.toLocaleString()}</span>
+                    <span style={{ fontFamily: MONO_FONT, fontSize: 18, fontWeight: 700, opacity: 0.85 }}>P</span>
+                  </div>
+                </div>
+                <div className="text-[11px] mt-0.5" style={{ opacity: 0.7 }}>보유 포인트</div>
+              </div>
+              {next ? (
                 <div className="rounded-xl px-4 py-3 mb-4" style={{ background: "rgba(255,255,255,0.18)" }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
