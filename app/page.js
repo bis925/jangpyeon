@@ -2670,9 +2670,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <div className="mb-4" style={{ color: INK_SOFT }}>
                 해당 월 적립 포인트가 많은 순서대로 상위 5명을 표시해요. 포인트가 같다면, 그 달에 먼저 그 포인트에 도달한 분이 상위로 표시돼요.
               </div>
-              <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>3. 포인트 적립 및 관리 원칙</div>
+                           <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>3. 포인트 적립 및 관리 원칙</div>
               <div className="mb-4" style={{ color: INK_SOFT }}>
                 포인트는 정상적인 서비스 이용(장소 등록, 정보 확인, 도움이 됐어요 응답 등)을 통해서만 적립돼요. 중복 계정, 허위 정보 등록, 자동화 프로그램 등 비정상적인 방법으로 포인트를 취득한 사실이 확인되면, 사전 통지 없이 포인트 및 순위가 조정되거나 삭제될 수 있어요.
+              </div>
+
+              <div className="rounded-xl p-4 mb-4" style={{ background: CORAL_TINT, border: `1.5px solid ${CORAL}` }}>
+                <div className="font-extrabold mb-2 flex items-center gap-1.5" style={{ color: CORAL }}>
+                  🎁 순위 보상(쿠폰) 안내
+                </div>
+                <div style={{ color: INK }}>
+                  매달 1~3등에게는 <b>치킨 쿠폰</b>, 4~5등에게는 <b>커피 쿠폰</b>이 지급돼요.
+                  <br /><br />
+                  <b>쿠폰을 원하지 않으시면 거부하실 수 있어요.</b> 거부하셔도 <b>포인트는 차감되지 않고 그대로 유지</b>돼요.
+                </div>
               </div>
               <div className="font-extrabold mb-1.5" style={{ color: TEAL_DARK }}>4. 개인정보 표시</div>
               <div className="mb-4" style={{ color: INK_SOFT }}>
