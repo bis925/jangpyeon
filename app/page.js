@@ -2335,7 +2335,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 if (key.startsWith("sb-") || key.includes("supabase")) localStorage.removeItem(key);
               });
               window.location.href = "/";
-            }} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+                      }} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95 flex-shrink-0 whitespace-nowrap" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
               <LogOut size={14} />
               로그아웃
             </button>
