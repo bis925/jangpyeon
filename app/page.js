@@ -3252,7 +3252,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <div className="text-xs opacity-70 mb-2">{session.user.email}</div>
                       <div className="inline-block text-[11px] rounded-full px-2.5 py-1" style={{ background: "rgba(255,255,255,0.18)" }}>{tier.emoji} {tier.label}</div>
               </div>
-              <div style={{ fontFamily: MONO_FONT, fontSize: 34, fontWeight: 700 }}>{points.toLocaleString()}P</div>
+   <div className="flex items-center gap-2 mb-1">
+  <span style={{ fontSize: 28 }}>🪙</span>
+  <div className="flex items-baseline gap-1">
+    <span style={{ fontFamily: MONO_FONT, fontSize: 38, fontWeight: 800, textShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>{points.toLocaleString()}</span>
+    <span style={{ fontFamily: MONO_FONT, fontSize: 20, fontWeight: 700, opacity: 0.85 }}>P</span>
+  </div>
+</div>
                        {next ? (
                 <div className="rounded-xl px-4 py-3 mb-4" style={{ background: "rgba(255,255,255,0.18)" }}>
                   <div className="flex items-center justify-between">
