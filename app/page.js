@@ -131,10 +131,10 @@ function useKoreanHolidays() {
 function maskEmail(email) {
   if (!email) return "익명";
   const atIndex = email.indexOf("@");
-  if (atIndex === -1) return email.slice(0, 4) + "***";
+  if (atIndex === -1) return email.slice(0, 3) + "***";
   const localPart = email.slice(0, atIndex);
   const domain = email.slice(atIndex);
-  const visible = localPart.slice(0, 4);
+  const visible = localPart.slice(0, 3);
   return visible + "***" + domain;
 }
 
