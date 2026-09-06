@@ -1840,12 +1840,12 @@ async function handleAvatarChange(e) {
       setShowNicknamePrompt(true);
     }
 
-    const inviteFrom = localStorage.getItem("jangpyeon_invite_from");
+      const inviteFrom = localStorage.getItem("jangpyeon_invite_from");
     if (inviteFrom && data && !data.invited_by) {
       const { error } = await supabase.rpc("reward_invite", { p_new_user_id: session.user.id, p_inviter_id: inviteFrom });
       localStorage.removeItem("jangpyeon_invite_from");
       if (!error) {
-        showToast("친구 초대로 가입해서 +5P를 받았어요!");
+        setTimeout(() => showToast("친구 초대로 가입해서 +5P를 받았어요!"), 3500);
         setTimeout(() => fetchProfile(), 500);
       }
     }
