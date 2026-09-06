@@ -2079,8 +2079,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           <LogoMark size={40} />
                      <span style={{ fontFamily: DISPLAY_FONT, fontSize: `${24 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
         </div>
-        <div className="flex-1">
-        <div className="flex items-center justify-end px-5 sm:px-8 py-3.5 relative">
+             <div className="flex-1 flex justify-end">
+        <div className="hidden sm:block" style={{ width: 155 }} />
+        <div className="flex-1 flex items-center justify-end px-5 sm:px-8 py-3.5 relative">
           <button onClick={() => { setTab("my"); setTimeout(() => { document.getElementById("coupon-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} className={`flex sm:hidden items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 flex-shrink-0 mr-2 transition-all duration-200 active:scale-90 ${myCoupons.some(c => c.status === "unused") ? "coupon-badge-glow" : ""}`} style={{ background: myCoupons.some(c => c.status === "unused") ? YELLOW : PAPER }} aria-label="쿠폰함">
             <Gift size={16} color={myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT} />
 <span style={{ fontSize: `${11 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, fontWeight: 700, color: myCoupons.some(c => c.status === "unused") ? "#fff" : INK_SOFT }}>쿠폰</span>
