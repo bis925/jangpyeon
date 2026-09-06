@@ -121,7 +121,7 @@ const CATEGORY_MARKERS = {
   문화시설: { emoji: "🎭", color: "#9B59B6" },
   쇼핑: { emoji: "🛍️", color: "#E8A800" },
   병원: { emoji: "🏥", color: "#E74C3C" },
-}; "카페", "문화시설", "쇼핑", "병원"];
+};
 const WEEKDAYS = [
   { key: "mon", label: "월" }, { key: "tue", label: "화" }, { key: "wed", label: "수" },
   { key: "thu", label: "목" }, { key: "fri", label: "금" }, { key: "sat", label: "토" }, { key: "sun", label: "일" },
