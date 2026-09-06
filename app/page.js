@@ -113,7 +113,7 @@ function renderRichText(html) {
   return <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-const CATEGORIES = ["공공기관", "음식점",const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원"];
+const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원"];
 const CATEGORY_MARKERS = {
   공공기관: { emoji: "🏛️", color: "#4A90D9" },
   음식점: { emoji: "🍽️", color: "#F0603D" },
