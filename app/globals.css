@@ -216,3 +216,29 @@ html {
 .sos-button-pulse {
   animation: sos-pulse 2s ease-in-out infinite;
 }
+
+@keyframes logo-snow-fall {
+  0% { transform: translateY(-10px); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(40px); opacity: 0; }
+}
+.logo-snowflake {
+  position: absolute;
+  top: 0;
+  font-size: 10px;
+  animation: logo-snow-fall 3s linear infinite;
+}
+@keyframes logo-rain-fall {
+  0% { transform: translateY(-5px); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(35px); opacity: 0; }
+}
+.logo-raindrop {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 10px;
+  background: #4A90D9;
+  border-radius: 2px;
+  animation: logo-rain-fall 1s linear infinite;
+}
