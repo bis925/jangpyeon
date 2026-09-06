@@ -71,6 +71,21 @@ const BADGE_META = {
   lift: { label: "엘리베이터", icon: MoveVertical, field: "has_elevator" },
 };
 
+const CARD_THEMES = {
+  default: { label: "기본", gradient: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})` },
+  sunset: { label: "노을", gradient: "linear-gradient(135deg, #FF7E5F, #FEB47B)" },
+  ocean: { label: "바다", gradient: "linear-gradient(135deg, #2193B0, #6DD5ED)" },
+  berry: { label: "베리", gradient: "linear-gradient(135deg, #C33764, #1D2671)" },
+  forest: { label: "숲", gradient: "linear-gradient(135deg, #134E5E, #71B280)" },
+  peach: { label: "복숭아", gradient: "linear-gradient(135deg, #FFAFBD, #FFC3A0)" },
+  lavender: { label: "라벤더", gradient: "linear-gradient(135deg, #834D9B, #D04ED6)" },
+  gold: { label: "골드", gradient: "linear-gradient(135deg, #F7971E, #FFD200)" },
+  mint: { label: "민트", gradient: "linear-gradient(135deg, #00B09B, #96C93D)" },
+  night: { label: "밤하늘", gradient: "linear-gradient(135deg, #0F2027, #2C5364)" },
+  cherry: { label: "체리", gradient: "linear-gradient(135deg, #EB3349, #F45C43)" },
+  sky: { label: "하늘", gradient: "linear-gradient(135deg, #4B79A1, #283E51)" },
+};
+
 const TIERS = [
   { label: "아기병아리", emoji: "🐤", min: 0 },
   { label: "아기토끼", emoji: "🐰", min: 500 },
@@ -1278,6 +1293,12 @@ const viewingReviewsPlaceRef = useRef(null);
     localStorage.setItem("jangpyeon_nickname_prompt_dismissed", "true");
     setShowNicknamePrompt(false);
   }
+
+   async function changeCardTheme(themeKey) {
+    const { error } = await supabase.from("profiles").update({ card_theme: themeKey }).eq("id", session.user.id);
+    if (error) { showToast("변경 실패: " + error.message); return; }
+    setProfile((prev) => ({ ...prev, card_theme: themeKey }));
+  } 
   
     async function saveNickname() {
     if (!nicknameDraft.trim()) { showToast("닉네임을 입력해주세요"); return; }
@@ -1287,6 +1308,7 @@ const viewingReviewsPlaceRef = useRef(null);
     setEditingNickname(false);
     showToast("닉네임이 변경됐어요!");
   }
+  
 async function handleAvatarChange(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -3639,7 +3661,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         {/* ===================== 마이페이지 ===================== */}
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
-            <div className="rounded-2xl p-6 mb-5 text-white" style={{ background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})` }}>
+                <div className="rounded-2xl p-6 mb-5 text-white" style={{ background: CARD_THEMES[profile?.card_theme || "default"].gradient }}>
                                             <div className="flex flex-col items-center text-center mb-5">
                 <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
                               <label htmlFor="avatar-upload" className="w-28 h-28 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0 mb-4" style={{ background: "rgba(255,255,255,0.15)", border: "3.5px solid rgba(255,255,255,0.5)", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
@@ -3696,6 +3718,22 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   </div>
                 </div>
                 <div className="text-[11px] mt-0.5" style={{ opacity: 0.7 }}>보유 포인트</div>
+              </div>
+              <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
+                {Object.entries(CARD_THEMES).map(([key, theme]) => (
+                  <button
+                    key={key}
+                    onClick={() => changeCardTheme(key)}
+                    className="rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                    style={{
+                      width: 26, height: 26,
+                      background: theme.gradient,
+                      border: (profile?.card_theme || "default") === key ? "3px solid #fff" : "2px solid rgba(255,255,255,0.4)",
+                      boxShadow: (profile?.card_theme || "default") === key ? "0 0 0 2px rgba(0,0,0,0.15)" : "none",
+                    }}
+                    aria-label={theme.label}
+                  />
+                ))}
               </div>
               {next ? (
                 <div className="rounded-xl px-4 py-3 mb-4" style={{ background: "rgba(255,255,255,0.18)" }}>
