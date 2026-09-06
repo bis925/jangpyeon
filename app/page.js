@@ -2662,7 +2662,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             <div className="p-4 flex-shrink-0" style={{ borderTop: `1px solid ${LINE}` }}>
               <button onClick={() => setShowRankingPolicy(false)} className="w-full rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
                 확인했어요
-
+    </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
