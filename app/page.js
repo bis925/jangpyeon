@@ -165,6 +165,16 @@ const FAQ_LIST = [
   { q: "글자 크기나 다크모드를 바꿀 수 있나요?", a: "마이페이지에서 다크모드를 켜고 끌 수 있고, 상단의 글자 크기 버튼으로 다섯 단계로 조절하실 수 있어요." },
 ];
 
+function getTodaySpecialEvent() {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const date = now.getDate();
+  if (month === 12 && date === 25) return { type: "christmas", emoji: "🎅", message: null };
+  if (month === 1 && date === 1) return { type: "newyear", emoji: "🎉", message: "새해 복 많이 받으세요!" };
+  if (month === 10 && date === 9) return { type: "hangeul", emoji: "🇰🇷", message: "한글날이에요!" };
+  return null;
+}
+
 function maskEmail(email) {
   if (!email) return "익명";
   const atIndex = email.indexOf("@");
@@ -860,6 +870,7 @@ export default function Page() {
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [fullscreenCenter, setFullscreenCenter] = useState(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [logoWeather, setLogoWeather] = useState(null);
   const [mySessionToken, setMySessionToken] = useState(null);
   
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
@@ -1654,6 +1665,27 @@ async function handleAvatarChange(e) {
     if (inviteId) {
       localStorage.setItem("jangpyeon_invite_from", inviteId);
     }
+  }, []);
+
+    useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code`);
+          const data = await res.json();
+          const code = data?.current?.weather_code;
+          if (code >= 71 && code <= 77) setLogoWeather("snow");
+          else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) setLogoWeather("rain");
+          else setLogoWeather(null);
+        } catch (err) {
+          setLogoWeather(null);
+        }
+      },
+      () => setLogoWeather(null),
+      { timeout: 5000 }
+    );
   }, []);
 
   /* --- 인증 상태 감지 --- */
@@ -2566,8 +2598,33 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
 {/* ===== NAVBAR ===== */}
 <div className="z-10 flex relative" style={{ background: CARD, borderBottom: `1px solid ${LINE}`, fontSize: `${16 * FONT_SCALES[fontScale] * 0.7}px` }}>
         <div ref={logoAreaRef} className="flex-1 flex items-center pl-5 sm:pl-8">
-          <LogoMark size={40} />
+                  <div ref={logoAreaRef} className="flex-1 flex items-center pl-5 sm:pl-8 relative" style={{ overflow: "visible" }}>
+          <div className="relative" style={{ overflow: "visible" }}>
+            <LogoMark size={40} />
+            {getTodaySpecialEvent()?.type === "christmas" && (
+              <span style={{ position: "absolute", top: -10, left: -4, fontSize: 18 }}>🎅</span>
+            )}
+            {logoWeather === "snow" && (
+              <div style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
+                {[...Array(4)].map((_, i) => (
+                  <span key={i} className="logo-snowflake" style={{ left: `${i * 10}px`, animationDelay: `${i * 0.7}s` }}>❄️</span>
+                ))}
+              </div>
+            )}
+            {logoWeather === "rain" && (
+              <div style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
+                {[...Array(4)].map((_, i) => (
+                  <span key={i} className="logo-raindrop" style={{ left: `${i * 10}px`, animationDelay: `${i * 0.3}s` }} />
+                ))}
+              </div>
+            )}
+          </div>
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: `${24 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
+          {getTodaySpecialEvent()?.message && (
+            <span className="hidden sm:inline-block ml-3 text-xs font-bold rounded-full px-3 py-1" style={{ background: CORAL_TINT, color: CORAL }}>
+              {getTodaySpecialEvent().emoji} {getTodaySpecialEvent().message}
+            </span>
+          )}
         </div>
         <div className="hidden sm:flex items-center gap-1 rounded-full p-1 flex-shrink-0 my-3.5 sm:absolute sm:left-1/2 sm:-translate-x-1/2" style={{ background: PAPER }}>
           {NAV.map((n) => {
