@@ -2086,7 +2086,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
   const points = profile?.points ?? 0;
   const tier = currentTier(points);
   const next = nextTier(points);
-  const registerCount = history.filter((h) => h.activity_type === "register_place").length;
+  const registerCount = places.filter((p) => p.created_by === session.user.id).length;
   const helpfulCount = history.filter((h) => h.activity_type === "helpful_received").length;
    const isAdmin = session.user.email === ADMIN_EMAIL;
   const isStaff = profile?.role === "staff";
