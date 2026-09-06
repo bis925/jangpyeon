@@ -2097,7 +2097,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <ZoomIn size={15} color={INK_SOFT} />
             </button>
           </div>
-               <div className="hidden sm:flex items-center gap-1 rounded-full p-1 sm:absolute sm:left-1/2 sm:-translate-x-1/2" style={{ background: PAPER }}>
+                       <div className="hidden sm:flex items-center gap-1 rounded-full p-1" style={{ background: PAPER, position: "fixed", left: "50%", transform: "translateX(-50%)", top: 18, zIndex: 20 }}>
             {NAV.map((n) => {
               const Icon = n.icon;
               const active = tab === n.id;
