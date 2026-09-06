@@ -1299,6 +1299,10 @@ const viewingReviewsPlaceRef = useRef(null);
   async function uploadCardBackground(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
+    if (!window.confirm("이 사진은 본인에게만 보여요. 부적절하거나 타인의 저작권을 침해하는 사진은 삼가주세요. 계속하시겠어요?")) {
+      e.target.value = "";
+      return;
+    }
     const compressed = await compressImage(file, 800, 0.85);
     const filePath = `${session.user.id}/card-bg-${Date.now()}.jpg`;
     const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, compressed, { upsert: true });
