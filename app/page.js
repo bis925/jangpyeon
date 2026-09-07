@@ -3631,9 +3631,9 @@ if (authLoading) {
           <div>
             <div className="mb-6">
                                  <div className="flex items-center gap-2 rounded-full px-4 py-3 mb-3" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-                <button
+                          <button
                   onClick={startVoiceSearch}
-                  className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
+                  className="flex sm:hidden items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
                   style={{ width: 40, height: 40, background: isListening ? CORAL : TEAL }}
                   aria-label="음성으로 검색"
                 >
@@ -3644,8 +3644,16 @@ if (authLoading) {
                     <line x1="8" y1="23" x2="16" y2="23" />
                   </svg>
                 </button>
-                <Search size={16} color={INK_SOFT} />
+                         <Search size={16} color={INK_SOFT} />
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
+                <button
+                  onClick={() => {}}
+                  className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
+                  style={{ width: 40, height: 40, background: TEAL }}
+                  aria-label="검색하기"
+                >
+                  <Search size={18} color="#fff" />
+                </button>
               </div>
                          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 {Object.entries(BADGE_META).map(([key, meta]) => {
