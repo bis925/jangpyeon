@@ -2003,6 +2003,21 @@ async function handleAvatarChange(e) {
   
   async function fetchProfile() {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
+
+    if (data && !data.login_provider_set) {
+      const provider = session.user.app_metadata?.provider || "email";
+      const meta = session.user.user_metadata || {};
+      const updates = { login_provider: provider, login_provider_set: true };
+      if (!data.nickname) {
+        updates.nickname = meta.full_name || meta.name || meta.user_name || null;
+      }
+      if (!data.avatar_url) {
+        updates.avatar_url = meta.avatar_url || meta.picture || null;
+      }
+      await supabase.from("profiles").update(updates).eq("id", session.user.id);
+      Object.assign(data, updates);
+    }
+
     setProfile(data);
     setAvatarUrl(data?.avatar_url || null);
     if (data && !data.nickname && !localStorage.getItem(`jangpyeon_nickname_prompt_dismissed_${session.user.id}`)) {
@@ -4356,9 +4371,15 @@ if (authLoading) {
                     <Pencil size={14} color="rgba(255,255,255,0.7)" />
                   </button>
                 )}
-                <div className="flex items-center gap-1.5 mb-3" style={{ opacity: 0.75 }}>
+               <div className="flex items-center gap-1.5 mb-3 flex-wrap" style={{ opacity: 0.75 }}>
                   <Mail size={12} />
                   <span className="text-xs">{session.user.email}</span>
+                  {profile?.login_provider === "google" && (
+                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: "rgba(255,255,255,0.25)" }}>G 구글 로그인</span>
+                  )}
+                  {profile?.login_provider === "kakao" && (
+                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: "#FEE500", color: "#3C1E1E" }}>K 카카오 로그인</span>
+                  )}
                 </div>
                       <div className="inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-3 py-1" style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.3)" }}>
                         <span className="flex items-center justify-center rounded-full" style={{ width: 20, height: 20, background: "rgba(255,255,255,0.25)", fontSize: 12 }}>{tier.emoji}</span>
@@ -4873,8 +4894,18 @@ if (authLoading) {
                                <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
                                    <button onClick={() => setExpandedMemberId(expandedMemberId === p.id ? null : p.id)} className="w-full flex items-center justify-between">
                     <div className="text-left min-w-0">
-                      <div className="flex items-center gap-1.5 min-w-0">
+                                            <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
                         <div className="text-sm font-bold truncate" style={{ color: INK }}>{p.email || "(이메일 없음)"}</div>
+                        {p.login_provider === "google" && (
+                          <span className="text-[9px] font-bold rounded-full px-1.5 py-0.5 flex-shrink-0" style={{ background: "#E8F0FE", color: "#4285F4" }}>
+                            G 구글
+                          </span>
+                        )}
+                        {p.login_provider === "kakao" && (
+                          <span className="text-[9px] font-bold rounded-full px-1.5 py-0.5 flex-shrink-0" style={{ background: "#FEE500", color: "#3C1E1E" }}>
+                            K 카카오
+                          </span>
+                        )}
                         {p.invited_by && (
                           <span className="text-[9px] font-bold rounded-full px-1.5 py-0.5 flex-shrink-0" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
                             👫 초대가입
