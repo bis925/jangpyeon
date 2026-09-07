@@ -785,29 +785,56 @@ export default function Page() {
     showToast("삭제됐어요");
   }
 
-    function startVoiceSearch() {
-    const SpeechRecognition = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
-    if (!SpeechRecognition) {
-      showToast("이 기기에서는 음성 검색을 지원하지 않아요");
-      return;
+async function startVoiceSearch() {
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
+        const { available } = await SpeechRecognition.available();
+        if (!available) { showToast("이 기기에서는 음성 검색을 지원하지 않아요"); return; }
+
+        const permission = await SpeechRecognition.requestPermissions();
+        if (permission.speechRecognition !== "granted") {
+          showToast("마이크 권한을 허용해주세요");
+          return;
+        }
+
+        setIsListening(true);
+        SpeechRecognition.addListener("partialResults", (data) => {
+          if (data.matches && data.matches.length > 0) {
+            setQuery(data.matches[0]);
+          }
+        });
+
+        await SpeechRecognition.start({
+          language: "ko-KR",
+          maxResults: 1,
+          partialResults: true,
+          popup: false,
+        });
+        setIsListening(false);
+        SpeechRecognition.removeAllListeners();
+      } catch (err) {
+        setIsListening(false);
+        showToast("음성 인식에 실패했어요, 다시 시도해주세요");
+      }
+    } else {
+      const SR = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
+      if (!SR) { showToast("이 브라우저에서는 음성 검색을 지원하지 않아요"); return; }
+      const recognition = new SR();
+      recognition.lang = "ko-KR";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onstart = () => setIsListening(true);
+      recognition.onend = () => setIsListening(false);
+      recognition.onerror = () => {
+        setIsListening(false);
+        showToast("음성을 인식하지 못했어요, 다시 시도해주세요");
+      };
+      recognition.onresult = (event) => {
+        setQuery(event.results[0][0].transcript);
+      };
+      recognition.start();
     }
-    const recognition = new SpeechRecognition();
-    recognition.lang = "ko-KR";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = (event) => {
-      setIsListening(false);
-      alert("음성 인식 에러: " + event.error);
-    };
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setQuery(transcript);
-    };
-
-    recognition.start();
   }
   
   function showToast(message) {
