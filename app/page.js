@@ -1406,18 +1406,22 @@ const viewingReviewsPlaceRef = useRef(null);
   }
 
   async function signInWithGoogle() {
+    alert("버튼 눌림, Capacitor: " + (typeof window !== "undefined" && window.Capacitor));
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
+        alert("네이티브 분기 진입, import 시도");
         const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
+        alert("import 성공, signIn 호출");
         const googleUser = await GoogleAuth.signIn();
+        alert("signIn 성공: " + JSON.stringify(googleUser).slice(0, 200));
         const idToken = googleUser.authentication.idToken;
         const { error } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: idToken,
         });
-        if (error) { showToast("구글 로그인 실패: " + error.message); }
+        if (error) { alert("Supabase 에러: " + error.message); }
       } catch (err) {
-        showToast("구글 로그인이 취소됐거나 실패했어요");
+        alert("에러 발생: " + JSON.stringify(err));
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
