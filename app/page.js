@@ -1898,6 +1898,7 @@ async function handleAvatarChange(e) {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data);
     setAvatarUrl(data?.avatar_url || null);
+    alert("닉네임 값: [" + data?.nickname + "], dismissed 값: " + localStorage.getItem(`jangpyeon_nickname_prompt_dismissed_${session.user.id}`));
     if (data && !data.nickname && !localStorage.getItem(`jangpyeon_nickname_prompt_dismissed_${session.user.id}`)) {
       setShowNicknamePrompt(true);
     }
