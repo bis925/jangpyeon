@@ -242,36 +242,53 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo, onShowRecencyHelp }) {
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo, onShowRecencyHelp, onOpenMenu }) {
   const badges = getBadges(place);
   const openStatus = isOpenNow(place.business_hours, holidays);
+  const longPressTimer = useRef(null);
+  const didLongPress = useRef(false);
+
+  function handlePressStart() {
+    didLongPress.current = false;
+    longPressTimer.current = setTimeout(() => {
+      didLongPress.current = true;
+      if (navigator.vibrate) navigator.vibrate(30);
+      onOpenMenu(place);
+    }, 500);
+  }
+  function handlePressEnd() {
+    clearTimeout(longPressTimer.current);
+  }
+  function handleContextMenu(e) {
+    e.preventDefault();
+    onOpenMenu(place);
+  }
+
   return (
-       <div className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md" style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}>
+         <div
+        onMouseDown={handlePressStart}
+        onMouseUp={handlePressEnd}
+        onMouseLeave={handlePressEnd}
+        onTouchStart={handlePressStart}
+        onTouchEnd={handlePressEnd}
+        onTouchMove={handlePressEnd}
+        onContextMenu={handleContextMenu}
+        className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md select-none"
+        style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}
+      >
       {openStatus === false && (
         <div className="absolute inset-0 flex items-center justify-center rounded-2xl z-20 pointer-events-none">
           <span className="rounded-full px-4 py-1.5 text-sm font-extrabold" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}>영업 종료</span>
         </div>
       )}
+ 
         <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-        {isAdminUser && !isOwner && (
-          <>
-                       <button onClick={(e) => { e.stopPropagation(); onAdminEdit(place); }} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ background: PAPER, width: 30, height: 30 }} aria-label="관리자 권한으로 수정">
-              <Pencil size={14} color={INK_SOFT} />
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); onAdminDelete(place); }} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ background: PAPER, width: 30, height: 30 }} aria-label="관리자 권한으로 삭제">
-              <Trash2 size={14} color={CORAL} />
-            </button>
-          </>
-        )}
         {openStatus === true && (
           <div className="flex items-center gap-1 rounded-full px-2 py-1" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
             <div className="rounded-full" style={{ width: 7, height: 7, background: "#22C55E" }} />
             <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
           </div>
         )}
-             <button onClick={() => onToggleFavorite(place.id)} className="rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 active:scale-90" style={{ background: isFavorite ? "#FFF3D6" : PAPER, width: 28, height: 28 }} aria-label="즐겨찾기">
-          <Star size={16} color={isFavorite ? "#E8A800" : INK_SOFT} fill={isFavorite ? "#E8A800" : "none"} />
-        </button>
         <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 rounded-full px-2 py-1.5" style={{ background: TEAL_TINT }}>
           <MessageSquare size={14} color={TEAL_DARK} />
           <span style={{ fontSize: 10, fontWeight: 700, color: TEAL_DARK }}>리뷰</span>
@@ -295,21 +312,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           <div className="w-16 h-16 rounded-xl" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
         )}
       </div>
-      <div className="flex items-center justify-between gap-2 mb-1">
+  <div className="flex items-center justify-between gap-2 mb-1">
       <div className="flex items-center gap-1.5 min-w-0">
           <div className="font-extrabold truncate" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
-                  {isOwner && (
-            <>
-              <button onClick={(e) => { e.stopPropagation(); onEdit(place); }} className="flex items-center gap-1 rounded-full pl-1.5 pr-2 py-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="수정하기">
-                <Pencil size={13} color={INK_SOFT} />
-                <span style={{ fontSize: 10, fontWeight: 700, color: INK_SOFT }}>수정</span>
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete(place); }} className="flex items-center gap-1 rounded-full pl-1.5 pr-2 py-1 transition-all duration-150 active:scale-90 hover:bg-black/5" aria-label="삭제하기">
-                <Trash2 size={13} color={CORAL} />
-                <span style={{ fontSize: 10, fontWeight: 700, color: CORAL }}>삭제</span>
-              </button>
-            </>
-          )}
         </div>
       </div>
       <div className="text-xs mb-2 truncate" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
@@ -349,12 +354,6 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
           <Navigation size={14} color="#fff" />
           <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>길찾기</span>
         </button>
-        {!isOwner && (
-          <button onClick={() => onReport(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: CORAL_TINT }} aria-label="정보가 달라졌어요 신고">
-            <Flag size={14} color={CORAL} />
-            <span style={{ fontSize: 10, fontWeight: 700, color: CORAL }}>신고</span>
-          </button>
-        )}
       </div>
        <button onClick={() => onHelpful(place.id)} className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ background: CORAL_TINT, color: CORAL }}>
         <Heart size={14} fill={CORAL} />
@@ -943,6 +942,7 @@ async function startVoiceSearch() {
   const [newGuardianEmail, setNewGuardianEmail] = useState("");
   const [sendingSOS, setSendingSOS] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [placeContextMenu, setPlaceContextMenu] = useState(null);
   const [fullscreenCenter, setFullscreenCenter] = useState(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [logoWeather, setLogoWeather] = useState(null);
@@ -2931,7 +2931,7 @@ if (authLoading) {
               <div className="grid sm:grid-cols-2 gap-3 min-w-0">
                 {places.filter((p) => favorites.has(p.id)).map((p) => (
                   <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer min-w-0">
-                    <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
+<PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} onOpenMenu={setPlaceContextMenu} />
                   </div>
                 ))}
               </div>
@@ -3486,6 +3486,77 @@ if (authLoading) {
         </div>
       )}
 
+      {/* ===== PLACE CONTEXT MENU ===== */}
+      {placeContextMenu && (
+        <div onClick={() => setPlaceContextMenu(null)} className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-xs rounded-t-3xl sm:rounded-3xl overflow-hidden" style={{ background: CARD, boxShadow: "0 -8px 30px rgba(0,0,0,0.15)" }}>
+            <div className="px-5 pt-5 pb-3 text-center" style={{ borderBottom: `1px solid ${LINE}` }}>
+              <div className="font-extrabold text-sm truncate" style={{ color: INK }}>{placeContextMenu.name}</div>
+              <div className="text-xs mt-0.5 truncate" style={{ color: INK_SOFT }}>{placeContextMenu.address}</div>
+            </div>
+            <div className="py-2">
+              {(isAdmin || placeContextMenu.created_by === session.user.id) && (
+                <>
+                  <button
+                    onClick={() => { const p = placeContextMenu; setPlaceContextMenu(null); if (isAdmin && placeContextMenu.created_by !== session.user.id) adminEditPlace(p); else startEdit(p); }}
+                    className="w-full flex items-center gap-3 px-5 py-3.5 transition-all duration-150 active:bg-black/5"
+                  >
+                    <span className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: TEAL_TINT }}>
+                      <Pencil size={16} color={TEAL_DARK} />
+                    </span>
+                    <span className="text-sm font-bold" style={{ color: INK }}>수정하기</span>
+                  </button>
+                  <button
+                    onClick={() => { const p = placeContextMenu; setPlaceContextMenu(null); if (isAdmin && placeContextMenu.created_by !== session.user.id) setDeletingPlace({ ...p, isAdminAction: true }); else deletePlace(p); }}
+                    className="w-full flex items-center gap-3 px-5 py-3.5 transition-all duration-150 active:bg-black/5"
+                  >
+                    <span className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: CORAL_TINT }}>
+                      <Trash2 size={16} color={CORAL} />
+                    </span>
+                    <span className="text-sm font-bold" style={{ color: CORAL }}>삭제하기</span>
+                  </button>
+                  <div className="mx-5 my-1" style={{ borderTop: `1px solid ${LINE}` }} />
+                </>
+              )}
+              <button
+                onClick={() => { toggleFavorite(placeContextMenu.id); setPlaceContextMenu(null); }}
+                className="w-full flex items-center gap-3 px-5 py-3.5 transition-all duration-150 active:bg-black/5"
+              >
+                <span className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: favorites.has(placeContextMenu.id) ? "#FFF3D6" : PAPER }}>
+                  <Star size={16} color={favorites.has(placeContextMenu.id) ? "#E8A800" : INK_SOFT} fill={favorites.has(placeContextMenu.id) ? "#E8A800" : "none"} />
+                </span>
+                <span className="text-sm font-bold" style={{ color: INK }}>{favorites.has(placeContextMenu.id) ? "즐겨찾기 해제하기" : "즐겨찾기하기"}</span>
+              </button>
+              <button
+                onClick={() => { shareToKakao(placeContextMenu); setPlaceContextMenu(null); }}
+                className="w-full flex items-center gap-3 px-5 py-3.5 transition-all duration-150 active:bg-black/5"
+              >
+                <span className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: "#FEE500" }}>
+                  <MessageCircle size={16} color="#3C1E1E" fill="#3C1E1E" />
+                </span>
+                <span className="text-sm font-bold" style={{ color: INK }}>친구에게 공유하기</span>
+              </button>
+              {placeContextMenu.created_by !== session.user.id && (
+                <button
+                  onClick={() => { reportPlace(placeContextMenu); setPlaceContextMenu(null); }}
+                  className="w-full flex items-center gap-3 px-5 py-3.5 transition-all duration-150 active:bg-black/5"
+                >
+                  <span className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: CORAL_TINT }}>
+                    <Flag size={16} color={CORAL} />
+                  </span>
+                  <span className="text-sm font-bold" style={{ color: CORAL }}>신고하기</span>
+                </button>
+              )}
+            </div>
+            <div className="p-3" style={{ borderTop: `1px solid ${LINE}` }}>
+              <button onClick={() => setPlaceContextMenu(null)} className="w-full rounded-full py-3 text-sm font-bold" style={{ background: PAPER, color: INK }}>
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ===== EXIT CONFIRM POPUP ===== */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -3773,7 +3844,7 @@ if (authLoading) {
                    <div className="grid sm:grid-cols-2 gap-3 min-w-0">
               {visiblePlaces.map((p) => (
                      <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer min-w-0">
-                            <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
+<PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} onOpenMenu={setPlaceContextMenu} />
                              </div>
                          ))}
               {filteredPlaces.length === 0 && (
@@ -3823,7 +3894,7 @@ if (authLoading) {
                     <div className="grid sm:grid-cols-2 gap-3 min-w-0">
               {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer min-w-0">
-                                                         <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections}  onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} />
+              <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} onOpenMenu={setPlaceContextMenu} />
                 </div>
               ))}
             </div>
