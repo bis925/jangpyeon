@@ -3630,7 +3630,7 @@ if (authLoading) {
         {tab === "home" && (
           <div>
             <div className="mb-6">
-                                 <div className="flex items-center gap-2 rounded-full px-3 py-2.5 mb-3 flex-wrap" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+        <div className="flex items-center gap-1.5 rounded-full px-3 py-2.5 mb-3" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                           <button
                   onClick={startVoiceSearch}
                   className="flex sm:hidden items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
@@ -3645,7 +3645,7 @@ if (authLoading) {
                   </svg>
                 </button>
                          <Search size={16} color={INK_SOFT} />
-                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
+                <input value={query} onCha<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 min-w-0 outline-none text-sm bg-transparent" style={{ color: INK }} />nge={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
                            <button
                   onClick={() => {}}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
