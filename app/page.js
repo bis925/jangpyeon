@@ -393,7 +393,7 @@ function TierBar({ points }) {
 }
 
 /* ===================== 로그인 화면 ===================== */
-function LoginScreen({ onSent, signInWithGoogle, showToast }) {
+function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
@@ -523,7 +523,7 @@ function LoginScreen({ onSent, signInWithGoogle, showToast }) {
                 <span className="text-xs" style={{ color: INK_SOFT }}>또는</span>
                 <div className="flex-1 h-px" style={{ background: LINE }} />
               </div>
-              <button
+                       <button
                 onClick={signInWithGoogle}
                 className="w-full flex items-center justify-center gap-2 rounded-full font-bold transition-all duration-200 active:scale-[0.98] py-3.5 sm:py-3.5"
                 style={{ background: "#fff", border: `2px solid ${TEAL}`, color: INK, boxShadow: "0 2px 10px rgba(15,110,98,0.15)" }}
@@ -536,9 +536,19 @@ function LoginScreen({ onSent, signInWithGoogle, showToast }) {
                 </svg>
                 <span className="text-base sm:text-sm">구글로 계속하기</span>
               </button>
-              <p className="text-xs sm:hidden mt-2.5 font-bold" style={{ color: TEAL_DARK }}>
+              <p className="text-xs sm:hidden mt-2.5 mb-3 font-bold" style={{ color: TEAL_DARK }}>
                 📱 지메일로 로그인 시 바로 로그인이 가능합니다
               </p>
+              <button
+                onClick={signInWithKakao}
+                className="w-full flex items-center justify-center gap-2 rounded-full py-3.5 font-bold transition-all duration-200 active:scale-[0.98]"
+                style={{ background: "#FEE500", color: "#3C1E1E" }}
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" className="flex-shrink-0">
+                  <path fill="#3C1E1E" d="M10 1C4.9 1 0.7 4.4 0.7 8.6c0 2.7 1.7 5.1 4.3 6.5-0.2 0.7-0.7 2.6-0.8 3-0.1 0.5 0.2 0.5 0.4 0.4 0.2-0.1 2.7-1.8 3.8-2.6 0.5 0.1 1.1 0.1 1.6 0.1 5.1 0 9.3-3.4 9.3-7.6C19.3 4.4 15.1 1 10 1z"/>
+                </svg>
+                <span className="text-base sm:text-sm">카카오로 계속하기</span>
+              </button>
             </>
           )}
                   <p className="text-xs mt-6 mb-4" style={{ color: INK_SOFT }}>
@@ -1471,6 +1481,14 @@ const viewingReviewsPlaceRef = useRef(null);
     if (error) { showToast("저장 실패: " + error.message); return; }
     setProfile((prev) => ({ ...prev, card_background_url: newUrl, card_theme: "photo" }));
     showToast("배경 사진이 변경됐어요!");
+  }
+
+    async function signInWithKakao() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "kakao",
+      options: { redirectTo: "https://jangpyeon.kr/" },
+    });
+    if (error) { showToast("카카오 로그인 실패: " + error.message); }
   }
 
   async function signInWithGoogle() {
@@ -2724,7 +2742,7 @@ if (authLoading) {
   if (!session) {
     return (
       <>
-        <LoginScreen signInWithGoogle={signInWithGoogle} showToast={showToast} />
+        <LoginScreen signInWithGoogle={signInWithGoogle} signInWithKakao={signInWithKakao} showToast={showToast} />
         {showExitConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
             <div className="w-full max-w-xs rounded-2xl p-6 text-center" style={{ background: CARD }}>
