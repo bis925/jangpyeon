@@ -943,6 +943,8 @@ async function startVoiceSearch() {
   const [sendingSOS, setSendingSOS] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [placeContextMenu, setPlaceContextMenu] = useState(null);
+  const [memberSort, setMemberSort] = useState("points_desc");
+  const [memberFilter, setMemberFilter] = useState("all");
   const [fullscreenCenter, setFullscreenCenter] = useState(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [logoWeather, setLogoWeather] = useState(null);
@@ -4795,10 +4797,36 @@ if (authLoading) {
            <div id="admin-members" className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
             <input value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} placeholder="이메일 또는 닉네임으로 검색"
               className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+            <div className="flex gap-2 mb-3">
+              <select value={memberSort} onChange={(e) => setMemberSort(e.target.value)} className="flex-1 rounded-xl px-3 py-2 text-xs font-bold outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: "#fff" }}>
+                <option value="points_desc">포인트 높은순</option>
+                <option value="points_asc">포인트 낮은순</option>
+                <option value="created_desc">가입일 최신순</option>
+                <option value="created_asc">가입일 오래된순</option>
+              </select>
+              <select value={memberFilter} onChange={(e) => setMemberFilter(e.target.value)} className="flex-1 rounded-xl px-3 py-2 text-xs font-bold outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: "#fff" }}>
+                <option value="all">전체 회원</option>
+                <option value="invited">초대가입만</option>
+                <option value="아기병아리">아기병아리</option>
+                <option value="아기토끼">아기토끼</option>
+                <option value="아기여우">아기여우</option>
+                <option value="아기사자">아기사자</option>
+                <option value="날개곰">날개곰</option>
+                <option value="황금독수리">황금독수리</option>
+              </select>
+            </div>
             <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {allProfiles.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>회원이 없어요</div>}
               {allProfiles
                 .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
+                .filter((p) => memberFilter === "all" ? true : memberFilter === "invited" ? !!p.invited_by : currentTier(p.points).label === memberFilter)
+                .sort((a, b) => {
+                  if (memberSort === "points_desc") return b.points - a.points;
+                  if (memberSort === "points_asc") return a.points - b.points;
+                  if (memberSort === "created_desc") return new Date(b.created_at) - new Date(a.created_at);
+                  if (memberSort === "created_asc") return new Date(a.created_at) - new Date(b.created_at);
+                  return 0;
+                })
                 .map((p) => (
                                <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
                                    <button onClick={() => setExpandedMemberId(expandedMemberId === p.id ? null : p.id)} className="w-full flex items-center justify-between">
