@@ -3655,7 +3655,7 @@ if (authLoading) {
                   <Search size={16} color="#fff" />
                 </button>
               </div>
-              </div>
+     
                          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 {Object.entries(BADGE_META).map(([key, meta]) => {
                   const Icon = meta.icon;
