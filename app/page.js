@@ -3645,7 +3645,7 @@ if (authLoading) {
                   </svg>
                 </button>
                          <Search size={16} color={INK_SOFT} />
-                <input value={query} onCha<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 min-w-0 outline-none text-sm bg-transparent" style={{ color: INK }} />nge={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
+                <input value={query} onCha<input valu<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 min-w-0 outline-none text-sm bg-transparent" style={{ color: INK }} />e={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 min-w-0 outline-none text-sm bg-transparent" style={{ color: INK }} />nge={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
                            <button
                   onClick={() => {}}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
