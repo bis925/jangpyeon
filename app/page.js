@@ -1895,7 +1895,9 @@ async function handleAvatarChange(e) {
   }
   
   async function fetchProfile() {
+    alert("fetchProfile 호출됨");
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
+    alert("data 받음: " + JSON.stringify(data));
     setProfile(data);
     setAvatarUrl(data?.avatar_url || null);
     alert("닉네임 값: [" + data?.nickname + "], dismissed 값: " + localStorage.getItem(`jangpyeon_nickname_prompt_dismissed_${session.user.id}`));
