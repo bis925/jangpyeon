@@ -1428,8 +1428,8 @@ const viewingReviewsPlaceRef = useRef(null);
           token: idToken,
         });
         if (error) { showToast("구글 로그인 실패: " + error.message); }
-          } catch (err) {
-        showToast("에러: " + (err?.message || JSON.stringify(err)));
+             } catch (err) {
+        alert("코드: " + err?.code + "\n메시지: " + err?.message + "\n전체: " + JSON.stringify(err));
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
