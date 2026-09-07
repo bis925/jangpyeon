@@ -798,9 +798,9 @@ export default function Page() {
 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => {
+    recognition.onerror = (event) => {
       setIsListening(false);
-      showToast("음성을 인식하지 못했어요, 다시 시도해주세요");
+      alert("음성 인식 에러: " + event.error);
     };
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
