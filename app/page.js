@@ -897,6 +897,7 @@ export default function Page() {
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [logoWeather, setLogoWeather] = useState(null);
   const [mySessionToken, setMySessionToken] = useState(null);
+  const mySessionTokenRef = useRef(null);
   
   const [responseMonthFilter, setResponseMonthFilter] = useState(() => {
     const now = new Date();
@@ -1843,16 +1844,18 @@ async function handleAvatarChange(e) {
     const mapped = (data || []).map((r) => ({ email: r.email, points: r.total_points }));
     setPointRanking(mapped);
   }
-  async function checkDeviceSession() {
+  
+   async function checkDeviceSession() {
+    if (mySessionTokenRef.current) return;
     const deviceType = (typeof window !== "undefined" && window.Capacitor) ? "mobile" : "pc";
     const deviceLabel = deviceType === "mobile" ? "모바일 앱" : "PC 브라우저";
-
     let token = localStorage.getItem("jangpyeon_session_token");
     if (!token) {
       token = crypto.randomUUID();
       localStorage.setItem("jangpyeon_session_token", token);
     }
     setMySessionToken(token);
+    mySessionTokenRef.current = token;
 
     const isValid = await supabase.rpc("validate_session", { p_session_token: token });
     if (isValid.data) return;
