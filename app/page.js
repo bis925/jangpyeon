@@ -394,7 +394,7 @@ function TierBar({ points }) {
 }
 
 /* ===================== 로그인 화면 ===================== */
-function LoginScreen({ onSent, signInWithGoogle }) {
+function LoginScreen({ onSent, signInWithGoogle, showToast }) {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
@@ -2630,7 +2630,36 @@ if (authLoading) {
     return <div className="min-h-screen flex items-center justify-center" style={{ background: PAPER }}><LogoMark size={40} /></div>;
   }
   if (!session) {
-    return <LoginScreen signInWithGoogle={signInWithGoogle} />;
+    return (
+      <>
+        <LoginScreen signInWithGoogle={signInWithGoogle} showToast={showToast} />
+        {showExitConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <div className="w-full max-w-xs rounded-2xl p-6 text-center" style={{ background: CARD }}>
+              <div className="font-extrabold text-base mb-2" style={{ color: INK }}>장편 앱을 종료하시겠습니까?</div>
+              <div className="flex gap-2 mt-5">
+                <button onClick={() => setShowExitConfirm(false)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                  취소
+                </button>
+                <button
+                  onClick={async () => {
+                    const { App } = await import("@capacitor/app");
+                    App.exitApp();
+                  }}
+                  className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: CORAL }}>
+                  종료
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {toast && (
+          <div className="fixed left-1/2 bottom-6 z-50 -translate-x-1/2 pointer-events-none">
+            <div className="rounded-full px-5 py-3 text-sm font-bold text-white shadow-lg" style={{ background: INK }}>{toast}</div>
+          </div>
+        )}
+      </>
+    );
   }
 
   const points = profile?.points ?? 0;
