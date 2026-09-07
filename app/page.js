@@ -998,6 +998,8 @@ const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => { isMapFullscreenRef.current = isMapFullscreen; }, [isMapFullscreen]);
   const placeContextMenuRef = useRef(null);
   useEffect(() => { placeContextMenuRef.current = placeContextMenu; }, [placeContextMenu]);
+  const showCouponPopRef = useRef(false);
+  useEffect(() => { showCouponPopRef.current = showCouponPop; }, [showCouponPop]);
   const sessionRef = useRef(null);
   useEffect(() => { sessionRef.current = session; }, [session]);
   const didSwipe = useRef(false);
@@ -1077,6 +1079,8 @@ const viewingReviewsPlaceRef = useRef(null);
           setImageScale(1);
         } else if (placeContextMenuRef.current) {
           setPlaceContextMenu(null);
+        } else if (showCouponPopRef.current) {
+          setShowCouponPop(false);
         } else if (isMapFullscreenRef.current) {
           setIsMapFullscreen(false);
         } else if (showFavoritesOnlyRef.current) {
@@ -1994,7 +1998,6 @@ async function handleAvatarChange(e) {
     if (unusedCount > 0 && !hadUnusedBefore) {
       pendingCouponAnnounce.current = unusedCount;
       setShowCouponPop(true);
-      setTimeout(() => setShowCouponPop(false), 5000);
     }
   }
     async function fetchAllCoupons() {
@@ -3635,34 +3638,22 @@ if (authLoading) {
         </div>
       )}
 
-      {/* ===== COUPON POP ANIMATION ===== */}
+    {/* ===== COUPON POP (SIMPLE) ===== */}
         {showCouponPop && (
-        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center pointer-events-none overflow-hidden">
-               <div className="coupon-pop-text-v2 mb-6">
-            <div className="font-extrabold text-3xl text-center px-6" style={{ color: INK, textShadow: "0 2px 12px rgba(255,255,255,0.9)" }}>
-              🎉 쿠폰이 도착했어요!
-            </div>
-          </div>
-                          <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }}>
-            <div className="coupon-box-pop-in">🎁</div>
-            {Array.from({ length: 50 }).map((_, i) => {
-              const angle = (Math.PI * 2 * i) / 50 + (Math.random() * 0.5 - 0.25);
-              const distance = 150 + Math.random() * 220;
-              const tx = Math.cos(angle) * distance;
-              const ty = Math.sin(angle) * distance * 0.6 - 60;
-              const isCircle = i % 3 === 0;
-              return (
-                <div key={i} className="confetti-piece-v2" style={{
-                  "--tx": `${tx}px`,
-                  "--ty": `${ty}px`,
-                  "--rot": `${360 + Math.random() * 360}deg`,
-                  width: isCircle ? 12 : 9,
-                  height: isCircle ? 12 : 16,
-                  borderRadius: isCircle ? "50%" : "2px",
-                  background: [TEAL, CORAL, YELLOW, "#fff", "#FFD700", "#FF6B9D"][i % 6],
-                }} />
-              );
-            })}
+        <div onClick={() => setShowCouponPop(false)} className="fixed inset-0 z-[70] flex items-center justify-center px-8" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-xs rounded-3xl p-6 text-center relative" style={{ background: CARD }}>
+            <button onClick={() => setShowCouponPop(false)} className="absolute top-4 right-4 rounded-full p-1.5 transition-all duration-150 active:scale-90" style={{ background: PAPER }} aria-label="닫기">
+              <X size={16} color={INK_SOFT} />
+            </button>
+            <div className="text-5xl mb-3 mt-2">🎁</div>
+            <div className="font-extrabold text-lg mb-6" style={{ color: INK }}>쿠폰이 도착했어요!</div>
+            <button
+              onClick={() => { setShowCouponPop(false); setTab("my"); setTimeout(() => { document.getElementById("coupon-section")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }}
+              className="w-full rounded-full py-3.5 font-extrabold text-white transition-all duration-200 active:scale-[0.98]"
+              style={{ background: TEAL }}
+            >
+              쿠폰 확인하기
+            </button>
           </div>
         </div>
       )}
