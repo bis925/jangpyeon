@@ -1771,6 +1771,7 @@ async function handleAvatarChange(e) {
   useEffect(() => {
     if (!session || !mySessionToken) return;
     const interval = setInterval(async () => {
+      if (sessionConflict) return;
       const { data } = await supabase.rpc("validate_session", { p_session_token: mySessionToken });
       if (data === false) {
         window.speechSynthesis?.cancel();
@@ -1781,7 +1782,7 @@ async function handleAvatarChange(e) {
       }
     }, 30000);
     return () => clearInterval(interval);
-  }, [session, mySessionToken]);
+  }, [session, mySessionToken, sessionConflict]);
   
   useEffect(() => {
     if (typeof window === "undefined") return;
