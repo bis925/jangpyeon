@@ -1408,24 +1408,28 @@ const viewingReviewsPlaceRef = useRef(null);
   async function signInWithGoogle() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
+        alert("1: import 시도");
         const { SocialLogin } = await import("@capgo/capacitor-social-login");
+        alert("2: import 성공, initialize 시도");
         await SocialLogin.initialize({
           google: {
             webClientId: "578266178904-s7jkmgoqvbvanv7t45nlmmgar91ejcuo.apps.googleusercontent.com",
           },
         });
+        alert("3: initialize 성공, login 시도");
         const res = await SocialLogin.login({
           provider: "google",
           options: { scopes: ["email", "profile"] },
         });
+        alert("4: login 성공: " + JSON.stringify(res).slice(0, 300));
         const idToken = res.result.idToken;
         const { error } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: idToken,
         });
-        if (error) { showToast("구글 로그인 실패: " + error.message); }
+        if (error) { alert("5: Supabase 에러: " + error.message); }
       } catch (err) {
-        showToast("구글 로그인이 취소됐거나 실패했어요: " + (err?.message || ""));
+        alert("에러 발생\n이름: " + err?.name + "\n메시지: " + err?.message + "\n전체: " + String(err));
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
