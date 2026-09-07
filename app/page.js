@@ -1410,7 +1410,9 @@ const viewingReviewsPlaceRef = useRef(null);
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
         alert("네이티브 분기 진입, import 시도");
-        const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
+        const googleAuthModule = await import("@codetrix-studio/capacitor-google-auth");
+        alert("모듈 내용: " + JSON.stringify(Object.keys(googleAuthModule)));
+        const { GoogleAuth } = googleAuthModule;
         alert("import 성공, signIn 호출");
         const googleUser = await GoogleAuth.signIn();
         alert("signIn 성공: " + JSON.stringify(googleUser).slice(0, 200));
