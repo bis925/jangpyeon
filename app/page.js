@@ -944,6 +944,8 @@ const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => { showFavoritesOnlyRef.current = showFavoritesOnly; }, [showFavoritesOnly]);
   const isMapFullscreenRef = useRef(false);
   useEffect(() => { isMapFullscreenRef.current = isMapFullscreen; }, [isMapFullscreen]);
+  const sessionRef = useRef(null);
+  useEffect(() => { sessionRef.current = session; }, [session]);
   const didSwipe = useRef(false);
   const [reportReason, setReportReason] = useState("");
     const [pullDistance, setPullDistance] = useState(0);
@@ -1029,6 +1031,8 @@ const viewingReviewsPlaceRef = useRef(null);
           setSpeakingFaqId(null);
         } else if (viewingReviewsPlaceRef.current) {
           setViewingReviewsPlace(null);
+        } else if (!sessionRef.current) {
+          setShowExitConfirm(true);
         } else if (tabRef.current !== "home") {
           setTab("home");
         } else {
