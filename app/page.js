@@ -1420,7 +1420,7 @@ const viewingReviewsPlaceRef = useRef(null);
         });
         const res = await SocialLogin.login({
           provider: "google",
-          options: { scopes: ["email", "profile"] },
+          options: { scopes: ["email", "profile"], filterByAuthorizedAccounts: false },
         });
         const idToken = res.result.idToken;
         const { error } = await supabase.auth.signInWithIdToken({
