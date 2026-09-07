@@ -1410,7 +1410,7 @@ const viewingReviewsPlaceRef = useRef(null);
       try {
           const googleAuthModule = await import("@codetrix-studio/capacitor-google-auth");
         const GoogleAuth = googleAuthModule.default;
-        alert("GoogleAuth 타입: " + typeof GoogleAuth + ", signIn 존재: " + typeof GoogleAuth?.signIn);
+        alert("GoogleAuth 안의 함수들: " + JSON.stringify(Object.keys(GoogleAuth)));
         const googleUser = await GoogleAuth.signIn();
         alert("signIn 완료: " + JSON.stringify(googleUser).slice(0, 300));
         const idToken = googleUser.authentication.idToken;
