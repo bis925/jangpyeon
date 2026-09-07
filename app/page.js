@@ -1420,8 +1420,8 @@ const viewingReviewsPlaceRef = useRef(null);
           token: idToken,
         });
         if (error) { alert("Supabase 에러: " + error.message); }
-      } catch (err) {
-        alert("에러 발생: " + JSON.stringify(err));
+          } catch (err) {
+        alert("에러 발생\n이름: " + err?.name + "\n메시지: " + err?.message + "\n코드: " + err?.code + "\n전체: " + String(err));
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
