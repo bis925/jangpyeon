@@ -1489,7 +1489,13 @@ const viewingReviewsPlaceRef = useRef(null);
         });
         if (error) { showToast("구글 로그인 실패: " + error.message); }
              } catch (err) {
-        alert("코드: " + err?.code + "\n메시지: " + err?.message + "\n전체: " + JSON.stringify(err));
+        if (err?.code === "USER_CANCELLED" || err?.message?.includes("cancelled")) {
+          showToast("구글 로그인이 취소됐어요");
+        } else if (err?.message?.includes("access_denied") || err?.message?.includes("not authorized") || err?.message?.includes("reauth")) {
+          showToast("죄송해요, 지금은 베타 테스트 기간이라 등록된 분만 구글 로그인이 가능해요");
+        } else {
+          showToast("구글 로그인에 실패했어요, 다시 시도해주세요");
+        }
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
