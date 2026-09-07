@@ -1408,9 +1408,11 @@ const viewingReviewsPlaceRef = useRef(null);
     async function signInWithGoogle() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const googleAuthModule = await import("@codetrix-studio/capacitor-google-auth");
+          const googleAuthModule = await import("@codetrix-studio/capacitor-google-auth");
         const GoogleAuth = googleAuthModule.default;
+        alert("GoogleAuth 타입: " + typeof GoogleAuth + ", signIn 존재: " + typeof GoogleAuth?.signIn);
         const googleUser = await GoogleAuth.signIn();
+        alert("signIn 완료: " + JSON.stringify(googleUser).slice(0, 300));
         const idToken = googleUser.authentication.idToken;
         const { error } = await supabase.auth.signInWithIdToken({
           provider: "google",
