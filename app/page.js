@@ -1903,6 +1903,18 @@ async function handleAvatarChange(e) {
     const mapped = (data || []).map((r) => ({ email: r.email, points: r.total_points }));
     setPointRanking(mapped);
   }
+
+    async function handleLogout() {
+    const token = localStorage.getItem("jangpyeon_session_token");
+    if (token) {
+      await supabase.from("active_sessions").delete().eq("session_token", token);
+    }
+    await supabase.auth.signOut({ scope: "local" });
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("sb-") || key.includes("supabase") || key === "jangpyeon_session_token") localStorage.removeItem(key);
+    });
+    window.location.href = "/";
+  }
   
    async function checkDeviceSession() {
     if (mySessionTokenRef.current) return;
@@ -2822,13 +2834,7 @@ if (authLoading) {
             <button onClick={() => setShowFavoritesOnly(true)} className="rounded-full p-2 flex-shrink-0 transition-all duration-200 active:scale-90" style={{ background: PAPER }} aria-label="즐겨찾기 목록">
               <Star size={16} color={INK_SOFT} />
             </button>
-                                    <button onClick={async () => {
-              await supabase.auth.signOut({ scope: "local" });
-              Object.keys(localStorage).forEach((key) => {
-                if (key.startsWith("sb-") || key.includes("supabase")) localStorage.removeItem(key);
-              });
-              window.location.href = "/";
-            }} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+                                    <button onClick={handleLogout} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
               <LogOut size={14} />
               로그아웃
             </button>
@@ -2842,13 +2848,7 @@ if (authLoading) {
             <span style={{ fontSize: `${14 * FONT_SCALES[fontScale] * 0.7}px` }}>🪙</span>
             <span style={{ fontFamily: MONO_FONT, color: CORAL, fontWeight: 700, fontSize: `${12 * FONT_SCALES[fontScale] * 0.7}px` }} className="whitespace-nowrap">{points.toLocaleString()}P</span>
           </button>
-                                  <button onClick={async () => {
-              await supabase.auth.signOut({ scope: "local" });
-              Object.keys(localStorage).forEach((key) => {
-                if (key.startsWith("sb-") || key.includes("supabase")) localStorage.removeItem(key);
-              });
-              window.location.href = "/";
-                      }} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95 flex-shrink-0 whitespace-nowrap" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
+                                  <button onClick={handleLogout} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95 flex-shrink-0 whitespace-nowrap" style={{ border: `1.4px solid ${LINE}`, color: INK_SOFT }}>
               <LogOut size={14} />
               로그아웃
             </button>
