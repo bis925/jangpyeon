@@ -4670,7 +4670,8 @@ if (authLoading) {
               {[
                 { id: "admin-ranking", label: "순위 보상", icon: ShieldCheck, color: "#E8A800", bg: "#FFF3D6" },
                 { id: "admin-members", label: "회원 관리", icon: User, color: TEAL_DARK, bg: TEAL_TINT },
-                { id: "admin-notif", label: "알림 보내기", icon: Bell, color: CORAL, bg: CORAL_TINT },
+                          { id: "admin-notif", label: "알림 보내기", icon: Bell, color: CORAL, bg: CORAL_TINT },
+                { id: "admin-inquiries", label: "1:1 문의", icon: MessageSquare, color: newInquiryCount > 0 ? CORAL : TEAL_DARK, bg: newInquiryCount > 0 ? CORAL_TINT : TEAL_TINT },
                 { id: "admin-campaign", label: "캠페인 배너", icon: Camera, color: TEAL_DARK, bg: TEAL_TINT },
                 { id: "admin-notice-write", label: "공지사항", icon: Megaphone, color: CORAL, bg: CORAL_TINT },
                 { id: "admin-faq", label: "FAQ 관리", icon: Headset, color: TEAL_DARK, bg: TEAL_TINT },
@@ -5209,7 +5210,7 @@ if (authLoading) {
               </div>
             )}
 
-               <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
+    <div id="admin-inquiries" className="font-extrabold text-sm mb-3" style={{ color: INK }}>1:1 문의 관리</div>
             <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {allInquiries.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>문의가 없어요</div>}
               {allInquiries.map((q) => {
