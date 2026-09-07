@@ -946,6 +946,7 @@ async function startVoiceSearch() {
   const [memberSort, setMemberSort] = useState("points_desc");
   const [memberFilter, setMemberFilter] = useState("all");
   const [memberPage, setMemberPage] = useState(1);
+  const [newInquiryCount, setNewInquiryCount] = useState(0);
   const [fullscreenCenter, setFullscreenCenter] = useState(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [logoWeather, setLogoWeather] = useState(null);
@@ -1771,6 +1772,13 @@ async function handleAvatarChange(e) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+    useEffect(() => {
+    if (!session || (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff")) return;
+    fetchAllInquiries();
+    const interval = setInterval(fetchAllInquiries, 30000);
+    return () => clearInterval(interval);
+  }, [session, profile?.role]);
+
   useEffect(() => {
     if (!session || !mySessionToken) return;
     const interval = setInterval(async () => {
@@ -2067,6 +2075,7 @@ async function handleAvatarChange(e) {
     if (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff") return;
     const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
     setAllInquiries(data || []);
+    setNewInquiryCount((data || []).filter((i) => i.status !== "answered").length);
   }
     async function fetchAllProfiles() {
     if (session.user.email !== ADMIN_EMAIL) return;
@@ -2758,7 +2767,7 @@ if (authLoading) {
     { id: "map", label: "지도·검색", icon: MapPin },
     { id: "register", label: "등록", icon: Plus },
     { id: "notice", label: "공지사항", icon: Megaphone },
-    { id: "my", label: "마이페이지", icon: User },
+        { id: "my", label: "마이페이지", icon: User, badge: newInquiryCount > 0 && (session.user.email === ADMIN_EMAIL || profile?.role === "staff") ? newInquiryCount : 0 },
     ...(isAdmin ? [{ id: "admin", label: "관리자", icon: ShieldCheck }] : []),
     ...(isStaff && !isAdmin ? [{ id: "staff", label: "업무", icon: ShieldCheck }] : []),
   ];
@@ -2801,9 +2810,14 @@ if (authLoading) {
             const Icon = n.icon;
             const active = tab === n.id;
             return (
-              <button key={n.id} onClick={() => setTab(n.id)} className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-bold transition-all duration-200 active:scale-95 hover:opacity-90"
+                     <button key={n.id} onClick={() => setTab(n.id)} className="relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-bold transition-all duration-200 active:scale-95 hover:opacity-90"
                 style={{ background: active ? TEAL : "transparent", color: active ? "#fff" : INK_SOFT }}>
                 <Icon size={15} />{n.label}
+                {n.badge > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center rounded-full font-extrabold coupon-badge-glow" style={{ width: 18, height: 18, background: CORAL, color: "#fff", fontSize: 10 }}>
+                    {n.badge > 9 ? "9+" : n.badge}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -2871,10 +2885,15 @@ if (authLoading) {
           const Icon = n.icon;
           const active = tab === n.id;
           return (
-            <button key={n.id} onClick={() => setTab(n.id)} className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-all duration-200 active:scale-95"
+            <button key={n.id} onClick={() => setTab(n.id)} className="relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-all duration-200 active:scale-95"
               style={{ color: active ? TEAL : INK_SOFT }}>
               <Icon size={17} />
               <span style={{ fontSize: `${9 * FONT_SCALES[fontScale] * 1.2}px`, fontWeight: 700, whiteSpace: "nowrap" }}>{n.label}</span>
+              {n.badge > 0 && (
+                <span className="absolute top-0 right-2 flex items-center justify-center rounded-full font-extrabold coupon-badge-glow" style={{ width: 16, height: 16, background: CORAL, color: "#fff", fontSize: 9 }}>
+                  {n.badge > 9 ? "9+" : n.badge}
+                </span>
+              )}
             </button>
           );
         })}
