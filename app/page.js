@@ -805,12 +805,16 @@ async function startVoiceSearch() {
           }
         });
 
-        await SpeechRecognition.start({
+         const result = await SpeechRecognition.start({
           language: "ko-KR",
           maxResults: 1,
           partialResults: true,
           popup: false,
         });
+        alert("최종 결과: " + JSON.stringify(result));
+        if (result?.matches && result.matches.length > 0) {
+          setQuery(result.matches[0]);
+        }
         setIsListening(false);
         SpeechRecognition.removeAllListeners();
        } catch (err) {
