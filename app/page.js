@@ -1418,9 +1418,9 @@ const viewingReviewsPlaceRef = useRef(null);
             webClientId: "578266178904-s7jkmgoqvbvanv7t45nlmmgar91ejcuo.apps.googleusercontent.com",
           },
         });
-        const res = await SocialLogin.login({
+          const res = await SocialLogin.login({
           provider: "google",
-          options: { scopes: ["email", "profile"], filterByAuthorizedAccounts: false },
+          options: { scopes: ["email", "profile"], style: "standard", filterByAuthorizedAccounts: false },
         });
         const idToken = res.result.idToken;
         const { error } = await supabase.auth.signInWithIdToken({
