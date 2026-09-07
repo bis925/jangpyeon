@@ -1406,11 +1406,26 @@ const viewingReviewsPlaceRef = useRef(null);
   }
 
   async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: "https://jangpyeon.kr/" },
-    });
-    if (error) { showToast("구글 로그인 실패: " + error.message); }
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
+        const googleUser = await GoogleAuth.signIn();
+        const idToken = googleUser.authentication.idToken;
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: "google",
+          token: idToken,
+        });
+        if (error) { showToast("구글 로그인 실패: " + error.message); }
+      } catch (err) {
+        showToast("구글 로그인이 취소됐거나 실패했어요");
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: "https://jangpyeon.kr/" },
+      });
+      if (error) { showToast("구글 로그인 실패: " + error.message); }
+    }
   }
   
   async function deleteMyAccount() {
