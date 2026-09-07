@@ -3630,7 +3630,7 @@ if (authLoading) {
         {tab === "home" && (
           <div>
             <div className="mb-6">
-                                 <div className="flex items-center gap-2 rounded-full px-4 py-3 mb-3" style={{ background: CARD, border: `1px solid ${LINE}` }}>
+                                 <div className="flex items-center gap-2 rounded-full px-3 py-2.5 mb-3 flex-wrap" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                           <button
                   onClick={startVoiceSearch}
                   className="flex sm:hidden items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
