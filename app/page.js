@@ -3646,14 +3646,15 @@ if (authLoading) {
                 </button>
                          <Search size={16} color={INK_SOFT} />
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
-                <button
+                           <button
                   onClick={() => {}}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
-                  style={{ width: 40, height: 40, background: TEAL }}
+                  style={{ width: 36, height: 36, minWidth: 36, background: TEAL }}
                   aria-label="검색하기"
                 >
-                  <Search size={18} color="#fff" />
+                  <Search size={16} color="#fff" />
                 </button>
+              </div>
               </div>
                          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 {Object.entries(BADGE_META).map(([key, meta]) => {
