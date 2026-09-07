@@ -996,6 +996,8 @@ const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => { showFavoritesOnlyRef.current = showFavoritesOnly; }, [showFavoritesOnly]);
   const isMapFullscreenRef = useRef(false);
   useEffect(() => { isMapFullscreenRef.current = isMapFullscreen; }, [isMapFullscreen]);
+  const placeContextMenuRef = useRef(null);
+  useEffect(() => { placeContextMenuRef.current = placeContextMenu; }, [placeContextMenu]);
   const sessionRef = useRef(null);
   useEffect(() => { sessionRef.current = session; }, [session]);
   const didSwipe = useRef(false);
@@ -1070,9 +1072,11 @@ const viewingReviewsPlaceRef = useRef(null);
     let subPromise;
     import("@capacitor/app").then(({ App }) => {
       subPromise = App.addListener("backButton", () => {
-               if (previewImagesRef.current.length > 0) {
+        if (previewImagesRef.current.length > 0) {
           setPreviewImages([]);
           setImageScale(1);
+        } else if (placeContextMenuRef.current) {
+          setPlaceContextMenu(null);
         } else if (isMapFullscreenRef.current) {
           setIsMapFullscreen(false);
         } else if (showFavoritesOnlyRef.current) {
