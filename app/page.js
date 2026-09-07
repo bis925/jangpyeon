@@ -813,9 +813,9 @@ async function startVoiceSearch() {
         });
         setIsListening(false);
         SpeechRecognition.removeAllListeners();
-      } catch (err) {
+       } catch (err) {
         setIsListening(false);
-        showToast("음성 인식에 실패했어요, 다시 시도해주세요");
+        alert("에러 상세\n메시지: " + err?.message + "\n전체: " + JSON.stringify(err));
       }
     } else {
       const SR = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
