@@ -21,7 +21,7 @@
     "@capacitor-community/text-to-speech": "^8.0.0",
     "react-quill-new": "^3.3.3",
     "@capacitor/push-notifications": "^6.0.0",
-    "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4"
+  "@capgo/capacitor-social-login": "^8.5.5"
   },
   "devDependencies": {
     "tailwindcss": "3.4.7",
