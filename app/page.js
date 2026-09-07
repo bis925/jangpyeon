@@ -798,24 +798,18 @@ async function startVoiceSearch() {
           return;
         }
 
-        setIsListening(true);
-        SpeechRecognition.addListener("partialResults", (data) => {
-          if (data.matches && data.matches.length > 0) {
-            setQuery(data.matches[0]);
-          }
-        });
+         setIsListening(true);
 
-         const result = await SpeechRecognition.start({
+          const result = await SpeechRecognition.start({
           language: "ko-KR",
           maxResults: 1,
-          partialResults: true,
-          popup: false,
+          partialResults: false,
+          popup: true,
         });
-        alert("최종 결과: " + JSON.stringify(result));
+        setIsListening(false);
         if (result?.matches && result.matches.length > 0) {
           setQuery(result.matches[0]);
         }
-        setIsListening(false);
         SpeechRecognition.removeAllListeners();
        } catch (err) {
         setIsListening(false);
