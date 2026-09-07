@@ -1405,22 +1405,27 @@ const viewingReviewsPlaceRef = useRef(null);
     showToast("배경 사진이 변경됐어요!");
   }
 
-    async function signInWithGoogle() {
+  async function signInWithGoogle() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-          const googleAuthModule = await import("@codetrix-studio/capacitor-google-auth");
-        const GoogleAuth = googleAuthModule.default;
-        alert("GoogleAuth 안의 함수들: " + JSON.stringify(Object.keys(GoogleAuth)));
-        const googleUser = await GoogleAuth.signIn();
-        alert("signIn 완료: " + JSON.stringify(googleUser).slice(0, 300));
-        const idToken = googleUser.authentication.idToken;
+        const { SocialLogin } = await import("@capgo/capacitor-social-login");
+        await SocialLogin.initialize({
+          google: {
+            webClientId: "578266178904-s7jkmgoqvbvanv7t45nlmmgar91ejcuo.apps.googleusercontent.com",
+          },
+        });
+        const res = await SocialLogin.login({
+          provider: "google",
+          options: { scopes: ["email", "profile"] },
+        });
+        const idToken = res.result.idToken;
         const { error } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: idToken,
         });
         if (error) { showToast("구글 로그인 실패: " + error.message); }
       } catch (err) {
-        showToast("구글 로그인이 취소됐거나 실패했어요");
+        showToast("구글 로그인이 취소됐거나 실패했어요: " + (err?.message || ""));
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
