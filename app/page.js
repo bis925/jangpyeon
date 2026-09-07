@@ -1387,7 +1387,7 @@ const viewingReviewsPlaceRef = useRef(null);
     setShowNicknamePrompt(false);
   }
   function dismissNicknamePrompt() {
-    localStorage.setItem("jangpyeon_nickname_prompt_dismissed", "true");
+    localStorage.setItem(`jangpyeon_nickname_prompt_dismissed_${session.user.id}`, "true");
     setShowNicknamePrompt(false);
   }
 
@@ -1898,7 +1898,7 @@ async function handleAvatarChange(e) {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data);
     setAvatarUrl(data?.avatar_url || null);
-    if (data && !data.nickname && !localStorage.getItem("jangpyeon_nickname_prompt_dismissed")) {
+    if (data && !data.nickname && !localStorage.getItem(`jangpyeon_nickname_prompt_dismissed_${session.user.id}`)) {
       setShowNicknamePrompt(true);
     }
 
