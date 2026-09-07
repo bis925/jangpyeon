@@ -3605,22 +3605,22 @@ if (authLoading) {
         {tab === "home" && (
           <div>
             <div className="mb-6">
-                       <div className="flex items-center gap-2 rounded-full px-4 py-3 mb-3" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-                <Search size={16} color={INK_SOFT} />
-                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
+                                 <div className="flex items-center gap-2 rounded-full px-4 py-3 mb-3" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                 <button
                   onClick={startVoiceSearch}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
-                  style={{ width: 30, height: 30, background: isListening ? CORAL : TEAL_TINT }}
+                  style={{ width: 40, height: 40, background: isListening ? CORAL : TEAL }}
                   aria-label="음성으로 검색"
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isListening ? "#fff" : TEAL_DARK} strokeWidth="2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
                     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                     <line x1="12" y1="19" x2="12" y2="23" />
                     <line x1="8" y1="23" x2="16" y2="23" />
                   </svg>
                 </button>
+                <Search size={16} color={INK_SOFT} />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 outline-none text-sm bg-transparent" style={{ color: INK }} />
               </div>
                          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 {Object.entries(BADGE_META).map(([key, meta]) => {
