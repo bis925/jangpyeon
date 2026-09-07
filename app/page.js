@@ -800,11 +800,11 @@ async function startVoiceSearch() {
 
              setIsListening(true);
 
-        const result = await SpeechRecognition.start({
+            const result = await SpeechRecognition.start({
           language: "ko-KR",
           maxResults: 1,
           partialResults: false,
-          popup: false,
+          popup: true,
         });
         setIsListening(false);
         if (result?.matches && result.matches.length > 0) {
