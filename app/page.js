@@ -3634,7 +3634,7 @@ if (authLoading) {
                           <button
                   onClick={startVoiceSearch}
                   className="flex sm:hidden items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
-                                    style={{ width: 36, height: 36, minWidth: 36, background: isListening ? CORAL : TEAL }}
+                                     style={{ width: 44, height: 44, minWidth: 44, background: isListening ? CORAL : TEAL }}
                   aria-label="음성으로 검색"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
