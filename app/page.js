@@ -511,9 +511,12 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
                 className="w-full rounded-full py-3.5 font-extrabold text-white transition-all duration-200 active:scale-[0.98] hover:opacity-90"
                 style={{ background: CORAL }}
               >
-                {loading ? "보내는 중..." : "이메일로 로그인 링크 받기"}
+                 {loading ? "보내는 중..." : "이메일로 로그인 링크 받기"}
               </button>
                           {errorMsg && <p className="text-xs mt-3" style={{ color: CORAL }}>{errorMsg}</p>}
+              <p className="text-xs mt-3" style={{ color: INK_SOFT }}>
+                비밀번호 없이, 메일로 온 코드만 입력하면 로그인돼요.
+              </p>
             </form>
           )}
                                      {!sent && (
@@ -550,11 +553,8 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
                 📱 구글·카카오 계정으로 비밀번호 없이 바로 로그인할 수 있어요
               </p>
             </>
-          )}
-                  <p className="text-xs mt-6 mb-6" style={{ color: INK_SOFT }}>
-            이메일 인증은 비밀번호 없이, 메일로 온 코드만 입력하면 로그인돼요.
-          </p>
-                    <div className="flex items-center gap-3 mb-6">
+                  )}
+                    <div className="flex items-center gap-3 mt-6 mb-6">
             <div className="flex-1 h-px" style={{ background: LINE }} />
           </div>
                     <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer"
