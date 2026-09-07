@@ -516,7 +516,7 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
                           {errorMsg && <p className="text-xs mt-3" style={{ color: CORAL }}>{errorMsg}</p>}
             </form>
           )}
-                                 {!sent && (
+                                     {!sent && (
             <>
               <div className="flex items-center gap-3 my-5">
                 <div className="flex-1 h-px" style={{ background: LINE }} />
@@ -525,7 +525,7 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
               </div>
                        <button
                 onClick={signInWithGoogle}
-                className="w-full flex items-center justify-center gap-2 rounded-full font-bold transition-all duration-200 active:scale-[0.98] py-3.5 sm:py-3.5"
+                className="w-full flex items-center justify-center gap-2 rounded-full font-bold transition-all duration-200 active:scale-[0.98] py-3.5 sm:py-3.5 mb-2.5"
                 style={{ background: "#fff", border: `2px solid ${TEAL}`, color: INK, boxShadow: "0 2px 10px rgba(15,110,98,0.15)" }}
               >
                 <svg width="20" height="20" viewBox="0 0 18 18" className="flex-shrink-0">
@@ -536,9 +536,6 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
                 </svg>
                 <span className="text-base sm:text-sm">구글로 계속하기</span>
               </button>
-              <p className="text-xs sm:hidden mt-2.5 mb-3 font-bold" style={{ color: TEAL_DARK }}>
-                📱 지메일로 로그인 시 바로 로그인이 가능합니다
-              </p>
               <button
                 onClick={signInWithKakao}
                 className="w-full flex items-center justify-center gap-2 rounded-full py-3.5 font-bold transition-all duration-200 active:scale-[0.98]"
@@ -549,13 +546,19 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
                 </svg>
                 <span className="text-base sm:text-sm">카카오로 계속하기</span>
               </button>
+              <p className="text-xs mt-3 font-bold" style={{ color: TEAL_DARK }}>
+                📱 구글·카카오 계정으로 비밀번호 없이 바로 로그인할 수 있어요
+              </p>
             </>
           )}
-                  <p className="text-xs mt-6 mb-4" style={{ color: INK_SOFT }}>
-            비밀번호 없이, 메일로 온 링크만 누르면 로그인돼요.
+                  <p className="text-xs mt-6 mb-6" style={{ color: INK_SOFT }}>
+            이메일 인증은 비밀번호 없이, 메일로 온 코드만 입력하면 로그인돼요.
           </p>
+                    <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-px" style={{ background: LINE }} />
+          </div>
                     <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-full py-3.5 font-extrabold mt-8 mb-8 transition-all duration-200 active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 rounded-full py-3.5 font-extrabold transition-all duration-200 active:scale-[0.98]"
               style={{ background: "#FEE500", color: "#3C1E1E" }}>
               <Headset size={18} />
               카카오톡으로 상담하기
