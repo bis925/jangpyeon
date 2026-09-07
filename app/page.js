@@ -798,13 +798,13 @@ async function startVoiceSearch() {
           return;
         }
 
-         setIsListening(true);
+             setIsListening(true);
 
-          const result = await SpeechRecognition.start({
+        const result = await SpeechRecognition.start({
           language: "ko-KR",
           maxResults: 1,
           partialResults: false,
-          popup: true,
+          popup: false,
         });
         setIsListening(false);
         if (result?.matches && result.matches.length > 0) {
