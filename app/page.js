@@ -1405,25 +1405,20 @@ const viewingReviewsPlaceRef = useRef(null);
     showToast("배경 사진이 변경됐어요!");
   }
 
-  async function signInWithGoogle() {
-    alert("버튼 눌림, Capacitor: " + (typeof window !== "undefined" && window.Capacitor));
+    async function signInWithGoogle() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        alert("네이티브 분기 진입, import 시도");
         const googleAuthModule = await import("@codetrix-studio/capacitor-google-auth");
-        alert("모듈 내용: " + JSON.stringify(Object.keys(googleAuthModule)));
-        const { GoogleAuth } = googleAuthModule;
-        alert("import 성공, signIn 호출");
+        const GoogleAuth = googleAuthModule.default;
         const googleUser = await GoogleAuth.signIn();
-        alert("signIn 성공: " + JSON.stringify(googleUser).slice(0, 200));
         const idToken = googleUser.authentication.idToken;
         const { error } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: idToken,
         });
-        if (error) { alert("Supabase 에러: " + error.message); }
-          } catch (err) {
-        alert("에러 발생\n이름: " + err?.name + "\n메시지: " + err?.message + "\n코드: " + err?.code + "\n전체: " + String(err));
+        if (error) { showToast("구글 로그인 실패: " + error.message); }
+      } catch (err) {
+        showToast("구글 로그인이 취소됐거나 실패했어요");
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -1433,7 +1428,6 @@ const viewingReviewsPlaceRef = useRef(null);
       if (error) { showToast("구글 로그인 실패: " + error.message); }
     }
   }
-  
   async function deleteMyAccount() {
     const { error } = await supabase.rpc("delete_my_account");
     if (error) { showToast("탈퇴 실패: " + error.message); return; }
