@@ -945,6 +945,7 @@ async function startVoiceSearch() {
   const [placeContextMenu, setPlaceContextMenu] = useState(null);
   const [memberSort, setMemberSort] = useState("points_desc");
   const [memberFilter, setMemberFilter] = useState("all");
+  const [memberPage, setMemberPage] = useState(1);
   const [fullscreenCenter, setFullscreenCenter] = useState(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [logoWeather, setLogoWeather] = useState(null);
@@ -4795,16 +4796,16 @@ if (authLoading) {
               </button>
             </div>
            <div id="admin-members" className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
-            <input value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} placeholder="이메일 또는 닉네임으로 검색"
+           <input value={memberSearch} onChange={(e) => { setMemberSearch(e.target.value); setMemberPage(1); }} placeholder="이메일 또는 닉네임으로 검색"
               className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
             <div className="flex gap-2 mb-3">
-              <select value={memberSort} onChange={(e) => setMemberSort(e.target.value)} className="flex-1 rounded-xl px-3 py-2 text-xs font-bold outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: "#fff" }}>
+<select value={memberSort} onChange={(e) => { setMemberSort(e.target.value); setMemberPage(1); }} className="flex-1 rounded-xl px-3 py-2 text-xs font-bold outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: "#fff" }}>
                 <option value="points_desc">포인트 높은순</option>
                 <option value="points_asc">포인트 낮은순</option>
                 <option value="created_desc">가입일 최신순</option>
                 <option value="created_asc">가입일 오래된순</option>
               </select>
-              <select value={memberFilter} onChange={(e) => setMemberFilter(e.target.value)} className="flex-1 rounded-xl px-3 py-2 text-xs font-bold outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: "#fff" }}>
+<select value={memberFilter} onChange={(e) => { setMemberFilter(e.target.value); setMemberPage(1); }} className="flex-1 rounded-xl px-3 py-2 text-xs font-bold outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: "#fff" }}>
                 <option value="all">전체 회원</option>
                 <option value="invited">초대가입만</option>
                 <option value="아기병아리">아기병아리</option>
@@ -4817,17 +4818,20 @@ if (authLoading) {
             </div>
             <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {allProfiles.length === 0 && <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>회원이 없어요</div>}
-              {allProfiles
-                .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
-                .filter((p) => memberFilter === "all" ? true : memberFilter === "invited" ? !!p.invited_by : currentTier(p.points).label === memberFilter)
-                .sort((a, b) => {
-                  if (memberSort === "points_desc") return b.points - a.points;
-                  if (memberSort === "points_asc") return a.points - b.points;
-                  if (memberSort === "created_desc") return new Date(b.created_at) - new Date(a.created_at);
-                  if (memberSort === "created_asc") return new Date(a.created_at) - new Date(b.created_at);
-                  return 0;
-                })
-                .map((p) => (
+              {(() => {
+                const filtered = allProfiles
+                  .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
+                  .filter((p) => memberFilter === "all" ? true : memberFilter === "invited" ? !!p.invited_by : currentTier(p.points).label === memberFilter)
+                  .sort((a, b) => {
+                    if (memberSort === "points_desc") return b.points - a.points;
+                    if (memberSort === "points_asc") return a.points - b.points;
+                    if (memberSort === "created_desc") return new Date(b.created_at) - new Date(a.created_at);
+                    if (memberSort === "created_asc") return new Date(a.created_at) - new Date(b.created_at);
+                    return 0;
+                  });
+                const totalPages = Math.max(1, Math.ceil(filtered.length / 5));
+                const pageItems = filtered.slice((memberPage - 1) * 5, memberPage * 5);
+                return pageItems.map((p) => (
                                <div key={p.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
                                    <button onClick={() => setExpandedMemberId(expandedMemberId === p.id ? null : p.id)} className="w-full flex items-center justify-between">
                     <div className="text-left min-w-0">
@@ -4924,11 +4928,30 @@ if (authLoading) {
                       </div>
                     )}
                   </div>
-                  </div>
+                                   </div>
                   )}
                 </div>
-                 ))}
+                 ));
+              })()}
             </div>
+            {(() => {
+              const filtered = allProfiles
+                .filter((p) => (p.email || "").includes(memberSearch) || (p.nickname || "").includes(memberSearch))
+                .filter((p) => memberFilter === "all" ? true : memberFilter === "invited" ? !!p.invited_by : currentTier(p.points).label === memberFilter);
+              const totalPages = Math.max(1, Math.ceil(filtered.length / 5));
+              if (totalPages <= 1) return null;
+              return (
+                <div className="flex items-center justify-center gap-2 mb-8" style={{ marginTop: -24 }}>
+                  <button onClick={() => setMemberPage((p) => Math.max(1, p - 1))} disabled={memberPage === 1} className="rounded-full p-2" style={{ background: PAPER, opacity: memberPage === 1 ? 0.4 : 1 }} aria-label="이전 페이지">
+                    <ChevronRight size={16} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+                  </button>
+                  <span className="text-xs font-bold" style={{ color: INK_SOFT }}>{memberPage} / {totalPages}</span>
+                  <button onClick={() => setMemberPage((p) => Math.min(totalPages, p + 1))} disabled={memberPage === totalPages} className="rounded-full p-2" style={{ background: PAPER, opacity: memberPage === totalPages ? 0.4 : 1 }} aria-label="다음 페이지">
+                    <ChevronRight size={16} color={INK_SOFT} />
+                  </button>
+                </div>
+              );
+            })()}
 
             <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>포인트 조정 기록</div>
             <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
