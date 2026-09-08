@@ -1569,7 +1569,14 @@ const viewingReviewsPlaceRef = useRef(null);
           showToast("카카오 로그인에 실패했어요, 다시 시도해주세요");
           return;
         }
-        const payload = JSON.parse(atob(loginResult.idToken.split(".")[1]));
+        const base64Payload = loginResult.idToken.split(".")[1];
+        const decodedPayload = decodeURIComponent(
+          atob(base64Payload.replace(/-/g, "+").replace(/_/g, "/"))
+            .split("")
+            .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+            .join("")
+        );
+        const payload = JSON.parse(decodedPayload);
         const { data, error } = await supabase.functions.invoke("kakao-auth", {
           body: {
             kakaoId: payload.sub,
