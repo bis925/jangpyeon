@@ -95,12 +95,20 @@ export default function PrivacyPage() {
         <p style={{ margin: 0, color: INK_SOFT, fontSize: 14 }}>이용자는 언제든지 본인의 개인정보를 조회, 수정, 삭제할 수 있으며, 회원 탈퇴를 통해 개인정보 이용에 대한 동의를 철회할 수 있습니다.</p>
       </div>
 
-      <div style={{ background: TEAL_TINT, borderRadius: 16, padding: 24 }}>
+          <div style={{ background: TEAL_TINT, borderRadius: 16, padding: 24, marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
           <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: 999, background: "#fff", color: TEAL, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>8</span>
           <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: INK }}>개인정보 보호책임자</h2>
         </div>
         <p style={{ margin: 0, color: INK, fontSize: 14 }}>서비스명: 장편<br />문의: 카카오톡 채널 "장편" 또는 앱 내 1:1 문의</p>
+      </div>
+      <div style={{ textAlign: "center", padding: "8px 0" }}>
+        <p style={{ margin: 0, color: INK_SOFT, fontSize: 12, lineHeight: 1.8 }}>
+          코드람쥐<br />
+          사업자등록번호: 303-18-93738<br />
+          주소: 경기 평택시 산단로16번길 26 A동 14층 1408호<br />
+          전화: 0507-1328-0925
+        </p>
       </div>
       </div>
     </div>
