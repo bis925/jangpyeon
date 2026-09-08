@@ -1560,6 +1560,8 @@ const viewingReviewsPlaceRef = useRef(null);
     showToast("배경 사진이 변경됐어요!");
   }
 
+    const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
+
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
