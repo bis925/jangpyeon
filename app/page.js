@@ -1577,8 +1577,8 @@ const showFAQRef = useRef(false);
     showToast("배경 사진이 변경됐어요!");
   }
 
-    const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
-
+const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
+  const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       setKakaoLoggingIn(true);
