@@ -1492,7 +1492,15 @@ const viewingReviewsPlaceRef = useRef(null);
       try {
         const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
         const loginResult = await KakaoLoginPlugin.goLogin();
-        alert("로그인 결과: " + JSON.stringify(loginResult));
+        if (!loginResult?.success || !loginResult?.idToken) {
+          showToast("카카오 로그인에 실패했어요, 다시 시도해주세요");
+          return;
+        }
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: "kakao",
+          token: loginResult.idToken,
+        });
+        if (error) { showToast("카카오 로그인 실패: " + error.message); }
            } catch (err) {
         alert("에러 상세\n이름: " + err?.name + "\n메시지: " + err?.message + "\n코드: " + err?.code + "\n전체: " + JSON.stringify(err) + "\n키들: " + Object.keys(err || {}).join(","));
       }
