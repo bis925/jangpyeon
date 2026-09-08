@@ -846,6 +846,26 @@ async function startVoiceSearch() {
       recognition.start();
     }
   }
+
+  async function translatePlaceName() {
+    if (!form.name || !form.name.trim()) {
+      showToast("먼저 장소명을 입력해주세요");
+      return;
+    }
+    try {
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(form.name)}&langpair=en|ko`);
+      const data = await res.json();
+      const translated = data?.responseData?.translatedText;
+      if (translated) {
+        setForm({ ...form, name: translated });
+        showToast("번역됐어요!");
+      } else {
+        showToast("번역에 실패했어요");
+      }
+    } catch (err) {
+      showToast("번역 중 오류가 발생했어요");
+    }
+  }
   
   function showToast(message) {
     setToast(message);
@@ -4008,8 +4028,20 @@ if (authLoading) {
                 <div className="rounded-2xl p-4 mb-4" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                   <div className="text-xs font-bold mb-3" style={{ color: TEAL }}>📍 기본 정보</div>
                   <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>장소명</label>
+      <div className="flex items-center gap-2 mb-4">
                   <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
-                    className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                                   <button
+                    type="button"
+                    onClick={translatePlaceName}
+                    className="flex flex-col items-center justify-center gap-0.5 rounded-xl flex-shrink-0 transition-all duration-200 active:scale-90"
+                    style={{ width: 56, height: 56, minWidth: 56, background: TEAL, boxShadow: "0 2px 8px rgba(15,110,98,0.25)" }}
+                    aria-label="영어를 한글로 번역하기"
+                  >
+                    <span style={{ fontSize: 16 }}>🌐</span>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: "#fff" }}>번역</span>
+                  </button>
+                </div>
 
                                                                                                               <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
                   <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
