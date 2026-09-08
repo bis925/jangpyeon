@@ -393,7 +393,7 @@ function TierBar({ points }) {
 }
 
 /* ===================== 로그인 화면 ===================== */
-function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
+function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast, kakaoLoggingIn }) {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
@@ -2896,7 +2896,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
   if (!session) {
     return (
       <>
-        <LoginScreen signInWithGoogle={signInWithGoogle} signInWithKakao={signInWithKakao} showToast={showToast} />
+              <LoginScreen signInWithGoogle={signInWithGoogle} signInWithKakao={signInWithKakao} showToast={showToast} kakaoLoggingIn={kakaoLoggingIn} />
         {showExitConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
             <div className="w-full max-w-xs rounded-2xl p-6 text-center" style={{ background: CARD }}>
