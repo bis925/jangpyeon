@@ -956,6 +956,7 @@ async function startVoiceSearch() {
   const [sendingSOS, setSendingSOS] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [placeContextMenu, setPlaceContextMenu] = useState(null);
+  const [showBizInfo, setShowBizInfo] = useState(false);
   const [memberSort, setMemberSort] = useState("points_desc");
   const [memberFilter, setMemberFilter] = useState("all");
   const [memberPage, setMemberPage] = useState(1);
@@ -5334,8 +5335,21 @@ if (authLoading) {
         )}
 </main>
 
-      <footer className="text-center py-6 text-xs" style={{ color: INK_SOFT }}>
-        장편 · 코드람쥐
+      <footer className="text-center py-6 text-xs relative" style={{ color: INK_SOFT }}>
+        <butto onClick={() => setShowBizInfo(!showBizInfo)} className="inline-flex items-center gap-1">
+          제작 : 코드람쥐
+          <span className="flex items-center justify-center rounded-full" style={{ width: 13, height: 13, border: `1px solid ${INK_SOFT}`, fontSize: 9, fontWeight: 700 }}>i</span>
+        </button>
+        {showBizInfo && (
+          <div className="fixed inset-0 z-50" onClick={() => setShowBizInfo(false)}>
+            <div className="absolute left-1/2 rounded-2xl px-4 py-3" style={{ bottom: 60, transform: "translateX(-50%)", background: INK, color: "#fff", fontSize: 11, lineHeight: 1.8, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(0,0,0,0.25)" }}>
+              코드람쥐 · 사업자등록번호 303-18-93738<br />
+              경기 평택시 산단로16번길 26 A동 14층 1408호<br />
+              전화 0507-1328-0925
+              <div className="absolute left-1/2" style={{ bottom: -6, transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: `6px solid ${INK}` }} />
+            </div>
+          </div>
+        )}
       </footer>
     </div>
   );
