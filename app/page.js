@@ -4359,8 +4359,8 @@ if (authLoading) {
                     />
                   )}
                   <label htmlFor="avatar-upload" className="w-28 h-28 rounded-full flex items-center justify-center font-extrabold cursor-pointer overflow-hidden relative flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)", border: "3.5px solid rgba(255,255,255,0.5)", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="프로필 사진" className="w-full h-full object-cover" />
+                          {avatarUrl ? (
+                    <img src={avatarUrl.replace(/^http:\/\//i, "https://")} alt="프로필 사진" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = "none"; }} />
                   ) : (
                     <User size={36} />
                   )}
