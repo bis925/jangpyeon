@@ -856,15 +856,15 @@ async function startVoiceSearch() {
     }
     setIsTranslating(true);
     try {
-      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(form.name)}&langpair=en|ko`);
-      const data = await res.json();
-      const translated = data?.responseData?.translatedText;
-      if (translated) {
-        setForm({ ...form, name: translated });
-        showToast("번역됐어요!");
-      } else {
+      const { data, error } = await supabase.functions.invoke("smooth-endpoint", {
+        body: { text: form.name },
+      });
+      if (error || !data?.translated) {
         showToast("번역에 실패했어요");
+        return;
       }
+      setForm({ ...form, name: data.translated });
+      showToast("번역됐어요!");
     } catch (err) {
       showToast("번역 중 오류가 발생했어요");
     } finally {
