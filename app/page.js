@@ -1490,10 +1490,8 @@ const viewingReviewsPlaceRef = useRef(null);
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const kakaoModule = await import("@kichunsung/capacitor-kakao-login-plugin");
-        alert("모듈 내용: " + JSON.stringify(Object.keys(kakaoModule)));
-        const KakaoLogin = kakaoModule.KakaoLogin || kakaoModule.default;
-        const loginResult = await KakaoLogin.goLogin();
+        const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
+        const loginResult = await KakaoLoginPlugin.goLogin();
         alert("로그인 결과: " + JSON.stringify(loginResult));
            } catch (err) {
         alert("에러 상세\n이름: " + err?.name + "\n메시지: " + err?.message + "\n코드: " + err?.code + "\n전체: " + JSON.stringify(err) + "\n키들: " + Object.keys(err || {}).join(","));
