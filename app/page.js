@@ -1195,6 +1195,8 @@ const showFAQRef = useRef(false);
           setShowFAQ(false);
           if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
           setSpeakingFaqId(null);
+        } else if (showRankingPolicyRef.current) {
+          setShowRankingPolicy(false);
         } else if (viewingReviewsPlaceRef.current) {
           setViewingReviewsPlace(null);
         } else if (!sessionRef.current) {
