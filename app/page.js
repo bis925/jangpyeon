@@ -847,11 +847,14 @@ async function startVoiceSearch() {
     }
   }
 
+    const [isTranslating, setIsTranslating] = useState(false);
+
   async function translatePlaceName() {
     if (!form.name || !form.name.trim()) {
       showToast("먼저 장소명을 입력해주세요");
       return;
     }
+    setIsTranslating(true);
     try {
       const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(form.name)}&langpair=en|ko`);
       const data = await res.json();
@@ -864,6 +867,8 @@ async function startVoiceSearch() {
       }
     } catch (err) {
       showToast("번역 중 오류가 발생했어요");
+    } finally {
+      setIsTranslating(false);
     }
   }
   
@@ -4028,20 +4033,35 @@ if (authLoading) {
                 <div className="rounded-2xl p-4 mb-4" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                   <div className="text-xs font-bold mb-3" style={{ color: TEAL }}>📍 기본 정보</div>
                   <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>장소명</label>
-      <div className="flex items-center gap-2 mb-4">
+<div className="flex items-center gap-2 mb-1">
                   <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
                     className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-                                   <button
+                                                   <button
                     type="button"
                     onClick={translatePlaceName}
+                    disabled={isTranslating}
                     className="flex flex-col items-center justify-center gap-0.5 rounded-xl flex-shrink-0 transition-all duration-200 active:scale-90"
-                    style={{ width: 56, height: 56, minWidth: 56, background: TEAL, boxShadow: "0 2px 8px rgba(15,110,98,0.25)" }}
+                    style={{ width: 56, height: 56, minWidth: 56, background: TEAL, boxShadow: "0 2px 8px rgba(15,110,98,0.25)", opacity: isTranslating ? 0.7 : 1 }}
                     aria-label="영어를 한글로 번역하기"
                   >
-                    <span style={{ fontSize: 16 }}>🌐</span>
-                    <span style={{ fontSize: 10, fontWeight: 800, color: "#fff" }}>번역</span>
-                  </button>
+                                 {isTranslating ? (
+                      <>
+                        <div className="rounded-full animate-spin" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff" }} />
+                        <span style={{ fontSize: 9, fontWeight: 800, color: "#fff" }}>번역중</span>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ fontSize: 16 }}>🌐</span>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: "#fff" }}>번역</span>
+                      </>
+                    )}
+                        </button>
                 </div>
+                {isTranslating && (
+                  <p className="text-xs mb-3 font-bold" style={{ color: TEAL_DARK }}>
+                    🌐 번역하고 있어요, 잠시만 기다려주세요...
+                  </p>
+                )}
 
                                                                                                               <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
                   <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
