@@ -5005,7 +5005,6 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 {splashUploading ? "업로드 중..." : "새 이미지 올리기"}
               </label>
             </div>
-            <div id="admin-members" className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
            <div id="admin-members" className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
            <input value={memberSearch} onChange={(e) => { setMemberSearch(e.target.value); setMemberPage(1); }} placeholder="이메일 또는 닉네임으로 검색"
               className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
