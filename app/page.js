@@ -1487,39 +1487,14 @@ const viewingReviewsPlaceRef = useRef(null);
     showToast("배경 사진이 변경됐어요!");
   }
 
-async function signInWithKakao() {
+  async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const { SocialLogin } = await import("@capgo/capacitor-social-login");
-        await SocialLogin.initialize({
-          oauth2: {
-            kakao: {
-              appId: "9a87c454b6eaf9f72e255be980ccce93",
-              authorizationBaseUrl: "https://kauth.kakao.com/oauth/authorize",
-              accessTokenEndpoint: "https://kauth.kakao.com/oauth/token",
-              redirectUrl: "jangpyeon://oauth/kakao",
-              scope: "profile_nickname profile_image account_email openid",
-              pkceEnabled: true,
-              responseType: "code",
-            },
-          },
-        });
-        const res = await SocialLogin.login({
-          provider: "oauth2",
-          options: { providerId: "kakao" },
-        });
-        const idToken = res.result.idToken;
-        if (!idToken) {
-          showToast("카카오 로그인에 실패했어요, 다시 시도해주세요");
-          return;
-        }
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: "kakao",
-          token: idToken,
-        });
-        if (error) { showToast("카카오 로그인 실패: " + error.message); }
+        const { KakaoLogin } = await import("@kichunsung/capacitor-kakao-login-plugin");
+        const loginResult = await KakaoLogin.goLogin();
+        alert("로그인 결과: " + JSON.stringify(loginResult));
       } catch (err) {
-        showToast("카카오 로그인이 취소됐거나 실패했어요");
+        alert("카카오 로그인 에러: " + JSON.stringify(err));
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -1529,7 +1504,6 @@ async function signInWithKakao() {
       if (error) { showToast("카카오 로그인 실패: " + error.message); }
     }
   }
-
   async function signInWithGoogle() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
             try {
