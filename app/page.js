@@ -1578,7 +1578,8 @@ const showFAQRef = useRef(false);
   }
 
 const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
-  const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
+const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
+  const [myRank, setMyRank] = useState(0);
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       setKakaoLoggingIn(true);
@@ -2025,6 +2026,12 @@ async function handleAvatarChange(e) {
 
   /* --- 프로필(직급) 로드 후, 관리자/직원 전용 데이터 불러오기 --- */
   useEffect(() => {
+    if (session && tab === "my") {
+      fetchMyRank();
+    }
+  }, [session, tab]);
+
+  useEffect(() => {
     if (session && profile) {
       fetchAllInquiries();
       fetchAllProfiles();
@@ -2071,6 +2078,13 @@ async function handleAvatarChange(e) {
     showToast(`${rank}등에게 쿠폰을 발급했어요!`);
   }
 
+    async function fetchMyRank() {
+    if (!session?.user?.id) return;
+    const { data, error } = await supabase.rpc("get_my_monthly_rank", { p_user_id: session.user.id });
+    if (!error && data) setMyRank(data);
+  }
+
+  
   async function fetchPointRanking() {
     const { data, error } = await supabase.rpc("get_monthly_point_ranking");
     if (error) { console.error("랭킹 불러오기 실패:", error); return; }
@@ -4588,8 +4602,14 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
                 </div>
               </div>
-              <div className="flex flex-col items-center text-center pt-5 mb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+                  <div className="flex flex-col items-center text-center pt-5 mb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
                                       <div className="flex items-center gap-2">
+                  {myRank > 0 && (
+                    <div className="flex flex-col items-center justify-center rounded-2xl flex-shrink-0" style={{ background: "rgba(255,255,255,0.2)", border: "1.5px solid rgba(255,255,255,0.5)", padding: "6px 14px" }}>
+                      <span style={{ fontSize: 10, opacity: 0.85, fontWeight: 700 }}>이번 달</span>
+                      <span style={{ fontSize: 20, fontWeight: 900, fontFamily: MONO_FONT }}>{myRank}위</span>
+                    </div>
+                  )}
                   <span className="flex sm:hidden coin-spin" style={{ fontSize: 24 }}>🪙</span>
                   <div className="hidden sm:flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 26, height: 26, background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.5)" }}>
                     <span style={{ fontSize: 13, fontWeight: 800, fontFamily: MONO_FONT }}>P</span>
