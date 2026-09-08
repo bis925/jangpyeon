@@ -22,7 +22,8 @@
     "react-quill-new": "^3.3.3",
      "@capacitor/push-notifications": "^6.0.0",
  "@capgo/capacitor-social-login": "^8.5.5",
-    "@capgo/capacitor-speech-recognition": "^8.2.0"
+ "@capgo/capacitor-speech-recognition": "^8.2.0",
+"@kichunsung/capacitor-kakao-login-plugin": "^3.1.0-beta.1"
   },
   "devDependencies": {
     "tailwindcss": "3.4.7",
