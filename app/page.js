@@ -4564,18 +4564,18 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   ) : (
                     <Mail size={12} className="flex-shrink-0" />
                   )}
-                  {session.user.email?.endsWith("@jangpyeon.kr") ? (
-                    <span className="text-xs">{session.user.email.split("@")[0].slice(0, 3)}{"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}</span>
+                        {session.user.email?.endsWith("@jangpyeon.kr") ? (
+                    <>
+                      <span className="text-xs">{session.user.email.split("@")[0].slice(0, 3)}{"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}</span>
+                      <button onClick={() => setShowKakaoEmailInfo(true)} className="flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150">
+                        <span className="rounded-full flex items-center justify-center kakao-email-blink" style={{ width: 20, height: 20, background: "#FFC13B", color: "#3C1E1E", fontSize: 13, fontWeight: 900 }}>!</span>
+                      </button>
+                    </>
                   ) : (
                     <span className="text-xs">{session.user.email}</span>
                   )}
                 </div>
-                                    {session.user.email?.endsWith("@jangpyeon.kr") && (
-                  <button onClick={() => setShowKakaoEmailInfo(true)} className="flex items-center justify-center gap-1 mb-3 -mt-1.5">
-                    <span className="rounded-full flex items-center justify-center kakao-email-blink" style={{ width: 16, height: 16, background: "#FFC13B", color: "#3C1E1E", fontSize: 11, fontWeight: 900 }}>!</span>
-                  </button>
-                )}
-                {showKakaoEmailInfo && (
+                          {showKakaoEmailInfo && (
                   <div className="fixed inset-0 z-50" onClick={(e) => { e.stopPropagation(); setShowKakaoEmailInfo(false); }}>
                     <div onClick={(e) => e.stopPropagation()} className="absolute left-1/2 rounded-2xl px-4 py-3" style={{ top: "35%", transform: "translateX(-50%)", background: INK, color: "#fff", fontSize: 12, lineHeight: 1.7, width: 260, boxShadow: "0 4px 16px rgba(0,0,0,0.25)" }}>
                       카카오톡 → 설정 → 카카오계정에서 이메일 인증 후, 로그아웃하고 다시 로그인하면 이메일이 표시돼요
