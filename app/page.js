@@ -1028,6 +1028,8 @@ async function startVoiceSearch() {
     let cancelled = false;
     async function checkSplash() {
       if (typeof window === "undefined" || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (currentSession) return;
       const { data } = await supabase.from("app_settings").select("value").eq("key", "splash_image_url").single();
       if (cancelled) return;
       setSplashImageUrl(data?.value || null);
