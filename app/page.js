@@ -4684,8 +4684,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                             <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
                           </svg>
                         )}
-                        <span className={isFirst ? "font-extrabold truncate" : "text-sm font-bold truncate"} style={{ color: INK, fontSize: isFirst ? 16 : undefined }}>{maskEmail(p.email)}</span>
-                      </span>r: INK, fontSize: isFirst ? 16 : undefined }}>{maskEmail(p.email)}</span>
+                                <span className={isFirst ? "font-extrabold truncate" : "text-sm font-bold truncate"} style={{ color: INK, fontSize: isFirst ? 16 : undefined }}>{maskEmail(p.email)}</span>
+                      </span>
                     </div>
                     <span className="flex-shrink-0" style={{ fontFamily: MONO_FONT, color: isTop3 ? CORAL : INK_SOFT, fontWeight: 800, fontSize: isFirst ? 18 : (isTop3 ? 15 : 13) }}>{p.points.toLocaleString()}P</span>
                   </div>
