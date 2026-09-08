@@ -4540,23 +4540,28 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <Pencil size={14} color="rgba(255,255,255,0.7)" />
                   </button>
                 )}
-                <div className="flex items-center justify-center gap-1.5 mb-3 flex-wrap" style={{ opacity: 0.85 }}>
-                  <Mail size={12} className="flex-shrink-0" />
+                              <div className="flex items-center justify-center gap-1.5 mb-3 flex-wrap" style={{ opacity: 0.85 }}>
+                  {profile?.login_provider === "kakao" ? (
+                    <span style={{ fontSize: 12 }} className="flex-shrink-0">💬</span>
+                  ) : profile?.login_provider === "google" ? (
+                    <svg width="12" height="12" viewBox="0 0 18 18" className="flex-shrink-0">
+                      <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" />
+                      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.85.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z" />
+                      <path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z" />
+                      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
+                    </svg>
+                  ) : (
+                    <Mail size={12} className="flex-shrink-0" />
+                  )}
                   {session.user.email?.endsWith("@jangpyeon.kr") ? (
                     <span className="text-xs">{session.user.email.split("@")[0].slice(0, 3)}{"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}</span>
                   ) : (
                     <span className="text-xs">{session.user.email}</span>
                   )}
-                  {profile?.login_provider === "google" && (
-                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: "rgba(255,255,255,0.25)" }}>G 구글 로그인</span>
-                  )}
-                  {profile?.login_provider === "kakao" && (
-                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: "#FEE500", color: "#3C1E1E" }}>K 카카오 로그인</span>
-                  )}
                 </div>
-                              {session.user.email?.endsWith("@jangpyeon.kr") && (
-                  <div className="text-[10px] mb-3 -mt-2" style={{ opacity: 0.6 }}>
-                    카카오에서 이메일 인증을 하시면 이메일로 표시돼요
+                {session.user.email?.endsWith("@jangpyeon.kr") && (
+                  <div className="text-[10px] mb-3 -mt-2 text-center" style={{ opacity: 0.6, maxWidth: 220 }}>
+                    카카오 인증 후 재로그인하면 이메일이 표시돼요
                   </div>
                 )}
                 <div className="inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-3 py-1" style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.3)" }}>
