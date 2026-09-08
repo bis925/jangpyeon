@@ -1563,25 +1563,33 @@ const viewingReviewsPlaceRef = useRef(null);
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-                const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
-        try {
-          const hashInfo = await KakaoLoginPlugin.getKeyHash();
-          alert("실제 키 해시: " + JSON.stringify(hashInfo));
-              } catch (hashErr) {
-          alert("키 해시 확인 실패: " + JSON.stringify(hashErr));
-        }
+        const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
         const loginResult = await KakaoLoginPlugin.goLogin();
         if (!loginResult?.success || !loginResult?.idToken) {
           showToast("카카오 로그인에 실패했어요, 다시 시도해주세요");
           return;
         }
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: "kakao",
-          token: loginResult.idToken,
+        const payload = JSON.parse(atob(loginResult.idToken.split(".")[1]));
+        const { data, error } = await supabase.functions.invoke("kakao-auth", {
+          body: {
+            kakaoId: payload.sub,
+            email: payload.email,
+            emailVerified: payload.email_verified === true,
+            nickname: payload.nickname || payload.name,
+            picture: payload.picture,
+          },
         });
-        if (error) { showToast("카카오 로그인 실패: " + error.message); }
-           } catch (err) {
-        alert("에러 상세\n이름: " + err?.name + "\n메시지: " + err?.message + "\n코드: " + err?.code + "\n전체: " + JSON.stringify(err) + "\n키들: " + Object.keys(err || {}).join(","));
+        if (error || !data?.token_hash) {
+          showToast("카카오 로그인 실패, 다시 시도해주세요");
+          return;
+        }
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          type: "magiclink",
+          token_hash: data.token_hash,
+        });
+        if (verifyError) { showToast("카카오 로그인 실패: " + verifyError.message); }
+      } catch (err) {
+        showToast("카카오 로그인이 취소됐거나 실패했어요");
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
