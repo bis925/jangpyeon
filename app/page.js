@@ -4602,14 +4602,14 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
                 </div>
               </div>
-                  <div className="flex flex-col items-center text-center pt-5 mb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+                          <div className="flex flex-col items-center text-center pt-5 mb-4 relative w-full" style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+                {myRank > 0 && (
+                  <div className="flex flex-col items-center justify-center rounded-2xl absolute" style={{ background: "rgba(255,255,255,0.2)", border: "1.5px solid rgba(255,255,255,0.5)", padding: "6px 14px", left: "50%", top: 20, transform: "translateX(-100px)" }}>
+                    <span style={{ fontSize: 10, opacity: 0.85, fontWeight: 700 }}>이번 달</span>
+                    <span style={{ fontSize: 20, fontWeight: 900, fontFamily: MONO_FONT }}>{myRank}위</span>
+                  </div>
+                )}
                                       <div className="flex items-center gap-2">
-                  {myRank > 0 && (
-                    <div className="flex flex-col items-center justify-center rounded-2xl flex-shrink-0" style={{ background: "rgba(255,255,255,0.2)", border: "1.5px solid rgba(255,255,255,0.5)", padding: "6px 14px" }}>
-                      <span style={{ fontSize: 10, opacity: 0.85, fontWeight: 700 }}>이번 달</span>
-                      <span style={{ fontSize: 20, fontWeight: 900, fontFamily: MONO_FONT }}>{myRank}위</span>
-                    </div>
-                  )}
                   <span className="flex sm:hidden coin-spin" style={{ fontSize: 24 }}>🪙</span>
                   <div className="hidden sm:flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 26, height: 26, background: "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.5)" }}>
                     <span style={{ fontSize: 13, fontWeight: 800, fontFamily: MONO_FONT }}>P</span>
