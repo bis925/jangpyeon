@@ -1093,8 +1093,11 @@ async function startVoiceSearch() {
   useEffect(() => { tabRef.current = tab; }, [tab]);
 const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => { viewingReviewsPlaceRef.current = viewingReviewsPlace; }, [viewingReviewsPlace]);
-  const showFAQRef = useRef(false);
+const showFAQRef = useRef(false);
+  
   useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
+  const showRankingPolicyRef = useRef(false);
+  useEffect(() => { showRankingPolicyRef.current = showRankingPolicy; }, [showRankingPolicy]);
    const showFavoritesOnlyRef = useRef(false);
   useEffect(() => { showFavoritesOnlyRef.current = showFavoritesOnly; }, [showFavoritesOnly]);
   const isMapFullscreenRef = useRef(false);
