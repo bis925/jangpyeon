@@ -1022,7 +1022,7 @@ async function startVoiceSearch() {
       setSplashImageUrl(data?.value || null);
       if (data?.value) {
         setShowBrandSplash(true);
-        setTimeout(() => { if (!cancelled) setShowBrandSplash(false); }, 2500);
+        setTimeout(() => { if (!cancelled) setShowBrandSplash(false); }, 5000);
       }
     }
     checkSplash();
