@@ -4539,9 +4539,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <Pencil size={14} color="rgba(255,255,255,0.7)" />
                   </button>
                 )}
-               <div className="flex items-center gap-1.5 mb-3 flex-wrap" style={{ opacity: 0.75 }}>
+                            <div className="flex items-center gap-1.5 mb-1 flex-wrap" style={{ opacity: 0.75 }}>
                   <Mail size={12} />
-                  <span className="text-xs">{session.user.email}</span>
+                  {session.user.email?.endsWith("@jangpyeon.kr") ? (
+                    <span className="text-xs">카카오에서 이메일 인증을 하시면 이메일로 표시돼요</span>
+                  ) : (
+                    <span className="text-xs">{session.user.email}</span>
+                  )}
                   {profile?.login_provider === "google" && (
                     <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: "rgba(255,255,255,0.25)" }}>G 구글 로그인</span>
                   )}
@@ -4549,6 +4553,11 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: "#FEE500", color: "#3C1E1E" }}>K 카카오 로그인</span>
                   )}
                 </div>
+                {session.user.email?.endsWith("@jangpyeon.kr") && (
+                  <div className="text-[10px] mb-3" style={{ opacity: 0.6 }}>
+                    카카오 고유번호: {session.user.email.split("@")[0].slice(0, 3)}{"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}
+                  </div>
+                )}
                       <div className="inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-3 py-1" style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.3)" }}>
                         <span className="flex items-center justify-center rounded-full" style={{ width: 20, height: 20, background: "rgba(255,255,255,0.25)", fontSize: 12 }}>{tier.emoji}</span>
                         <span className="text-xs font-extrabold">{tier.label}</span>
