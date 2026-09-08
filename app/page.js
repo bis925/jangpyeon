@@ -4541,8 +4541,10 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   </button>
                 )}
                               <div className="flex items-center justify-center gap-1.5 mb-3 flex-wrap" style={{ opacity: 0.85 }}>
-                  {profile?.login_provider === "kakao" ? (
-                    <span style={{ fontSize: 12 }} className="flex-shrink-0">💬</span>
+                              {profile?.login_provider === "kakao" ? (
+                    <svg width="12" height="12" viewBox="0 0 20 20" className="flex-shrink-0">
+                      <path fill="#FEE500" d="M10 1C4.9 1 0.7 4.4 0.7 8.6c0 2.7 1.7 5.1 4.3 6.5-0.2 0.7-0.7 2.6-0.8 3-0.1 0.5 0.2 0.5 0.4 0.4 0.2-0.1 2.7-1.8 3.8-2.6 0.5 0.1 1.1 0.1 1.6 0.1 5.1 0 9.3-3.4 9.3-7.6C19.3 4.4 15.1 1 10 1z"/>
+                    </svg>
                   ) : profile?.login_provider === "google" ? (
                     <svg width="12" height="12" viewBox="0 0 18 18" className="flex-shrink-0">
                       <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" />
