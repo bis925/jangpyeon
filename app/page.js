@@ -1046,6 +1046,7 @@ async function startVoiceSearch() {
   const [memberFilter, setMemberFilter] = useState("all");
   const [memberPage, setMemberPage] = useState(1);
   const [newInquiryCount, setNewInquiryCount] = useState(0);
+  const [newRankingResponseCount, setNewRankingResponseCount] = useState(0);
   const [fullscreenCenter, setFullscreenCenter] = useState(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [logoWeather, setLogoWeather] = useState(null);
@@ -1929,10 +1930,11 @@ async function handleAvatarChange(e) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!session || (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff")) return;
     fetchAllInquiries();
-    const interval = setInterval(fetchAllInquiries, 30000);
+    fetchNewRankingResponseCount();
+    const interval = setInterval(() => { fetchAllInquiries(); fetchNewRankingResponseCount(); }, 30000);
     return () => clearInterval(interval);
   }, [session, profile?.role]);
 
@@ -2274,6 +2276,12 @@ async function handleAvatarChange(e) {
     const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
     setAllInquiries(data || []);
     setNewInquiryCount((data || []).filter((i) => i.status !== "answered").length);
+  }
+  
+  async function fetchNewRankingResponseCount() {
+    if (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff") return;
+    const { data } = await supabase.from("coupons").select("id").eq("is_ranking_coupon", true).eq("response_status", "accepted").is("admin_checked", null);
+    setNewRankingResponseCount((data || []).length);
   }
     async function fetchAllProfiles() {
     if (session.user.email !== ADMIN_EMAIL) return;
@@ -2973,7 +2981,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
     { id: "map", label: "지도·검색", icon: MapPin },
     { id: "register", label: "등록", icon: Plus },
     { id: "notice", label: "공지사항", icon: Megaphone },
-        { id: "my", label: "마이페이지", icon: User, badge: newInquiryCount > 0 && (session.user.email === ADMIN_EMAIL || profile?.role === "staff") ? newInquiryCount : 0 },
+         { id: "my", label: "마이페이지", icon: User, badge: (session.user.email === ADMIN_EMAIL || profile?.role === "staff") ? (newInquiryCount + newRankingResponseCount) : 0 },
     ...(isAdmin ? [{ id: "admin", label: "관리자", icon: ShieldCheck }] : []),
     ...(isStaff && !isAdmin ? [{ id: "staff", label: "업무", icon: ShieldCheck }] : []),
   ];
@@ -5037,7 +5045,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               )}
                            <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${LINE}` }}>
                 <div className="flex items-center gap-2 mb-1">
-                  <button onClick={() => fetchRankingCouponResponses()} className="text-xs font-bold" style={{ color: TEAL }}>발급된 쿠폰 응답 현황 보기</button>
+                  <button onClick={async () => { await fetchRankingCouponResponses(); await supabase.from("coupons").update({ admin_checked: true }).eq("is_ranking_coupon", true).eq("response_status", "accepted").is("admin_checked", null); setNewRankingResponseCount(0); }} className="text-xs font-bold" style={{ color: TEAL }}>발급된 쿠폰 응답 현황 보기</button>
                   {rankingCouponResponses && (
                     <select
                       value={responseMonthFilter}
