@@ -4553,9 +4553,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <span className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: "#FEE500", color: "#3C1E1E" }}>K 카카오 로그인</span>
                   )}
                 </div>
-                {session.user.email?.endsWith("@jangpyeon.kr") && (
+                      {session.user.email?.endsWith("@jangpyeon.kr") && (
                   <div className="text-[10px] mb-3" style={{ opacity: 0.6 }}>
-                    카카오 고유번호: {session.user.email.split("@")[0].slice(0, 3)}{"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}
+                    {session.user.email.split("@")[0].slice(0, 3)}{"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}
                   </div>
                 )}
                       <div className="inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-3 py-1" style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.3)" }}>
