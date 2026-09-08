@@ -4561,9 +4561,9 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <span className="text-xs">{session.user.email}</span>
                   )}
                 </div>
-                {session.user.email?.endsWith("@jangpyeon.kr") && (
-                  <div className="text-[10px] mb-3 -mt-2 text-center" style={{ opacity: 0.6, maxWidth: 220 }}>
-                    카카오 인증 후 재로그인하면 이메일이 표시돼요
+                        {session.user.email?.endsWith("@jangpyeon.kr") && (
+                  <div className="text-[10px] mb-3 -mt-2 text-center leading-relaxed" style={{ opacity: 0.65, maxWidth: 240 }}>
+                    카카오톡 → 설정 → 카카오계정에서<br />이메일 인증 후, 로그아웃하고 다시 로그인하면<br />이메일이 표시돼요
                   </div>
                 )}
                 <div className="inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-3 py-1" style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.3)" }}>
