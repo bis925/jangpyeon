@@ -871,6 +871,35 @@ async function startVoiceSearch() {
       setIsTranslating(false);
     }
   }
+
+  async function fetchSplashImage() {
+    const { data } = await supabase.from("app_settings").select("value").eq("key", "splash_image_url").single();
+    setSplashImageUrl(data?.value || null);
+  }
+
+  async function handleSplashImageUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setSplashUploading(true);
+    const compressed = await compressImage(file, 1200, 0.85);
+    const filePath = `splash_${Date.now()}.jpg`;
+    const { error: uploadError } = await supabase.storage.from("app-assets").upload(filePath, compressed, { upsert: true });
+    if (uploadError) { showToast("업로드 실패: " + uploadError.message); setSplashUploading(false); return; }
+    const { data: urlData } = supabase.storage.from("app-assets").getPublicUrl(filePath);
+    const newUrl = urlData.publicUrl;
+    await supabase.from("app_settings").update({ value: newUrl }).eq("key", "splash_image_url");
+    setSplashImageUrl(newUrl);
+    setSplashUploading(false);
+    showToast("시작 화면 이미지가 변경됐어요!");
+  }
+
+  async function removeSplashImage() {
+    if (!window.confirm("시작 화면 이미지를 제거하시겠어요?")) return;
+    await supabase.from("app_settings").update({ value: null }).eq("key", "splash_image_url");
+    setSplashImageUrl(null);
+    showToast("시작 화면 이미지가 제거됐어요");
+  }
+  
   
   function showToast(message) {
     setToast(message);
@@ -981,6 +1010,24 @@ async function startVoiceSearch() {
   const [sendingSOS, setSendingSOS] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [placeContextMenu, setPlaceContextMenu] = useState(null);
+  const [splashImageUrl, setSplashImageUrl] = useState(null);
+  const [splashUploading, setSplashUploading] = useState(false);
+  const [showBrandSplash, setShowBrandSplash] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkSplash() {
+      const { data } = await supabase.from("app_settings").select("value").eq("key", "splash_image_url").single();
+      if (cancelled) return;
+      setSplashImageUrl(data?.value || null);
+      if (data?.value) {
+        setShowBrandSplash(true);
+        setTimeout(() => { if (!cancelled) setShowBrandSplash(false); }, 2500);
+      }
+    }
+    checkSplash();
+    return () => { cancelled = true; };
+  }, []);
   const [showBizInfo, setShowBizInfo] = useState(false);
   const [memberSort, setMemberSort] = useState("points_desc");
   const [memberFilter, setMemberFilter] = useState("all");
@@ -1940,6 +1987,7 @@ async function handleAvatarChange(e) {
       fetchAdjustLog();
       fetchReports();
       fetchAllCoupons();
+      fetchSplashImage();
     }
   }, [session, profile]);
 
@@ -2797,8 +2845,16 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
     }
   }
 
-if (authLoading) {
-    return <div className="min-h-screen flex items-center justify-center" style={{ background: PAPER }}><LogoMark size={40} /></div>;
+  if (authLoading || showBrandSplash) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: splashImageUrl ? "#000" : PAPER }}>
+        {splashImageUrl ? (
+          <img src={splashImageUrl} alt="장편" className="w-full h-full object-cover absolute inset-0" />
+        ) : (
+          <LogoMark size={40} />
+        )}
+      </div>
+    );
   }
   if (!session) {
     return (
@@ -4927,6 +4983,28 @@ if (authLoading) {
                 모든 사용자에게 발송
               </button>
             </div>
+                  <div id="admin-splash" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎨 앱 시작 화면</div>
+            <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs mb-3" style={{ color: INK_SOFT }}>
+                앱을 실행하면 2.5초간 보여지는 시작 화면 이미지예요. 크리스마스, 명절 등 이벤트 때 바꿔보세요!
+              </div>
+              {splashImageUrl ? (
+                <div className="mb-3">
+                  <img src={splashImageUrl} alt="현재 시작화면" className="w-full rounded-xl mb-2" style={{ maxHeight: 200, objectFit: "cover" }} />
+                  <button onClick={removeSplashImage} className="text-xs font-bold" style={{ color: CORAL }}>이미지 제거하기</button>
+                </div>
+              ) : (
+                <div className="text-xs mb-3 rounded-xl p-4 text-center" style={{ background: PAPER, color: INK_SOFT }}>
+                  현재 설정된 이미지가 없어요 (기본 로고만 표시됨)
+                </div>
+              )}
+              <input type="file" accept="image/*" onChange={handleSplashImageUpload} className="hidden" id="splash-image-upload" disabled={splashUploading} />
+              <label htmlFor="splash-image-upload" className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold cursor-pointer transition-all duration-200 active:scale-95" style={{ background: splashUploading ? PAPER : TEAL, color: splashUploading ? INK_SOFT : "#fff" }}>
+                <Camera size={16} />
+                {splashUploading ? "업로드 중..." : "새 이미지 올리기"}
+              </label>
+            </div>
+            <div id="admin-members" className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
            <div id="admin-members" className="font-extrabold text-sm mb-3" style={{ color: INK }}>회원 관리 ({allProfiles.length}명)</div>
            <input value={memberSearch} onChange={(e) => { setMemberSearch(e.target.value); setMemberPage(1); }} placeholder="이메일 또는 닉네임으로 검색"
               className="w-full rounded-xl px-4 py-2.5 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
