@@ -1563,6 +1563,14 @@ const viewingReviewsPlaceRef = useRef(null);
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
+                const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
+        try {
+          const hashInfo = await KakaoLoginPlugin.getKeyHash();
+          alert("실제 키 해시: " + JSON.stringify(hashInfo));
+        } catch (hashErr) {
+          alert("키 해시 확인 실패: " + JSON.stringify(hashErr));
+        }
+        const loginResult = await KakaoLoginPlugin.goLogin();
         const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
         const loginResult = await KakaoLoginPlugin.goLogin();
         if (!loginResult?.success || !loginResult?.idToken) {
