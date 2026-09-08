@@ -1579,7 +1579,8 @@ const showFAQRef = useRef(false);
 
 const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
 const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
-  const [myRank, setMyRank] = useState(0);
+const [myRank, setMyRank] = useState(0);
+  const [showRankToggle, setShowRankToggle] = useState(false);
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       setKakaoLoggingIn(true);
@@ -2078,6 +2079,13 @@ async function handleAvatarChange(e) {
     showToast(`${rank}등에게 쿠폰을 발급했어요!`);
   }
 
+    async function toggleShowRank() {
+    const newValue = !showRankToggle;
+    setShowRankToggle(newValue);
+    await supabase.from("profiles").update({ show_rank: newValue }).eq("id", session.user.id);
+    showToast(newValue ? "내 순위가 보여요" : "내 순위를 숨겼어요");
+  }
+
     async function fetchMyRank() {
     if (!session?.user?.id) return;
     const { data, error } = await supabase.rpc("get_my_monthly_rank", { p_user_id: session.user.id });
@@ -2176,6 +2184,7 @@ async function handleAvatarChange(e) {
 
     setProfile(data);
     setAvatarUrl(data?.avatar_url || null);
+    setShowRankToggle(data?.show_rank || false);
     if (data && !data.nickname && !localStorage.getItem(`jangpyeon_nickname_prompt_dismissed_${session.user.id}`)) {
       setShowNicknamePrompt(true);
     }
@@ -4658,6 +4667,21 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <div className="rounded-xl p-3 text-center transition-all duration-200 hover:shadow-sm" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                 <div className="font-extrabold text-lg" style={{ color: INK }}>{helpfulCount}</div>
                 <div className="text-[11px]" style={{ color: INK_SOFT }}>도움이 됐어요</div>
+              </div>
+            </div>
+<div className="rounded-2xl p-4 mb-3" style={{ background: TEAL_TINT }}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-sm font-extrabold mb-0.5" style={{ color: TEAL_DARK }}>내 순위 공개하기</div>
+                  <div className="text-xs" style={{ color: INK_SOFT }}>켜두시면 아래 랭킹에 내 순위가 보여요</div>
+                </div>
+                <button
+                  onClick={toggleShowRank}
+                  className="relative rounded-full transition-all duration-200 flex-shrink-0"
+                  style={{ width: 48, height: 28, background: showRankToggle ? TEAL : LINE }}
+                >
+                  <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: showRankToggle ? 23 : 3 }} />
+                </button>
               </div>
             </div>
             <div id="point-ranking-section" className="flex items-center gap-1.5 mb-1">
