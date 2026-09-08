@@ -5336,7 +5336,7 @@ if (authLoading) {
 </main>
 
       <footer className="text-center py-6 text-xs relative" style={{ color: INK_SOFT }}>
-        <butto onClick={() => setShowBizInfo(!showBizInfo)} className="inline-flex items-center gap-1">
+        <button onClick={() => setShowBizInfo(!showBizInfo)} className="inline-flex items-center gap-1">
           제작 : 코드람쥐
           <span className="flex items-center justify-center rounded-full" style={{ width: 13, height: 13, border: `1px solid ${INK_SOFT}`, fontSize: 9, fontWeight: 700 }}>i</span>
         </button>
