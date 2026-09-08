@@ -539,15 +539,25 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast }) {
                 </svg>
                 <span className="text-base sm:text-sm">구글로 계속하기</span>
               </button>
-              <button
+                 <button
                 onClick={signInWithKakao}
+                disabled={kakaoLoggingIn}
                 className="w-full flex items-center justify-center gap-2 rounded-full py-3.5 font-bold transition-all duration-200 active:scale-[0.98]"
-                style={{ background: "#FEE500", color: "#3C1E1E" }}
+                style={{ background: "#FEE500", color: "#3C1E1E", opacity: kakaoLoggingIn ? 0.7 : 1 }}
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" className="flex-shrink-0">
-                  <path fill="#3C1E1E" d="M10 1C4.9 1 0.7 4.4 0.7 8.6c0 2.7 1.7 5.1 4.3 6.5-0.2 0.7-0.7 2.6-0.8 3-0.1 0.5 0.2 0.5 0.4 0.4 0.2-0.1 2.7-1.8 3.8-2.6 0.5 0.1 1.1 0.1 1.6 0.1 5.1 0 9.3-3.4 9.3-7.6C19.3 4.4 15.1 1 10 1z"/>
-                </svg>
-                <span className="text-base sm:text-sm">카카오로 계속하기</span>
+                {kakaoLoggingIn ? (
+                  <>
+                    <div className="rounded-full animate-spin" style={{ width: 16, height: 16, border: "2px solid rgba(60,30,30,0.3)", borderTopColor: "#3C1E1E" }} />
+                    <span className="text-base sm:text-sm">로그인 중이에요, 잠시만 기다려주세요...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="20" height="20" viewBox="0 0 20 20" className="flex-shrink-0">
+                      <path fill="#3C1E1E" d="M10 1C4.9 1 0.7 4.4 0.7 8.6c0 2.7 1.7 5.1 4.3 6.5-0.2 0.7-0.7 2.6-0.8 3-0.1 0.5 0.2 0.5 0.4 0.4 0.2-0.1 2.7-1.8 3.8-2.6 0.5 0.1 1.1 0.1 1.6 0.1 5.1 0 9.3-3.4 9.3-7.6C19.3 4.4 15.1 1 10 1z"/>
+                    </svg>
+                    <span className="text-base sm:text-sm">카카오로 계속하기</span>
+                  </>
+                )}
               </button>
               <p className="text-xs mt-3 font-bold" style={{ color: TEAL_DARK }}>
                 📱 구글·카카오 계정으로 비밀번호 없이 바로 로그인할 수 있어요
@@ -1564,6 +1574,7 @@ const viewingReviewsPlaceRef = useRef(null);
 
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      setKakaoLoggingIn(true);
       try {
         const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
         const loginResult = await KakaoLoginPlugin.goLogin();
@@ -1599,6 +1610,8 @@ const viewingReviewsPlaceRef = useRef(null);
         if (verifyError) { showToast("카카오 로그인 실패: " + verifyError.message); }
       } catch (err) {
         alert("에러 상세: " + err?.message + " / 전체: " + JSON.stringify(err));
+      } finally {
+        setKakaoLoggingIn(false);
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
