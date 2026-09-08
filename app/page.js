@@ -1017,12 +1017,13 @@ async function startVoiceSearch() {
   useEffect(() => {
     let cancelled = false;
     async function checkSplash() {
+      if (typeof window === "undefined" || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
       const { data } = await supabase.from("app_settings").select("value").eq("key", "splash_image_url").single();
       if (cancelled) return;
       setSplashImageUrl(data?.value || null);
       if (data?.value) {
         setShowBrandSplash(true);
-        setTimeout(() => { if (!cancelled) setShowBrandSplash(false); }, 5000);
+        setTimeout(() => { if (!cancelled) setShowBrandSplash(false); }, 3000);
       }
     }
     checkSplash();
