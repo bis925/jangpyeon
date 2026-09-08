@@ -1589,7 +1589,7 @@ const viewingReviewsPlaceRef = useRef(null);
         });
         if (verifyError) { showToast("카카오 로그인 실패: " + verifyError.message); }
       } catch (err) {
-        showToast("카카오 로그인이 취소됐거나 실패했어요");
+        alert("에러 상세: " + err?.message + " / 전체: " + JSON.stringify(err));
       }
     } else {
       const { error } = await supabase.auth.signInWithOAuth({
