@@ -950,7 +950,8 @@ const [voiceFaqAnswer, setVoiceFaqAnswer] = useState(null);
 const [unrecognizedCommands, setUnrecognizedCommands] = useState([]);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [maintenanceImageUrl, setMaintenanceImageUrl] = useState(null);
-  const [maintenanceUploading, setMaintenanceUploading] = useState(false);
+const [maintenanceUploading, setMaintenanceUploading] = useState(false);
+  const [voiceCommandPage, setVoiceCommandPage] = useState(1);
 
 async function startVoiceCommand() {
     try {
@@ -1037,9 +1038,7 @@ const matched = bestScore > 0 ? bestMatch : null;
 } else {
       setVoiceFaqAnswer({ question: text, answer: "__NOT_FOUND__" });
 if (session?.user?.id) {
-        supabase.from("unrecognized_voice_commands").insert({ user_id: session.user.id, spoken_text: text }).then(({ error }) => {
-          if (error) alert("저장 실패: " + error.message);
-        });
+        supabase.from("unrecognized_voice_commands").insert({ user_id: session.user.id, spoken_text: text });
       }
     }
   }
@@ -5472,12 +5471,12 @@ if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
                 모든 사용자에게 발송
               </button>
             </div>
-                  <div id="admin-voice-commands" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎤 답변 못한 음성 질문 ({unrecognizedCommands.length})</div>
-            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+     <div id="admin-voice-commands" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎤 답변 못한 음성 질문 ({unrecognizedCommands.length})</div>
+            <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {unrecognizedCommands.length === 0 && (
                 <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>아직 답변 못한 질문이 없어요</div>
               )}
-              {unrecognizedCommands.map((c) => (
+              {unrecognizedCommands.slice((voiceCommandPage - 1) * 5, voiceCommandPage * 5).map((c) => (
                 <div key={c.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
                   <div className="text-sm font-bold mb-1" style={{ color: INK }}>"{c.spoken_text}"</div>
                   <div className="text-xs" style={{ color: INK_SOFT }}>
@@ -5486,6 +5485,17 @@ if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
                 </div>
               ))}
             </div>
+            {unrecognizedCommands.length > 5 && (
+              <div className="flex items-center justify-center gap-2 mb-8">
+                <button onClick={() => setVoiceCommandPage((p) => Math.max(1, p - 1))} disabled={voiceCommandPage === 1} className="rounded-full p-2" style={{ background: PAPER, opacity: voiceCommandPage === 1 ? 0.4 : 1 }} aria-label="이전 페이지">
+                  <ChevronRight size={16} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+                </button>
+                <span className="text-xs font-bold" style={{ color: INK_SOFT }}>{voiceCommandPage} / {Math.max(1, Math.ceil(unrecognizedCommands.length / 5))}</span>
+                <button onClick={() => setVoiceCommandPage((p) => Math.min(Math.ceil(unrecognizedCommands.length / 5), p + 1))} disabled={voiceCommandPage >= Math.ceil(unrecognizedCommands.length / 5)} className="rounded-full p-2" style={{ background: PAPER, opacity: voiceCommandPage >= Math.ceil(unrecognizedCommands.length / 5) ? 0.4 : 1 }} aria-label="다음 페이지">
+                  <ChevronRight size={16} color={INK_SOFT} />
+                </button>
+              </div>
+            )}
 
 <div id="admin-maintenance" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🚧 서비스 점검 모드</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
