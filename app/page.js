@@ -2428,10 +2428,15 @@ async function handleLogout() {
     setInquiries(data || []);
   }
 
-  async function fetchUnrecognizedVoiceCommands() {
+async function fetchUnrecognizedVoiceCommands() {
     if (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff") return;
-    const { data } = await supabase.from("unrecognized_voice_commands").select("*, profiles(nickname, email)").order("created_at", { ascending: false }).limit(50);
-    setUnrecognizedCommands(data || []);
+    const { data } = await supabase.from("unrecognized_voice_commands").select("*").order("created_at", { ascending: false }).limit(50);
+    if (!data) { setUnrecognizedCommands([]); return; }
+    const userIds = [...new Set(data.map((c) => c.user_id))];
+    const { data: profilesData } = await supabase.from("profiles").select("id, nickname, email").in("id", userIds);
+    const profileMap = {};
+    (profilesData || []).forEach((p) => { profileMap[p.id] = p; });
+    setUnrecognizedCommands(data.map((c) => ({ ...c, profiles: profileMap[c.user_id] })));
   }
 
   
