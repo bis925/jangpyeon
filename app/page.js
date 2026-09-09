@@ -918,8 +918,6 @@ async function startVoiceCommand() {
         const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
         setIsVoiceCommandListening(false);
         setShowVoiceListeningUI(false);
-const text = (result?.matches?.[0] || "").trim();
-        alert("인식된 텍스트: " + text);
         processVoiceCommand(text);
       } else {
         showToast("음성 명령은 모바일 앱에서 사용 가능해요");
@@ -951,7 +949,7 @@ function processVoiceCommand(text) {
 } else if (text.includes("공지")) {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
-    } else if (text.includes("검색해줘") || text.includes("찾아줘")) {
+} else if (text.includes("검색해줘") || text.includes("찾아줘") || (text.length <= 6 && !text.includes(" "))) {
       const keyword = text.replace(/찾아줘|검색해줘|검색|해줘|줘/g, "").trim();
       if (keyword) {
         setQuery(keyword);
