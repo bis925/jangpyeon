@@ -5484,6 +5484,42 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 </div>
               ))}
             </div>
+
+<div id="admin-maintenance" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🚧 서비스 점검 모드</div>
+            <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자 화면이 점검 안내로 뒤덮여요</div>
+                <button
+                  onClick={toggleMaintenanceMode}
+                  className="relative rounded-full transition-all duration-200 flex-shrink-0"
+                  style={{ width: 48, height: 28, background: maintenanceMode ? CORAL : LINE }}
+                >
+                  <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: maintenanceMode ? 23 : 3 }} />
+                </button>
+              </div>
+              {maintenanceImageUrl ? (
+                <div className="mb-3">
+                  <img src={maintenanceImageUrl} alt="점검 안내 미리보기" className="w-full rounded-xl mb-2" style={{ maxHeight: 200, objectFit: "cover" }} />
+                  <button onClick={async () => { await supabase.from("app_settings").update({ value: null }).eq("key", "maintenance_image_url"); setMaintenanceImageUrl(null); showToast("이미지가 제거됐어요"); }} className="text-xs font-bold" style={{ color: CORAL }}>이미지 제거하기</button>
+                </div>
+              ) : (
+                <div className="text-xs mb-3 rounded-xl p-4 text-center" style={{ background: PAPER, color: INK_SOFT }}>
+                  이미지가 없으면 기본 점검 안내 문구가 보여요
+                </div>
+              )}
+              <input type="file" accept="image/*" onChange={handleMaintenanceImageUpload} className="hidden" id="maintenance-image-upload" disabled={maintenanceUploading} />
+              <label htmlFor="maintenance-image-upload" className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold cursor-pointer transition-all duration-200 active:scale-95" style={{ background: maintenanceUploading ? PAPER : TEAL, color: maintenanceUploading ? INK_SOFT : "#fff" }}>
+                <Camera size={16} />
+                {maintenanceUploading ? "업로드 중..." : "점검 안내 이미지 올리기"}
+              </label>
+              {maintenanceMode && (
+                <div className="mt-3 text-xs font-bold text-center rounded-xl py-2" style={{ background: CORAL_TINT, color: CORAL }}>
+                  ⚠️ 지금 점검 모드가 켜져 있어요!
+                </div>
+              )}
+            </div>
+
+                
                   <div id="admin-splash" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎨 앱 시작 화면</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <div className="text-xs mb-3" style={{ color: INK_SOFT }}>
