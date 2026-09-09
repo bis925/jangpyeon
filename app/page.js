@@ -1132,7 +1132,23 @@ async function addVoiceQa() {
     await supabase.from("voice_qa").delete().eq("id", id);
     fetchVoiceQaList();
   }
-  
+
+    function calcDistanceKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function fetchMyLocation() {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setMyLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {},
+      { enableHighAccuracy: false, timeout: 5000 }
+    );
+  }
   
   function showToast(message) {
     setToast(message);
@@ -1828,7 +1844,10 @@ const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
   const [newVoiceQaKeywords, setNewVoiceQaKeywords] = useState("");
 const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
 const [voiceQaPage, setVoiceQaPage] = useState(1);
-  const [openFilterActive, setOpenFilterActive] = useState(false);
+const [openFilterActive, setOpenFilterActive] = useState(false);
+  const [distanceFilter, setDistanceFilter] = useState(null);
+  const [myLocation, setMyLocation] = useState(null);
+  const [showDistancePicker, setShowDistancePicker] = useState(false);
   const [editingVoiceQaId, setEditingVoiceQaId] = useState(null);
   const [showVoiceButton, setShowVoiceButton] = useState(true);
 const [myRank, setMyRank] = useState(0);
@@ -2189,11 +2208,15 @@ async function handleAvatarChange(e) {
     return () => clearInterval(interval);
   }, [session, profile?.role]);
 
-  useEffect(() => {
+useEffect(() => {
     fetchMaintenanceMode();
     const interval = setInterval(fetchMaintenanceMode, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (session) fetchMyLocation();
+  }, [session]);
 
   useEffect(() => {
     if (!session || !mySessionToken) return;
@@ -2883,10 +2906,16 @@ const filteredPlaces = useMemo(() => {
   return places.filter((p) => {
     const matchesQuery = query.trim() === "" || p.name.includes(query) || p.address.includes(query) || (p.keywords && p.keywords.includes(query));
     const matchesFilter = activeFilters.length === 0 || activeFilters.every((f) => p[BADGE_META[f].field]);
-    const matchesOpen = !openFilterActive || isOpenNow(p.business_hours, holidays) !== false;
-    return matchesQuery && matchesFilter && matchesOpen;
+const matchesOpen = !openFilterActive || isOpenNow(p.business_hours, holidays) !== false;
+    const matchesDistance = !distanceFilter || !myLocation || (p.lat && p.lng && calcDistanceKm(myLocation.lat, myLocation.lng, p.lat, p.lng) <= distanceFilter);
+    return matchesQuery && matchesFilter && matchesOpen && matchesDistance;
+  }).sort((a, b) => {
+    if (!myLocation) return 0;
+    if (!a.lat || !a.lng) return 1;
+    if (!b.lat || !b.lng) return -1;
+    return calcDistanceKm(myLocation.lat, myLocation.lng, a.lat, a.lng) - calcDistanceKm(myLocation.lat, myLocation.lng, b.lat, b.lng);
   });
-}, [places, query, activeFilters, openFilterActive, holidays]);
+}, [places, query, activeFilters, openFilterActive, holidays, distanceFilter, myLocation]);
 const visiblePlaces = useMemo(() => filteredPlaces.slice(0, visibleCount), [filteredPlaces, visibleCount]);
 
 // 무한 스크롤 이펙트는 여기로 이동
@@ -4433,9 +4462,23 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 </button>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <button onClick={() => setOpenFilterActive(!openFilterActive)} className="text-xs font-bold flex items-center gap-1 rounded-full px-3 py-1.5 border transition-all duration-200" style={{ borderColor: TEAL, background: openFilterActive ? TEAL : "#fff", color: openFilterActive ? "#fff" : TEAL }}>
+       <button onClick={() => setOpenFilterActive(!openFilterActive)} className="text-xs font-bold flex items-center gap-1 rounded-full px-3 py-1.5 border transition-all duration-200 flex-shrink-0" style={{ borderColor: TEAL, background: openFilterActive ? TEAL : "#fff", color: openFilterActive ? "#fff" : TEAL }}>
                   🟢 영업중만
                 </button>
+                <div className="relative flex-shrink-0">
+                  <button onClick={() => setShowDistancePicker(!showDistancePicker)} className="text-xs font-bold flex items-center gap-1 rounded-full px-3 py-1.5 border transition-all duration-200" style={{ borderColor: TEAL, background: distanceFilter ? TEAL : "#fff", color: distanceFilter ? "#fff" : TEAL }}>
+                    📍 {distanceFilter ? `${distanceFilter}km 이내` : "거리"}
+                  </button>
+                  {showDistancePicker && (
+                    <div className="absolute top-full right-0 mt-1.5 rounded-xl overflow-hidden z-10" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                      {[3, 5, 10].map((km) => (
+                        <button key={km} onClick={() => { setDistanceFilter(distanceFilter === km ? null : km); setShowDistancePicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: distanceFilter === km ? TEAL : INK, background: distanceFilter === km ? TEAL_TINT : "transparent" }}>
+                          {km}km 이내
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 {activeFilters.length > 0 && (
                   <button onClick={() => setActiveFilters([])} className="text-xs font-bold flex items-center gap-1 flex-shrink-0" style={{ color: INK_SOFT }}><X size={12} /> 필터 초기화</button>
                 )}
