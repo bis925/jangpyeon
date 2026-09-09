@@ -3197,13 +3197,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
 </div>
 
       {/* ===== VOICE COMMAND FLOATING BUTTON ===== */}
-      {session && (
-        <div className="fixed z-40 transition-all duration-300" style={{ bottom: 90, right: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
-          <button onClick={startVoiceCommand} className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90" style={{ width: 52, height: 52, background: isVoiceCommandListening ? CORAL : TEAL }} aria-label="음성 명령">
+{session && (
+        <div className="fixed z-40 transition-all duration-300" style={{ bottom: 90, left: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
+       <button onClick={startVoiceCommand} className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90" style={{ width: 64, height: 64, background: isVoiceCommandListening ? CORAL : TEAL }} aria-label="음성 명령">
             {isVoiceCommandListening ? (
-              <div className="rounded-full animate-pulse" style={{ width: 14, height: 14, background: "#fff" }} />
+              <div className="rounded-full animate-pulse" style={{ width: 16, height: 16, background: "#fff" }} />
             ) : (
-              <Mic size={22} color="#fff" />
+              <Mic size={28} color="#fff" />
             )}
           </button>
         </div>
@@ -4103,7 +4103,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   </svg>
                 </button>
                          <Search size={16} color={INK_SOFT} />
-                                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="장소, 주소로 검색" className="flex-1 min-w-0 outline-none text-sm bg-transparent" style={{ color: INK }} />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="예) 한식, 카페, 강남역" className="flex-1 min-w-0 outline-none text-sm bg-transparent" style={{ color: INK }} />
                            <button
                   onClick={() => {}}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
