@@ -2144,13 +2144,10 @@ async function handleLogout() {
       await supabase.from("active_sessions").delete().eq("session_token", token);
     }
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
-      try {
-        const kakaoModule = await import("@kichunsung/capacitor-kakao-login-plugin");
-        alert("사용 가능한 함수들: " + Object.keys(kakaoModule.KakaoLoginPlugin).join(", "));
-        await kakaoModule.KakaoLoginPlugin.logout();
-      } catch (err) {
-        alert("에러: " + err?.message);
-      }
+          try {
+        const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
+        await KakaoLoginPlugin.unlink();
+      } catch (err) {}
     }
     await supabase.auth.signOut({ scope: "local" });
     Object.keys(localStorage).forEach((key) => {
