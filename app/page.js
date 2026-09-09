@@ -4672,7 +4672,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     </>
                   ) : (
                     <>
-                      <span className="text-xs">{showFullEmail ? session.user.email : `${session.user.email.split("@")[0].slice(0, 3)}${"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}@${session.user.email.split("@")[1]}`}</span>
+             <span className="text-xs">{showFullEmail ? session.user.email : `${session.user.email.split("@")[0].slice(0, 3)}${"*".repeat(Math.max(3, session.user.email.length - 3))}`}</span>
                       <button onClick={() => setShowFullEmail(!showFullEmail)} className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: "rgba(255,255,255,0.25)" }}>
                         {showFullEmail ? "가리기" : "보기"}
                       </button>
