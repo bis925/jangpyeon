@@ -1632,6 +1632,7 @@ const [myRank, setMyRank] = useState(0);
             .join("")
         );
 const payload = JSON.parse(decodedPayload);
+        alert("전체 payload: " + JSON.stringify(payload));
         const { data, error } = await supabase.functions.invoke("kakao-auth", {
           body: {
             kakaoId: payload.sub,
