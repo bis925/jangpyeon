@@ -1610,7 +1610,8 @@ const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
 const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
   const [showNameInputChoice, setShowNameInputChoice] = useState(false);
 const [isOcrProcessing, setIsOcrProcessing] = useState(false);
-  const [isNameInputManual, setIsNameInputManual] = useState(false);
+const [isNameInputManual, setIsNameInputManual] = useState(false);
+  const [showFullEmail, setShowFullEmail] = useState(false);
 const [myRank, setMyRank] = useState(0);
   const [showRankToggle, setShowRankToggle] = useState(false);
   async function signInWithKakao() {
@@ -4657,7 +4658,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   ) : (
                     <Mail size={12} className="flex-shrink-0" />
                   )}
-                        {session.user.email?.endsWith("@jangpyeon.kr") ? (
+  {session.user.email?.endsWith("@jangpyeon.kr") ? (
                     <>
                       <span className="text-xs">{session.user.email.split("@")[0].slice(0, 3)}{"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}</span>
                       <button onClick={() => setShowKakaoEmailInfo(true)} className="flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150">
@@ -4665,7 +4666,12 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                       </button>
                     </>
                   ) : (
-                    <span className="text-xs">{session.user.email}</span>
+                    <>
+                      <span className="text-xs">{showFullEmail ? session.user.email : `${session.user.email.split("@")[0].slice(0, 3)}${"*".repeat(Math.max(0, session.user.email.split("@")[0].length - 3))}@${session.user.email.split("@")[1]}`}</span>
+                      <button onClick={() => setShowFullEmail(!showFullEmail)} className="text-[10px] font-bold rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: "rgba(255,255,255,0.25)" }}>
+                        {showFullEmail ? "가리기" : "보기"}
+                      </button>
+                    </>
                   )}
                 </div>
             
