@@ -3481,12 +3481,10 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
 {showVoiceListeningUI && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8" style={{ background: "rgba(15,110,98,0.95)" }}>
-          <div className="relative flex items-center justify-center mb-6" style={{ width: 100, height: 100 }}>
-            <div className="absolute rounded-full voice-pulse-ring" style={{ width: 100, height: 100, border: "3px solid rgba(255,255,255,0.4)" }} />
-            <div className="absolute rounded-full voice-pulse-ring" style={{ width: 100, height: 100, border: "3px solid rgba(255,255,255,0.4)", animationDelay: "0.5s" }} />
-            <div className="rounded-full flex items-center justify-center" style={{ width: 72, height: 72, background: "rgba(255,255,255,0.2)" }}>
-              <Mic size={32} color="#fff" />
-            </div>
+          <div className="relative flex items-center justify-center mb-6" style={{ width: 140, height: 140 }}>
+            <div className="absolute rounded-full voice-pulse-ring" style={{ width: 140, height: 140, border: "3px solid rgba(255,255,255,0.4)" }} />
+            <div className="absolute rounded-full voice-pulse-ring" style={{ width: 140, height: 140, border: "3px solid rgba(255,255,255,0.4)", animationDelay: "0.5s" }} />
+            <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편 캐릭터" style={{ width: 110, height: 110, objectFit: "contain" }} />
           </div>
 <div className="text-white font-extrabold text-xl mb-1">무엇이든 물어보세요</div>
           <div className="text-white text-sm mb-8" style={{ opacity: 0.85 }}>듣고 있어요, 편하게 말씀해주세요</div>
