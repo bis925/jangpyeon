@@ -3210,7 +3210,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       )}
 
 {showVoiceListeningUI && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "rgba(15,110,98,0.95)" }}>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8" style={{ background: "rgba(15,110,98,0.95)" }}>
           <div className="relative flex items-center justify-center mb-6" style={{ width: 100, height: 100 }}>
             <div className="absolute rounded-full voice-pulse-ring" style={{ width: 100, height: 100, border: "3px solid rgba(255,255,255,0.4)" }} />
             <div className="absolute rounded-full voice-pulse-ring" style={{ width: 100, height: 100, border: "3px solid rgba(255,255,255,0.4)", animationDelay: "0.5s" }} />
@@ -3219,7 +3219,15 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
             </div>
           </div>
           <div className="text-white font-extrabold text-lg mb-2">듣고 있어요</div>
-          <div className="text-white text-sm" style={{ opacity: 0.85 }}>말씀해주세요...</div>
+          <div className="text-white text-sm mb-8" style={{ opacity: 0.85 }}>말씀해주세요...</div>
+          <div className="rounded-2xl p-4 w-full" style={{ background: "rgba(255,255,255,0.15)", maxWidth: 280 }}>
+            <div className="text-white text-xs font-bold mb-2 text-center" style={{ opacity: 0.9 }}>이렇게 말해보세요</div>
+            <div className="text-white text-xs leading-loose text-center">
+              "홈으로 가기" · "지도로 가기"<br />
+              "등록하기" · "마이페이지로 가기"<br />
+              "공지사항으로 가기" · "로그아웃"
+            </div>
+          </div>
         </div>
       )}
       {showVoiceHint && (
