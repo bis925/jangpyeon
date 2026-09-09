@@ -3200,8 +3200,8 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
 if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: maintenanceImageUrl ? "#000" : PAPER }}>
-        {maintenanceImageUrl ? (
-          <img src={maintenanceImageUrl} alt="점검 안내" className="w-full h-full object-cover absolute inset-0" />
+{maintenanceImageUrl ? (
+          <img src={maintenanceImageUrl} alt="점검 안내" className="w-full h-full object-contain absolute inset-0" />
         ) : (
           <div className="text-center">
             <LogoMark size={56} />
