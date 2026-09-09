@@ -4200,7 +4200,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   <div className="text-xs font-bold mb-3" style={{ color: TEAL }}>📍 기본 정보</div>
                   <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>장소명</label>
 <div className="flex items-center gap-2 mb-1">
-                 <input id="place-name-input" value={form.name} onClick={() => setShowNameInputChoice(true)} readOnly={!isNameInputManual} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
+            <input id="place-name-input" value={form.name} onClick={() => { alert("클릭됨! showNameInputChoice를 true로 바꿉니다"); setShowNameInputChoice(true); }} readOnly={!isNameInputManual} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
                     className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                                                    <button
                     type="button"
