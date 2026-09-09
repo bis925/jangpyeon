@@ -915,9 +915,10 @@ async function startVoiceCommand() {
         setIsVoiceCommandListening(true);
         setIsSearchVoice(false);
         setShowVoiceListeningUI(true);
-        const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
+const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
         setIsVoiceCommandListening(false);
         setShowVoiceListeningUI(false);
+        const text = (result?.matches?.[0] || "").trim();
         processVoiceCommand(text);
       } else {
         showToast("음성 명령은 모바일 앱에서 사용 가능해요");
