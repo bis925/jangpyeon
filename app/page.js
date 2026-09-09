@@ -807,59 +807,7 @@ export default function Page() {
     showToast("삭제됐어요");
   }
 
-async function startVoiceSearch() {
-    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
-      try {
-        const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
-        const { available } = await SpeechRecognition.available();
-        if (!available) { showToast("이 기기에서는 음성 검색을 지원하지 않아요"); return; }
 
-        const permission = await SpeechRecognition.requestPermissions();
-        if (permission.speechRecognition !== "granted") {
-          showToast("마이크 권한을 허용해주세요");
-          return;
-        }
-
-setIsListening(true);
-        setIsSearchVoice(true);
-        setShowVoiceListeningUI(true);
-            const result = await SpeechRecognition.start({
-          language: "ko-KR",
-          maxResults: 1,
-          partialResults: false,
-          popup: false,
-        });
-setIsListening(false);
-        setShowVoiceListeningUI(false);
-        setIsSearchVoice(false);
-        if (result?.matches && result.matches.length > 0) {
-          setQuery(result.matches[0]);
-        }
-        SpeechRecognition.removeAllListeners();
-} catch (err) {
-        setIsListening(false);
-        setShowVoiceListeningUI(false);
-        showToast("음성을 인식하지 못했어요, 다시 시도해주세요");
-      }
-    } else {
-      const SR = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
-      if (!SR) { showToast("이 브라우저에서는 음성 검색을 지원하지 않아요"); return; }
-      const recognition = new SR();
-      recognition.lang = "ko-KR";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      recognition.onerror = () => {
-        setIsListening(false);
-        showToast("음성을 인식하지 못했어요, 다시 시도해주세요");
-      };
-      recognition.onresult = (event) => {
-        setQuery(event.results[0][0].transcript);
-      };
-      recognition.start();
-    }
-  }
 
     const [isTranslating, setIsTranslating] = useState(false);
 
@@ -4242,20 +4190,7 @@ if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
           <div>
             <div className="mb-6">
         <div className="flex items-center gap-1.5 rounded-full px-3 py-2.5 mb-3" style={{ background: CARD, border: `1px solid ${LINE}` }}>
-                          <button
-                  onClick={startVoiceSearch}
-                  className="flex sm:hidden items-center justify-center rounded-full flex-shrink-0 transition-all duration-200 active:scale-90"
-                                     style={{ width: 44, height: 44, minWidth: 44, background: isListening ? CORAL : TEAL }}
-                  aria-label="음성으로 검색"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                    <line x1="12" y1="19" x2="12" y2="23" />
-                    <line x1="8" y1="23" x2="16" y2="23" />
-                  </svg>
-                </button>
-                         <Search size={16} color={INK_SOFT} />
+                         <Search size={16} color={INK_SOFT} className="ml-1" />
               <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="예) 한식, 카페, 강남역" className="flex-1 min-w-0 outline-none text-sm bg-transparent" style={{ color: INK }} />
                            <button
                   onClick={() => {}}
