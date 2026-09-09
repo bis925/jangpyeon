@@ -947,7 +947,10 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
 const [showVoiceListeningUI, setShowVoiceListeningUI] = useState(false);
 const [isSearchVoice, setIsSearchVoice] = useState(false);
 const [voiceFaqAnswer, setVoiceFaqAnswer] = useState(null);
-  const [unrecognizedCommands, setUnrecognizedCommands] = useState([]);
+const [unrecognizedCommands, setUnrecognizedCommands] = useState([]);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [maintenanceImageUrl, setMaintenanceImageUrl] = useState(null);
+  const [maintenanceUploading, setMaintenanceUploading] = useState(false);
 
 async function startVoiceCommand() {
     try {
@@ -1037,6 +1040,37 @@ const matched = bestScore > 0 ? bestMatch : null;
         supabase.from("unrecognized_voice_commands").insert({ user_id: session.user.id, spoken_text: text });
       }
     }
+  }
+
+    async function fetchMaintenanceMode() {
+    const { data } = await supabase.from("app_settings").select("key, value").in("key", ["maintenance_mode", "maintenance_image_url"]);
+    const map = {};
+    (data || []).forEach((d) => { map[d.key] = d.value; });
+    setMaintenanceMode(map.maintenance_mode === "true");
+    setMaintenanceImageUrl(map.maintenance_image_url || null);
+  }
+
+  async function toggleMaintenanceMode() {
+    const newValue = !maintenanceMode;
+    setMaintenanceMode(newValue);
+    await supabase.from("app_settings").update({ value: newValue ? "true" : "false" }).eq("key", "maintenance_mode");
+    showToast(newValue ? "점검 모드가 켜졌어요" : "점검 모드가 꺼졌어요");
+  }
+
+  async function handleMaintenanceImageUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setMaintenanceUploading(true);
+    const compressed = await compressImage(file, 1200, 0.85);
+    const filePath = `maintenance_${Date.now()}.jpg`;
+    const { error: uploadError } = await supabase.storage.from("app-assets").upload(filePath, compressed, { upsert: true });
+    if (uploadError) { showToast("업로드 실패: " + uploadError.message); setMaintenanceUploading(false); return; }
+    const { data: urlData } = supabase.storage.from("app-assets").getPublicUrl(filePath);
+    const newUrl = urlData.publicUrl;
+    await supabase.from("app_settings").update({ value: newUrl }).eq("key", "maintenance_image_url");
+    setMaintenanceImageUrl(newUrl);
+    setMaintenanceUploading(false);
+    showToast("점검 안내 이미지가 변경됐어요!");
   }
   
   function showToast(message) {
@@ -2089,6 +2123,12 @@ async function handleAvatarChange(e) {
   }, [session, profile?.role]);
 
   useEffect(() => {
+    fetchMaintenanceMode();
+    const interval = setInterval(fetchMaintenanceMode, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     if (!session || !mySessionToken) return;
     const interval = setInterval(async () => {
       if (sessionConflict) return;
@@ -3091,6 +3131,22 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         // 알림 실패는 조용히 무시 (등록 자체는 이미 성공했으니까요)
       }
     }
+  }
+
+  if (maintenanceMode) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: maintenanceImageUrl ? "#000" : PAPER }}>
+        {maintenanceImageUrl ? (
+          <img src={maintenanceImageUrl} alt="점검 안내" className="w-full h-full object-cover absolute inset-0" />
+        ) : (
+          <div className="text-center">
+            <LogoMark size={56} />
+            <div className="font-extrabold text-lg mt-4" style={{ color: INK }}>서비스 점검 중이에요</div>
+            <div className="text-sm mt-2" style={{ color: INK_SOFT }}>더 나은 서비스를 위해 잠시 점검하고 있어요<br />조금만 기다려주세요 💚</div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   if (authLoading || showBrandSplash) {
