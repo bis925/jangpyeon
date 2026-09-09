@@ -3137,10 +3137,13 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           const Icon = n.icon;
           const active = tab === n.id;
           return (
-            <button key={n.id} onClick={() => setTab(n.id)} className="relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-all duration-200 active:scale-95"
-              style={{ color: active ? TEAL : INK_SOFT }}>
+            <button key={n.id} onClick={() => setTab(n.id)} className="relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 rounded-xl transition-all duration-200 active:scale-95"
+              style={{ color: active ? TEAL : INK_SOFT, background: active ? TEAL_TINT : "transparent" }}>
               <Icon size={17} />
-              <span style={{ fontSize: `${9 * FONT_SCALES[fontScale] * 1.2}px`, fontWeight: 700, whiteSpace: "nowrap" }}>{n.label}</span>
+              <span style={{ fontSize: `${9 * FONT_SCALES[fontScale] * 1.2}px`, fontWeight: active ? 900 : 700, whiteSpace: "nowrap" }}>{n.label}</span>
+              {active && (
+                <div className="absolute rounded-full" style={{ bottom: 0, width: 20, height: 3, background: TEAL }} />
+              )}
               {n.badge > 0 && (
                 <span className="absolute top-0 right-2 flex items-center justify-center rounded-full font-extrabold coupon-badge-glow" style={{ width: 16, height: 16, background: CORAL, color: "#fff", fontSize: 9 }}>
                   {n.badge > 9 ? "9+" : n.badge}
