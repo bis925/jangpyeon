@@ -909,6 +909,34 @@ async function startVoiceSearch() {
     setSplashImageUrl(null);
     showToast("시작 화면 이미지가 제거됐어요");
   }
+
+    async function captureAndRecognizeText() {
+    setShowNameInputChoice(false);
+    try {
+      const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+      const photo = await Camera.getPhoto({
+        quality: 80,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+      });
+      if (!photo?.base64String) return;
+      setIsOcrProcessing(true);
+      const { data, error } = await supabase.functions.invoke("ocr-place-name", {
+        body: { image: photo.base64String },
+      });
+      if (error || !data?.text) {
+        showToast("글자를 인식하지 못했어요, 다시 시도해주세요");
+        return;
+      }
+      const firstLine = data.text.split("\n")[0].trim();
+      setForm((prev) => ({ ...prev, name: firstLine }));
+      showToast("장소명이 입력됐어요! 확인해주세요");
+    } catch (err) {
+      showToast("사진 촬영에 실패했어요");
+    } finally {
+      setIsOcrProcessing(false);
+    }
+  }
   
   
   function showToast(message) {
@@ -1580,6 +1608,8 @@ const showFAQRef = useRef(false);
 
 const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
 const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
+  const [showNameInputChoice, setShowNameInputChoice] = useState(false);
+  const [isOcrProcessing, setIsOcrProcessing] = useState(false);
 const [myRank, setMyRank] = useState(0);
   const [showRankToggle, setShowRankToggle] = useState(false);
   async function signInWithKakao() {
