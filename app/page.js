@@ -1336,6 +1336,9 @@ const showRankingPolicyRef = useRef(false);
           setShowFAQ(false);
           if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
           setSpeakingFaqId(null);
+} else if (voiceFaqAnswerRef.current) {
+          setVoiceFaqAnswer(null);
+          if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
         } else if (showRankingPolicyRef.current) {
           setShowRankingPolicy(false);
         } else if (viewingReviewsPlaceRef.current) {
