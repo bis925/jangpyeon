@@ -1019,12 +1019,14 @@ function searchFaqByVoice(text) {
  if (qaMatch) {
         setVoiceFaqAnswer({ question: text, answer: qaMatch.answer });
         if (typeof window !== "undefined" && window.speechSynthesis) {
-          window.speechSynthesis.cancel();
+       window.speechSynthesis.cancel();
           setTimeout(() => {
             const utterance = new SpeechSynthesisUtterance(qaMatch.answer);
             utterance.lang = "ko-KR";
+            utterance.volume = 1;
+            utterance.rate = 1;
             window.speechSynthesis.speak(utterance);
-          }, 400);
+          }, 1000);
         }
         return;
       }
