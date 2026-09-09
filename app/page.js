@@ -4542,6 +4542,9 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               ))}
             </select>
             <div className="flex items-center gap-2 mb-5 flex-wrap">
+        <button onClick={() => setDistanceFilter(null)} className="text-xs font-bold rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: !distanceFilter ? TEAL : "#fff", color: !distanceFilter ? "#fff" : TEAL }}>
+                전체보기
+              </button>
               {[3, 5, 10].map((km) => (
                 <button key={km} onClick={() => {
                   const newVal = distanceFilter === km ? null : km;
@@ -4551,9 +4554,6 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   📍 {km}km 이내
                 </button>
               ))}
-              {distanceFilter && (
-                <button onClick={() => setDistanceFilter(null)} className="text-xs font-bold flex items-center gap-1" style={{ color: INK_SOFT }}><X size={12} /> 해제</button>
-              )}
             </div>
                     <div className="grid sm:grid-cols-2 gap-3 min-w-0">
              {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).filter((p) => {
