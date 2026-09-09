@@ -2138,10 +2138,16 @@ async function handleAvatarChange(e) {
     setPointRanking(mapped);
   }
 
-    async function handleLogout() {
+async function handleLogout() {
     const token = localStorage.getItem("jangpyeon_session_token");
     if (token) {
       await supabase.from("active_sessions").delete().eq("session_token", token);
+    }
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        const { KakaoLoginPlugin } = await import("@kichunsung/capacitor-kakao-login-plugin");
+        await KakaoLoginPlugin.logout();
+      } catch (err) {}
     }
     await supabase.auth.signOut({ scope: "local" });
     Object.keys(localStorage).forEach((key) => {
@@ -2149,7 +2155,6 @@ async function handleAvatarChange(e) {
     });
     window.location.href = "/";
   }
-  
    async function checkDeviceSession() {
     if (mySessionTokenRef.current) return;
     const deviceType = (typeof window !== "undefined" && window.Capacitor) ? "mobile" : "pc";
