@@ -3197,7 +3197,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
     }
   }
 
-if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL && typeof window !== "undefined" && !window.location.search.includes("admin_bypass")) {
+if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: maintenanceImageUrl ? "#000" : PAPER }}>
 {maintenanceImageUrl ? (
