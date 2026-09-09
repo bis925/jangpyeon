@@ -955,6 +955,11 @@ function processVoiceCommand(text) {
       showToast("공지사항으로 이동할게요");
 } else if (voiceQaList && voiceQaList.length > 0 && voiceQaList.some((qa) => qa.keywords.some((k) => text.includes(k)))) {
       searchFaqByVoice(text);
+ } else if (places.some((p) => p.name === text || p.name.includes(text))) {
+      const matchedPlace = places.find((p) => p.name === text) || places.find((p) => p.name.includes(text));
+      setTab("map");
+      setTimeout(() => focusOnPlace(matchedPlace.id), 300);
+      showToast(`"${matchedPlace.name}"으로 이동할게요`);
     } else if (text.includes("검색해줘") || text.includes("찾아줘") || (text.length <= 6 && !text.includes(" "))) {
       const keyword = text.replace(/찾아줘|검색해줘|검색|해줘|줘/g, "").trim();
       if (keyword) {
