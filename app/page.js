@@ -1611,7 +1611,8 @@ const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
   const [showNameInputChoice, setShowNameInputChoice] = useState(false);
 const [isOcrProcessing, setIsOcrProcessing] = useState(false);
 const [isNameInputManual, setIsNameInputManual] = useState(false);
-  const [showFullEmail, setShowFullEmail] = useState(false);
+const [showFullEmail, setShowFullEmail] = useState(false);
+  const [noticePage, setNoticePage] = useState(1);
 const [myRank, setMyRank] = useState(0);
   const [showRankToggle, setShowRankToggle] = useState(false);
   async function signInWithKakao() {
@@ -4456,7 +4457,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               {notices.length === 0 && (
                 <div className="text-center py-14 text-sm" style={{ color: INK_SOFT }}>등록된 공지사항이 없어요</div>
               )}
-                                                     {notices.map((n) => {
+                                             {notices.slice((noticePage - 1) * 5, noticePage * 5).map((n) => {
                 const isExpanded = expandedNoticeId === n.id;
                 return (
                                <div key={n.id} id={`notice-${n.id}`} className="px-5 py-4" style={{ borderBottom: `1px solid ${LINE}`, background: n.id === selectedNoticeId ? TEAL_TINT : (isExpanded ? "#F5F5F3" : "transparent") }}>
@@ -4552,9 +4553,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     </>
                   )}
                 </div>
-                      );
+                        );
               })}
             </div>
+            {notices.length > 5 && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <button onClick={() => setNoticePage((p) => Math.max(1, p - 1))} disabled={noticePage === 1} className="rounded-full p-2" style={{ background: PAPER, opacity: noticePage === 1 ? 0.4 : 1 }} aria-label="이전 페이지">
+                  <ChevronRight size={16} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+                </button>
+                <span className="text-xs font-bold" style={{ color: INK_SOFT }}>{noticePage} / {Math.max(1, Math.ceil(notices.length / 5))}</span>
+                <button onClick={() => setNoticePage((p) => Math.min(Math.ceil(notices.length / 5), p + 1))} disabled={noticePage >= Math.ceil(notices.length / 5)} className="rounded-full p-2" style={{ background: PAPER, opacity: noticePage >= Math.ceil(notices.length / 5) ? 0.4 : 1 }} aria-label="다음 페이지">
+                  <ChevronRight size={16} color={INK_SOFT} />
+                </button>
+              </div>
+            )}
           </div>
         )}
         {/* ===================== 마이페이지 ===================== */}
