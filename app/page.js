@@ -955,8 +955,8 @@ function processVoiceCommand(text) {
       showToast("공지사항으로 이동할게요");
 } else if (voiceQaList && voiceQaList.length > 0 && voiceQaList.some((qa) => qa.keywords.some((k) => text.includes(k)))) {
       searchFaqByVoice(text);
- } else if (places.some((p) => p.name === text || p.name.includes(text))) {
-      const matchedPlace = places.find((p) => p.name === text) || places.find((p) => p.name.includes(text));
+} else if (places.some((p) => p.name === text || p.name.includes(text) || (p.name.length >= 2 && text.includes(p.name)))) {
+      const matchedPlace = places.find((p) => p.name === text) || places.find((p) => p.name.includes(text)) || places.find((p) => p.name.length >= 2 && text.includes(p.name));
       setTab("map");
       setTimeout(() => focusOnPlace(matchedPlace.id), 300);
       showToast(`"${matchedPlace.name}"으로 이동할게요`);
