@@ -821,6 +821,7 @@ async function startVoiceSearch() {
         }
 
 setIsListening(true);
+        setIsSearchVoice(true);
         setShowVoiceListeningUI(true);
             const result = await SpeechRecognition.start({
           language: "ko-KR",
@@ -828,8 +829,9 @@ setIsListening(true);
           partialResults: false,
           popup: false,
         });
-        setIsListening(false);
+setIsListening(false);
         setShowVoiceListeningUI(false);
+        setIsSearchVoice(false);
         if (result?.matches && result.matches.length > 0) {
           setQuery(result.matches[0]);
         }
@@ -942,13 +944,15 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
   }
 
  const [showVoiceHint, setShowVoiceHint] = useState(false);
-  const [showVoiceListeningUI, setShowVoiceListeningUI] = useState(false);
+const [showVoiceListeningUI, setShowVoiceListeningUI] = useState(false);
+  const [isSearchVoice, setIsSearchVoice] = useState(false);
 
 async function startVoiceCommand() {
     try {
       if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
         const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
         setIsVoiceCommandListening(true);
+        setIsSearchVoice(false);
         setShowVoiceListeningUI(true);
         const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
         setIsVoiceCommandListening(false);
@@ -3221,11 +3225,18 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           <div className="text-white text-sm mb-8" style={{ opacity: 0.85 }}>말씀해주세요...</div>
           <div className="rounded-2xl p-4 w-full" style={{ background: "rgba(255,255,255,0.15)", maxWidth: 280 }}>
             <div className="text-white text-xs font-bold mb-2 text-center" style={{ opacity: 0.9 }}>이렇게 말해보세요</div>
-            <div className="text-white text-xs leading-loose text-center">
-              "홈으로 가기" · "지도로 가기"<br />
-              "등록하기" · "마이페이지로 가기"<br />
-              "공지사항으로 가기" · "로그아웃"
-            </div>
+            {isSearchVoice ? (
+              <div className="text-white text-xs leading-loose text-center">
+                "한식" · "카페" · "강남역"<br />
+                찾고 싶은 장소나 지역을 말씀해주세요
+              </div>
+            ) : (
+              <div className="text-white text-xs leading-loose text-center">
+                "홈으로 가기" · "지도로 가기"<br />
+                "등록하기" · "마이페이지로 가기"<br />
+                "공지사항으로 가기" · "로그아웃"
+              </div>
+            )}
           </div>
         </div>
       )}
