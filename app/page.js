@@ -939,7 +939,8 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
     }
   }
 
-    const [showVoiceHint, setShowVoiceHint] = useState(false);
+ const [showVoiceHint, setShowVoiceHint] = useState(false);
+  const [showVoiceListeningUI, setShowVoiceListeningUI] = useState(false);
 
   async function startVoiceCommand() {
     setShowVoiceHint(true);
@@ -947,9 +948,11 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
       if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
         const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
         setIsVoiceCommandListening(true);
-        const result = await SpeechRecognition.start({ language: "ko-KR", popup: true });
+setShowVoiceHint(false);
+        setShowVoiceListeningUI(true);
+        const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
         setIsVoiceCommandListening(false);
-        setShowVoiceHint(false);
+        setShowVoiceListeningUI(false);
         const text = (result?.matches?.[0] || "").trim();
         processVoiceCommand(text);
       } else {
@@ -3205,6 +3208,19 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         </div>
       )}
 
+{showVoiceListeningUI && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "rgba(15,110,98,0.95)" }}>
+          <div className="relative flex items-center justify-center mb-6" style={{ width: 100, height: 100 }}>
+            <div className="absolute rounded-full voice-pulse-ring" style={{ width: 100, height: 100, border: "3px solid rgba(255,255,255,0.4)" }} />
+            <div className="absolute rounded-full voice-pulse-ring" style={{ width: 100, height: 100, border: "3px solid rgba(255,255,255,0.4)", animationDelay: "0.5s" }} />
+            <div className="rounded-full flex items-center justify-center" style={{ width: 72, height: 72, background: "rgba(255,255,255,0.2)" }}>
+              <Mic size={32} color="#fff" />
+            </div>
+          </div>
+          <div className="text-white font-extrabold text-lg mb-2">듣고 있어요</div>
+          <div className="text-white text-sm" style={{ opacity: 0.85 }}>말씀해주세요...</div>
+        </div>
+      )}
       {showVoiceHint && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-8" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div className="rounded-2xl p-5 text-center" style={{ background: CARD, maxWidth: 300 }}>
