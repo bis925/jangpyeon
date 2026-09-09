@@ -951,6 +951,13 @@ async function startVoiceCommand() {
     try {
       if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
         const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
+        const { available } = await SpeechRecognition.available();
+        if (!available) { showToast("이 기기에서는 음성 명령을 지원하지 않아요"); return; }
+        const permission = await SpeechRecognition.requestPermissions();
+        if (permission.speechRecognition !== "granted") {
+          showToast("마이크 권한을 허용해주세요");
+          return;
+        }
         setIsVoiceCommandListening(true);
         setIsSearchVoice(false);
         setShowVoiceListeningUI(true);
