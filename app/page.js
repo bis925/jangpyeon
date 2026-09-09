@@ -3207,7 +3207,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
 </div>
 
       {/* ===== VOICE COMMAND FLOATING BUTTON ===== */}
-{session && (
+{session && typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform() && (
         <div className="fixed z-40 transition-all duration-300" style={{ bottom: 90, left: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
        <button onClick={startVoiceCommand} className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90" style={{ width: 64, height: 64, background: isVoiceCommandListening ? CORAL : TEAL }} aria-label="음성 명령">
             {isVoiceCommandListening ? (
