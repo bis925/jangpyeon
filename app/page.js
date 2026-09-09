@@ -1021,7 +1021,7 @@ const stopwords = ["어떻게", "하나요", "해요", "인가요", "무엇", "�
       const score = inputKeywords.filter((k) => faqKeywords.some((fk) => fk.includes(k) || k.includes(fk))).length;
       if (score > bestScore) { bestScore = score; bestMatch = f; }
     });
-    const matched = bestScore > 0 ? bestMatch : null;
+const matched = bestScore > 0 ? bestMatch : null;
     if (matched) {
       setVoiceFaqAnswer(matched);
       if (typeof window !== "undefined" && window.speechSynthesis) {
@@ -1032,6 +1032,9 @@ const stopwords = ["어떻게", "하나요", "해요", "인가요", "무엇", "�
       }
     } else {
       showToast(`"${text}"에 대한 답변을 찾지 못했어요`);
+      if (session?.user?.id) {
+        supabase.from("unrecognized_voice_commands").insert({ user_id: session.user.id, spoken_text: text });
+      }
     }
   }
   
