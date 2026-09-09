@@ -834,9 +834,10 @@ setIsListening(true);
           setQuery(result.matches[0]);
         }
         SpeechRecognition.removeAllListeners();
-       } catch (err) {
+} catch (err) {
         setIsListening(false);
-        alert("에러 상세\n메시지: " + err?.message + "\n전체: " + JSON.stringify(err));
+        setShowVoiceListeningUI(false);
+        showToast("음성을 인식하지 못했어요, 다시 시도해주세요");
       }
     } else {
       const SR = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -943,13 +944,11 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
  const [showVoiceHint, setShowVoiceHint] = useState(false);
   const [showVoiceListeningUI, setShowVoiceListeningUI] = useState(false);
 
-  async function startVoiceCommand() {
-    setShowVoiceHint(true);
+async function startVoiceCommand() {
     try {
       if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
         const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
         setIsVoiceCommandListening(true);
-setShowVoiceHint(false);
         setShowVoiceListeningUI(true);
         const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
         setIsVoiceCommandListening(false);
@@ -960,10 +959,10 @@ setShowVoiceHint(false);
         showToast("음성 명령은 모바일 앱에서 사용 가능해요");
         setShowVoiceHint(false);
       }
-    } catch (err) {
+} catch (err) {
       setIsVoiceCommandListening(false);
       setShowVoiceHint(false);
-      alert("음성인식 에러: " + JSON.stringify(err));
+      setShowVoiceListeningUI(false);
     }
   }
 
@@ -3226,22 +3225,6 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               "홈으로 가기" · "지도로 가기"<br />
               "등록하기" · "마이페이지로 가기"<br />
               "공지사항으로 가기" · "로그아웃"
-            </div>
-          </div>
-        </div>
-      )}
-      {showVoiceHint && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-8" style={{ background: "rgba(0,0,0,0.5)" }}>
-          <div className="rounded-2xl p-5 text-center" style={{ background: CARD, maxWidth: 300 }}>
-            <div className="rounded-full flex items-center justify-center mx-auto mb-3" style={{ width: 56, height: 56, background: isVoiceCommandListening ? CORAL : TEAL_TINT }}>
-              <Mic size={26} color={isVoiceCommandListening ? "#fff" : TEAL} />
-            </div>
-            <div className="font-extrabold text-sm mb-2" style={{ color: INK }}>{isVoiceCommandListening ? "듣고 있어요..." : "잠시만 기다려주세요"}</div>
-            <div className="text-xs leading-relaxed" style={{ color: INK_SOFT }}>
-              이렇게 말해보세요<br />
-              <b>"홈으로 가기" · "지도로 가기"</b><br />
-              <b>"등록하기" · "마이페이지로 가기"</b><br />
-              <b>"로그아웃"</b>
             </div>
           </div>
         </div>
