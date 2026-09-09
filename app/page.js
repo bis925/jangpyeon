@@ -820,15 +820,16 @@ async function startVoiceSearch() {
           return;
         }
 
-             setIsListening(true);
-
+setIsListening(true);
+        setShowVoiceListeningUI(true);
             const result = await SpeechRecognition.start({
           language: "ko-KR",
           maxResults: 1,
           partialResults: false,
-          popup: true,
+          popup: false,
         });
         setIsListening(false);
+        setShowVoiceListeningUI(false);
         if (result?.matches && result.matches.length > 0) {
           setQuery(result.matches[0]);
         }
