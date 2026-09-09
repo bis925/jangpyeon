@@ -1031,8 +1031,8 @@ const matched = bestScore > 0 ? bestMatch : null;
         utterance.lang = "ko-KR";
         window.speechSynthesis.speak(utterance);
       }
-    } else {
-      showToast(`"${text}"에 대한 답변을 찾지 못했어요`);
+} else {
+      setVoiceFaqAnswer({ question: text, answer: "__NOT_FOUND__" });
       if (session?.user?.id) {
         supabase.from("unrecognized_voice_commands").insert({ user_id: session.user.id, spoken_text: text });
       }
@@ -3274,8 +3274,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               <Mic size={18} color={TEAL} />
               <span className="text-xs font-bold" style={{ color: TEAL_DARK }}>음성 질문 답변</span>
             </div>
-            <div className="font-extrabold text-base mb-3" style={{ color: INK }}>{voiceFaqAnswer.question}</div>
-            <div className="text-sm mb-5" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{voiceFaqAnswer.answer}</div>
+{voiceFaqAnswer.answer === "__NOT_FOUND__" ? (
+              <>
+                <div className="text-4xl text-center mb-3">🙏</div>
+                <div className="font-extrabold text-base mb-2 text-center" style={{ color: INK }}>죄송해요, 아직 잘 모르겠어요</div>
+                <div className="text-sm mb-5 text-center" style={{ color: INK_SOFT, lineHeight: 1.6 }}>
+                  "{voiceFaqAnswer.question}"라고 말씀해주셨는데,<br />제가 아직 그 답을 모르고 있어요.<br />더 열심히 배워서 다음엔 꼭 답해드릴게요!
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="font-extrabold text-base mb-3" style={{ color: INK }}>{voiceFaqAnswer.question}</div>
+                <div className="text-sm mb-5" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{voiceFaqAnswer.answer}</div>
+              </>
+            )}
             <button onClick={() => { setVoiceFaqAnswer(null); if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel(); }} className="w-full rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
               확인했어요
             </button>
