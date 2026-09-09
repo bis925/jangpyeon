@@ -1099,15 +1099,29 @@ if (session?.user?.id) {
     setVoiceQaList(data || []);
   }
 
-  async function addVoiceQa() {
+async function addVoiceQa() {
     if (!newVoiceQaKeywords.trim() || !newVoiceQaAnswer.trim()) { showToast("키워드와 답변을 모두 입력해주세요"); return; }
     const keywords = newVoiceQaKeywords.split(",").map((k) => k.trim()).filter((k) => k);
-    const { error } = await supabase.from("voice_qa").insert({ keywords, answer: newVoiceQaAnswer.trim() });
-    if (error) { showToast("등록 실패: " + error.message); return; }
+    if (editingVoiceQaId) {
+      const { error } = await supabase.from("voice_qa").update({ keywords, answer: newVoiceQaAnswer.trim() }).eq("id", editingVoiceQaId);
+      if (error) { showToast("수정 실패: " + error.message); return; }
+      showToast("수정됐어요!");
+      setEditingVoiceQaId(null);
+    } else {
+      const { error } = await supabase.from("voice_qa").insert({ keywords, answer: newVoiceQaAnswer.trim() });
+      if (error) { showToast("등록 실패: " + error.message); return; }
+      showToast("음성 질문-답변이 등록됐어요!");
+    }
     setNewVoiceQaKeywords("");
     setNewVoiceQaAnswer("");
     fetchVoiceQaList();
-    showToast("음성 질문-답변이 등록됐어요!");
+  }
+
+  function startEditVoiceQa(qa) {
+    setEditingVoiceQaId(qa.id);
+    setNewVoiceQaKeywords(qa.keywords.join(", "));
+    setNewVoiceQaAnswer(qa.answer);
+    document.getElementById("admin-voice-qa")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function deleteVoiceQa(id) {
@@ -1810,7 +1824,8 @@ const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
   const [voiceQaList, setVoiceQaList] = useState([]);
   const [newVoiceQaKeywords, setNewVoiceQaKeywords] = useState("");
 const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
-  const [voiceQaPage, setVoiceQaPage] = useState(1);
+const [voiceQaPage, setVoiceQaPage] = useState(1);
+  const [editingVoiceQaId, setEditingVoiceQaId] = useState(null);
   const [showVoiceButton, setShowVoiceButton] = useState(true);
 const [myRank, setMyRank] = useState(0);
   const [showRankToggle, setShowRankToggle] = useState(false);
@@ -5530,17 +5545,24 @@ if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
                 className="w-full rounded-xl px-3 py-2.5 mb-3 text-sm outline-none resize-none"
                 style={{ border: `1.4px solid ${LINE}`, color: INK }}
               />
-              <button onClick={addVoiceQa} className="w-full rounded-xl py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>
-                등록하기
-              </button>
+      <div className="flex gap-2">
+                <button onClick={addVoiceQa} className="flex-1 rounded-xl py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>
+                  {editingVoiceQaId ? "수정하기" : "등록하기"}
+                </button>
+                {editingVoiceQaId && (
+                  <button onClick={() => { setEditingVoiceQaId(null); setNewVoiceQaKeywords(""); setNewVoiceQaAnswer(""); }} className="rounded-xl px-4 py-2.5 text-sm font-bold" style={{ background: PAPER, color: INK }}>
+                    취소
+                  </button>
+                )}
+              </div>
             </div>
         <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {voiceQaList.length === 0 && (
                 <div className="text-center py-6 text-sm" style={{ color: INK_SOFT }}>등록된 음성 질문-답변이 없어요</div>
               )}
               {voiceQaList.slice((voiceQaPage - 1) * 5, voiceQaPage * 5).map((qa) => (
-                <div key={qa.id} className="px-4 py-3 flex items-start justify-between gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
-                  <div className="min-w-0 flex-1">
+    <div key={qa.id} className="px-4 py-3 flex items-start justify-between gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div onClick={() => startEditVoiceQa(qa)} className="min-w-0 flex-1 cursor-pointer">
                     <div className="flex flex-wrap gap-1 mb-1.5">
                       {qa.keywords.map((k, i) => (
                         <span key={i} className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: TEAL_TINT, color: TEAL_DARK }}>{k}</span>
