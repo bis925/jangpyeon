@@ -3486,8 +3486,9 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
             <div className="absolute rounded-full voice-pulse-ring" style={{ width: 140, height: 140, border: "3px solid rgba(255,255,255,0.4)", animationDelay: "0.5s" }} />
             <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편 캐릭터" style={{ width: 110, height: 110, objectFit: "contain" }} />
           </div>
-<div className="text-white font-extrabold text-xl mb-1">무엇이든 물어보세요</div>
-          <div className="text-white text-sm mb-8" style={{ opacity: 0.85 }}>듣고 있어요, 편하게 말씀해주세요</div>
+<div className="text-white text-xs font-bold mb-1" style={{ opacity: 0.8 }}>편이</div>
+          <div className="text-white font-extrabold text-xl mb-1">무엇이든 물어보세요</div>
+          <div className="text-white text-sm mb-8" style={{ opacity: 0.85 }}>듣고 있어요, 말씀해주세요</div>
           <div className="rounded-2xl p-4 w-full" style={{ background: "rgba(255,255,255,0.15)", maxWidth: 280 }}>
             <div className="text-white text-xs font-bold mb-2 text-center" style={{ opacity: 0.9 }}>이렇게 말해보세요</div>
            {isSearchVoice ? (
