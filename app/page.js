@@ -1039,7 +1039,7 @@ const matched = bestScore > 0 ? bestMatch : null;
       setVoiceFaqAnswer({ question: text, answer: "__NOT_FOUND__" });
 if (session?.user?.id) {
         supabase.from("unrecognized_voice_commands").insert({ user_id: session.user.id, spoken_text: text }).then(({ error }) => {
-          if (error) alert("저장 실패: " + error.message);
+          if (error) console.error("저장 실패:", error.message);
         });
       }
     }
