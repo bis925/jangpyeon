@@ -959,7 +959,7 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
     } catch (err) {
       setIsVoiceCommandListening(false);
       setShowVoiceHint(false);
-      showToast("음성을 인식하지 못했어요, 다시 시도해주세요");
+      alert("음성인식 에러: " + JSON.stringify(err));
     }
   }
 
