@@ -945,7 +945,8 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
 
  const [showVoiceHint, setShowVoiceHint] = useState(false);
 const [showVoiceListeningUI, setShowVoiceListeningUI] = useState(false);
-  const [isSearchVoice, setIsSearchVoice] = useState(false);
+const [isSearchVoice, setIsSearchVoice] = useState(false);
+  const [voiceFaqAnswer, setVoiceFaqAnswer] = useState(null);
 
 async function startVoiceCommand() {
     try {
