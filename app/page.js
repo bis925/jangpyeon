@@ -3272,8 +3272,11 @@ if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
 
       {/* ===== VOICE COMMAND FLOATING BUTTON ===== */}
 {session && typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform() && (
-        <div className="fixed z-40 transition-all duration-300" style={{ bottom: 90, left: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
-       <button onClick={startVoiceCommand} className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90" style={{ width: 64, height: 64, background: isVoiceCommandListening ? CORAL : TEAL }} aria-label="음성 명령">
+        <div className="fixed z-40 transition-all duration-300 flex flex-col items-center" style={{ bottom: 160, left: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
+          <div className="rounded-full px-2.5 py-1 mb-1.5 voice-hint-float" style={{ background: "rgba(0,0,0,0.6)", whiteSpace: "nowrap" }}>
+            <span className="text-white" style={{ fontSize: 10, fontWeight: 700 }}>도움이 필요하시면 눌러주세요</span>
+          </div>
+          <button onClick={startVoiceCommand} className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90 voice-btn-glow" style={{ width: 64, height: 64, background: isVoiceCommandListening ? CORAL : TEAL, border: "3px solid #FFC13B" }} aria-label="음성 명령">
             {isVoiceCommandListening ? (
               <div className="rounded-full animate-pulse" style={{ width: 16, height: 16, background: "#fff" }} />
             ) : (
