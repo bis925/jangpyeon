@@ -946,7 +946,8 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
  const [showVoiceHint, setShowVoiceHint] = useState(false);
 const [showVoiceListeningUI, setShowVoiceListeningUI] = useState(false);
 const [isSearchVoice, setIsSearchVoice] = useState(false);
-  const [voiceFaqAnswer, setVoiceFaqAnswer] = useState(null);
+const [voiceFaqAnswer, setVoiceFaqAnswer] = useState(null);
+  const [unrecognizedCommands, setUnrecognizedCommands] = useState([]);
 
 async function startVoiceCommand() {
     try {
@@ -2180,7 +2181,7 @@ async function handleAvatarChange(e) {
     }
   }, [session, tab]);
 
-  useEffect(() => {
+useEffect(() => {
     if (session && profile) {
       fetchAllInquiries();
       fetchAllProfiles();
@@ -2188,6 +2189,7 @@ async function handleAvatarChange(e) {
       fetchReports();
       fetchAllCoupons();
       fetchSplashImage();
+      fetchUnrecognizedVoiceCommands();
     }
   }, [session, profile]);
 
@@ -2422,6 +2424,14 @@ async function handleLogout() {
     const { data } = await supabase.from("inquiries").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false });
     setInquiries(data || []);
   }
+
+  async function fetchUnrecognizedVoiceCommands() {
+    if (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff") return;
+    const { data } = await supabase.from("unrecognized_voice_commands").select("*, profiles(nickname, email)").order("created_at", { ascending: false }).limit(50);
+    setUnrecognizedCommands(data || []);
+  }
+
+  
   async function fetchAllInquiries() {
     if (session.user.email !== ADMIN_EMAIL && profile?.role !== "staff") return;
     const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
@@ -5383,6 +5393,20 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                 <Bell size={15} />
                 모든 사용자에게 발송
               </button>
+            </div>
+                  <div id="admin-voice-commands" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎤 답변 못한 음성 질문 ({unrecognizedCommands.length})</div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {unrecognizedCommands.length === 0 && (
+                <div className="text-center py-8 text-sm" style={{ color: INK_SOFT }}>아직 답변 못한 질문이 없어요</div>
+              )}
+              {unrecognizedCommands.map((c) => (
+                <div key={c.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div className="text-sm font-bold mb-1" style={{ color: INK }}>"{c.spoken_text}"</div>
+                  <div className="text-xs" style={{ color: INK_SOFT }}>
+                    {c.profiles?.nickname || c.profiles?.email || "알 수 없음"} · {new Date(c.created_at).toLocaleString("ko-KR")}
+                  </div>
+                </div>
+              ))}
             </div>
                   <div id="admin-splash" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎨 앱 시작 화면</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
