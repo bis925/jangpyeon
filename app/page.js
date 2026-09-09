@@ -3385,7 +3385,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
       {/* ===== VOICE COMMAND FLOATING BUTTON ===== */}
 {session && typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform() && (
-        <div className="fixed z-40 transition-all duration-300 flex flex-col items-center" style={{ bottom: 160, left: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
+       <div className="fixed z-40 transition-all duration-300 flex flex-col items-center" style={{ bottom: 200, right: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
           <div className="rounded-full px-2.5 py-1 mb-1.5 voice-hint-float" style={{ background: "rgba(0,0,0,0.6)", whiteSpace: "nowrap" }}>
             <span className="text-white" style={{ fontSize: 10, fontWeight: 700 }}>도움이 필요하시면 눌러주세요</span>
           </div>
