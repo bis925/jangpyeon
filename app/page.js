@@ -2213,9 +2213,9 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (session) fetchMyLocation();
-  }, [session]);
+useEffect(() => {
+    if (session && tab === "home" && !myLocation) locateMe();
+  }, [session, tab]);
 
   useEffect(() => {
     if (!session || !mySessionToken) return;
@@ -4470,8 +4470,12 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </button>
                   {showDistancePicker && (
                     <div className="absolute top-full right-0 mt-1.5 rounded-xl overflow-hidden z-10" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                      {[3, 5, 10].map((km) => (
-                        <button key={km} onClick={() => { setDistanceFilter(distanceFilter === km ? null : km); setShowDistancePicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: distanceFilter === km ? TEAL : INK, background: distanceFilter === km ? TEAL_TINT : "transparent" }}>
+                 {[3, 5, 10].map((km) => (
+                        <button key={km} onClick={() => {
+                          setDistanceFilter(distanceFilter === km ? null : km);
+                          setShowDistancePicker(false);
+                          if (!myLocation) locateMe();
+                        }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: distanceFilter === km ? TEAL : INK, background: distanceFilter === km ? TEAL_TINT : "transparent" }}>
                           {km}km 이내
                         </button>
                       ))}
