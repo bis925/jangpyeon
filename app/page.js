@@ -1828,6 +1828,7 @@ const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
   const [newVoiceQaKeywords, setNewVoiceQaKeywords] = useState("");
 const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
 const [voiceQaPage, setVoiceQaPage] = useState(1);
+  const [openFilterActive, setOpenFilterActive] = useState(false);
   const [editingVoiceQaId, setEditingVoiceQaId] = useState(null);
   const [showVoiceButton, setShowVoiceButton] = useState(true);
 const [myRank, setMyRank] = useState(0);
@@ -2882,9 +2883,10 @@ const filteredPlaces = useMemo(() => {
   return places.filter((p) => {
     const matchesQuery = query.trim() === "" || p.name.includes(query) || p.address.includes(query) || (p.keywords && p.keywords.includes(query));
     const matchesFilter = activeFilters.length === 0 || activeFilters.every((f) => p[BADGE_META[f].field]);
-    return matchesQuery && matchesFilter;
+    const matchesOpen = !openFilterActive || isOpenNow(p.business_hours, holidays) !== false;
+    return matchesQuery && matchesFilter && matchesOpen;
   });
-}, [places, query, activeFilters]);
+}, [places, query, activeFilters, openFilterActive, holidays]);
 const visiblePlaces = useMemo(() => filteredPlaces.slice(0, visibleCount), [filteredPlaces, visibleCount]);
 
 // 무한 스크롤 이펙트는 여기로 이동
@@ -4423,16 +4425,21 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               </div>
             </button>
                 )}
-                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+<div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-extrabold text-sm truncate" style={{ color: INK }}>등록된 장소 {filteredPlaces.length}곳</span>
                               <button onClick={() => setShowRecencyHelp(true)} className="rounded-full p-0.5 flex-shrink-0" aria-label="정보 최신성 안내">
                   <span className="flex items-center justify-center rounded-full text-xs font-extrabold flex-shrink-0" style={{ width: 20, height: 20, background: TEAL, color: "#fff" }}>?</span>
                 </button>
               </div>
-              {activeFilters.length > 0 && (
-                <button onClick={() => setActiveFilters([])} className="text-xs font-bold flex items-center gap-1 flex-shrink-0" style={{ color: INK_SOFT }}><X size={12} /> 필터 초기화</button>
-              )}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button onClick={() => setOpenFilterActive(!openFilterActive)} className="text-xs font-bold flex items-center gap-1 rounded-full px-3 py-1.5 border transition-all duration-200" style={{ borderColor: TEAL, background: openFilterActive ? TEAL : "#fff", color: openFilterActive ? "#fff" : TEAL }}>
+                  🟢 영업중만
+                </button>
+                {activeFilters.length > 0 && (
+                  <button onClick={() => setActiveFilters([])} className="text-xs font-bold flex items-center gap-1 flex-shrink-0" style={{ color: INK_SOFT }}><X size={12} /> 필터 초기화</button>
+                )}
+              </div>
             </div>
 
                    <div className="grid sm:grid-cols-2 gap-3 min-w-0">
