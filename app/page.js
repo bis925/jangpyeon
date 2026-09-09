@@ -960,6 +960,15 @@ function processVoiceCommand(text) {
       setTab("map");
       setTimeout(() => focusOnPlace(matchedPlace.id), 300);
       showToast(`"${matchedPlace.name}"으로 이동할게요`);
+} else if (text.includes("가까운") || text.includes("근처") || text.includes("주변")) {
+      const keyword = text.replace(/가까운|근처|주변|검색해줘|찾아줘|검색|해줘|줘/g, "").trim();
+      if (keyword) {
+        setQuery(keyword);
+        setTab("home");
+        showToast(`가까운 "${keyword}"을 찾아드릴게요`);
+      } else {
+        showToast("무엇을 찾으시는지 말씀해주세요");
+      }
     } else if (text.includes("검색해줘") || text.includes("찾아줘") || (text.length <= 6 && !text.includes(" "))) {
       const keyword = text.replace(/찾아줘|검색해줘|검색|해줘|줘/g, "").trim();
       if (keyword) {
