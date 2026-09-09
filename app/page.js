@@ -947,11 +947,20 @@ function processVoiceCommand(text) {
     } else if (text.includes("등록")) {
       setTab("register");
       showToast("등록 화면으로 이동할게요");
- } else if (text.includes("공지")) {
+} else if (text.includes("공지")) {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
+    } else if (text.includes("검색해줘") || text.includes("찾아줘")) {
+      const keyword = text.replace(/찾아줘|검색해줘|검색|해줘|줘/g, "").trim();
+      if (keyword) {
+        setQuery(keyword);
+        setTab("home");
+        showToast(`"${keyword}" 검색결과를 보여드릴게요`);
+      } else {
+        showToast("무엇을 찾으시는지 말씀해주세요");
+      }
     } else {
-      tryFaqThenSearch(text);
+      searchFaqByVoice(text);
     }
   }
 
