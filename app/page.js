@@ -1846,7 +1846,6 @@ const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
 const [voiceQaPage, setVoiceQaPage] = useState(1);
 const [openFilterActive, setOpenFilterActive] = useState(false);
   const [distanceFilter, setDistanceFilter] = useState(null);
-  const [myLocation, setMyLocation] = useState(null);
   const [showDistancePicker, setShowDistancePicker] = useState(false);
   const [editingVoiceQaId, setEditingVoiceQaId] = useState(null);
   const [showVoiceButton, setShowVoiceButton] = useState(true);
