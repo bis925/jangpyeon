@@ -4200,7 +4200,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                   <div className="text-xs font-bold mb-3" style={{ color: TEAL }}>📍 기본 정보</div>
                   <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>장소명</label>
 <div className="flex items-center gap-2 mb-1">
-            <input id="place-name-input" value={form.name} onClick={() => { alert("클릭됨! showNameInputChoice를 true로 바꿉니다"); setShowNameInputChoice(true); }} readOnly={!isNameInputManual} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
+ <input id="place-name-input" value={form.name} onClick={() => setShowNameInputChoice(true)} readOnly={!isNameInputManual} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예) 행복나눔 도서관"
                     className="flex-1 min-w-0 rounded-xl px-4 py-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                                                    <button
                     type="button"
@@ -4223,11 +4223,42 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     )}
                         </button>
                 </div>
-                {isTranslating && (
+                     {isTranslating && (
                   <p className="text-xs mb-3 font-bold" style={{ color: TEAL_DARK }}>
                     🌐 번역하고 있어요, 잠시만 기다려주세요...
                   </p>
                 )}
+                {isOcrProcessing && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
+          <div className="rounded-full animate-spin mb-3" style={{ width: 40, height: 40, border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "#fff" }} />
+          <div className="text-white font-bold text-sm">글자를 읽고 있어요...</div>
+        </div>
+      )}
+      {showNameInputChoice && (
+        <div onClick={() => setShowNameInputChoice(false)} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl p-5" style={{ background: CARD }}>
+            <div className="font-extrabold text-base mb-4 text-center" style={{ color: INK }}>장소명을 어떻게 입력할까요?</div>
+            <button onClick={captureAndRecognizeText} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: TEAL_TINT }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: TEAL }}>
+                <Camera size={22} color="#fff" />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-sm" style={{ color: TEAL_DARK }}>카메라로 찍기</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>간판을 촬영하면 자동으로 입력돼요</div>
+              </div>
+            </button>
+          <button onClick={() => { setIsNameInputManual(true); setShowNameInputChoice(false); setTimeout(() => document.getElementById("place-name-input")?.focus(), 100); }} className="w-full flex items-center gap-3 rounded-2xl p-4 transition-all duration-200 active:scale-[0.98]" style={{ background: PAPER }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: "#fff", border: `1.4px solid ${LINE}` }}>
+                <Pencil size={20} color={INK_SOFT} />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-sm" style={{ color: INK }}>직접 입력하기</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>키보드로 타이핑해서 입력해요</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
 
                                                                                                               <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
                   <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
@@ -4637,38 +4668,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
                     <span className="text-xs">{session.user.email}</span>
                   )}
                 </div>
-                  {isOcrProcessing && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
-          <div className="rounded-full animate-spin mb-3" style={{ width: 40, height: 40, border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "#fff" }} />
-          <div className="text-white font-bold text-sm">글자를 읽고 있어요...</div>
-        </div>
-      )}
-      {showNameInputChoice && (
-        <div onClick={() => setShowNameInputChoice(false)} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-          <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl p-5" style={{ background: CARD }}>
-            <div className="font-extrabold text-base mb-4 text-center" style={{ color: INK }}>장소명을 어떻게 입력할까요?</div>
-            <button onClick={captureAndRecognizeText} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: TEAL_TINT }}>
-              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: TEAL }}>
-                <Camera size={22} color="#fff" />
-              </div>
-              <div className="text-left">
-                <div className="font-bold text-sm" style={{ color: TEAL_DARK }}>카메라로 찍기</div>
-                <div className="text-xs" style={{ color: INK_SOFT }}>간판을 촬영하면 자동으로 입력돼요</div>
-              </div>
-            </button>
-          <button onClick={() => { setIsNameInputManual(true); setShowNameInputChoice(false); setTimeout(() => document.getElementById("place-name-input")?.focus(), 100); }} className="w-full flex items-center gap-3 rounded-2xl p-4 transition-all duration-200 active:scale-[0.98]" style={{ background: PAPER }}>
-              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: "#fff", border: `1.4px solid ${LINE}` }}>
-                <Pencil size={20} color={INK_SOFT} />
-              </div>
-              <div className="text-left">
-                <div className="font-bold text-sm" style={{ color: INK }}>직접 입력하기</div>
-                <div className="text-xs" style={{ color: INK_SOFT }}>키보드로 타이핑해서 입력해요</div>
-              </div>
-            </button>
-          </div>
-        </div>
-      )}
-
+            
                           {showKakaoEmailInfo && (
                   <div className="fixed inset-0 z-50" onClick={(e) => { e.stopPropagation(); setShowKakaoEmailInfo(false); }}>
                     <div onClick={(e) => e.stopPropagation()} className="absolute left-1/2 rounded-2xl px-4 py-3" style={{ top: "35%", transform: "translateX(-50%)", background: INK, color: "#fff", fontSize: 12, lineHeight: 1.7, width: 260, boxShadow: "0 4px 16px rgba(0,0,0,0.25)" }}>
