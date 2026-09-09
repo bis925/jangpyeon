@@ -977,7 +977,7 @@ async function startVoiceCommand() {
     }
   }
 
-  function processVoiceCommand(text) {
+function processVoiceCommand(text) {
     if (!text) { showToast("아무 말도 들리지 않았어요"); return; }
     if (text.includes("로그아웃")) {
       handleLogout();
@@ -997,7 +997,26 @@ async function startVoiceCommand() {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
     } else {
+      searchFaqByVoice(text);
+    }
+  }
+
+  function searchFaqByVoice(text) {
+    if (!faqs || faqs.length === 0) {
       showToast(`"${text}"는 알 수 없는 명령이에요`);
+      return;
+    }
+    const matched = faqs.find((f) => text.includes(f.question.replace(/[?!.]+$/, "")) || f.question.includes(text));
+    if (matched) {
+      setVoiceFaqAnswer(matched);
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(`${matched.question.replace(/[?!.]+$/, "")}. ${matched.answer}`);
+        utterance.lang = "ko-KR";
+        window.speechSynthesis.speak(utterance);
+      }
+    } else {
+      showToast(`"${text}"에 대한 답변을 찾지 못했어요`);
     }
   }
   
@@ -1197,8 +1216,10 @@ useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => { window.removeEventListener("scroll", handleScroll); clearTimeout(scrollTimer); };
   }, []);
-  const showRankingPolicyRef = useRef(false);
+const showRankingPolicyRef = useRef(false);
+  const voiceFaqAnswerRef = useRef(null);
   useEffect(() => { showRankingPolicyRef.current = showRankingPolicy; }, [showRankingPolicy]);
+  useEffect(() => { voiceFaqAnswerRef.current = voiceFaqAnswer; }, [voiceFaqAnswer]);
    const showFavoritesOnlyRef = useRef(false);
   useEffect(() => { showFavoritesOnlyRef.current = showFavoritesOnly; }, [showFavoritesOnly]);
   const isMapFullscreenRef = useRef(false);
@@ -3218,6 +3239,22 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
           </button>
         </div>
       )}
+{voiceFaqAnswer && (
+        <div onClick={() => { setVoiceFaqAnswer(null); if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel(); }} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-6" style={{ background: CARD }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Mic size={18} color={TEAL} />
+              <span className="text-xs font-bold" style={{ color: TEAL_DARK }}>음성 질문 답변</span>
+            </div>
+            <div className="font-extrabold text-base mb-3" style={{ color: INK }}>{voiceFaqAnswer.question}</div>
+            <div className="text-sm mb-5" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{voiceFaqAnswer.answer}</div>
+            <button onClick={() => { setVoiceFaqAnswer(null); if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel(); }} className="w-full rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
+              확인했어요
+            </button>
+          </div>
+        </div>
+      )}
+
 
 {showVoiceListeningUI && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8" style={{ background: "rgba(15,110,98,0.95)" }}>
