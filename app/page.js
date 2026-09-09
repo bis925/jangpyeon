@@ -1632,12 +1632,11 @@ const [myRank, setMyRank] = useState(0);
             .join("")
         );
 const payload = JSON.parse(decodedPayload);
-        alert("전체 payload: " + JSON.stringify(payload));
         const { data, error } = await supabase.functions.invoke("kakao-auth", {
           body: {
             kakaoId: payload.sub,
             email: payload.email,
-            emailVerified: payload.email_verified === true || payload.is_email_verified === true || payload.is_email_valid === true,
+            emailVerified: !!payload.email,
             nickname: payload.nickname || payload.name,
             picture: payload.picture,
           },
