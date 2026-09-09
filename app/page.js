@@ -1809,7 +1809,8 @@ const [noticePage, setNoticePage] = useState(1);
 const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
   const [voiceQaList, setVoiceQaList] = useState([]);
   const [newVoiceQaKeywords, setNewVoiceQaKeywords] = useState("");
-  const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
+const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
+  const [voiceQaPage, setVoiceQaPage] = useState(1);
   const [showVoiceButton, setShowVoiceButton] = useState(true);
 const [myRank, setMyRank] = useState(0);
   const [showRankToggle, setShowRankToggle] = useState(false);
@@ -5533,11 +5534,11 @@ if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
                 등록하기
               </button>
             </div>
-            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+        <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {voiceQaList.length === 0 && (
                 <div className="text-center py-6 text-sm" style={{ color: INK_SOFT }}>등록된 음성 질문-답변이 없어요</div>
               )}
-              {voiceQaList.map((qa) => (
+              {voiceQaList.slice((voiceQaPage - 1) * 5, voiceQaPage * 5).map((qa) => (
                 <div key={qa.id} className="px-4 py-3 flex items-start justify-between gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap gap-1 mb-1.5">
@@ -5553,7 +5554,17 @@ if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
                 </div>
               ))}
             </div>
-
+            {voiceQaList.length > 5 && (
+              <div className="flex items-center justify-center gap-2 mb-8">
+                <button onClick={() => setVoiceQaPage((p) => Math.max(1, p - 1))} disabled={voiceQaPage === 1} className="rounded-full p-2" style={{ background: PAPER, opacity: voiceQaPage === 1 ? 0.4 : 1 }} aria-label="이전 페이지">
+                  <ChevronRight size={16} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+                </button>
+                <span className="text-xs font-bold" style={{ color: INK_SOFT }}>{voiceQaPage} / {Math.max(1, Math.ceil(voiceQaList.length / 5))}</span>
+                <button onClick={() => setVoiceQaPage((p) => Math.min(Math.ceil(voiceQaList.length / 5), p + 1))} disabled={voiceQaPage >= Math.ceil(voiceQaList.length / 5)} className="rounded-full p-2" style={{ background: PAPER, opacity: voiceQaPage >= Math.ceil(voiceQaList.length / 5) ? 0.4 : 1 }} aria-label="다음 페이지">
+                  <ChevronRight size={16} color={INK_SOFT} />
+                </button>
+              </div>
+            )}
                   
      <div id="admin-voice-commands" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎤 답변 못한 음성 질문 ({unrecognizedCommands.length})</div>
             <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
