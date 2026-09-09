@@ -4621,7 +4621,7 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
               </div>
                           <div className="flex flex-col items-center text-center pt-5 mb-4 relative w-full" style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
                                      {myRank > 0 && showRankToggle && (
-                  <div className="flex flex-col items-center justify-center rounded-2xl absolute" style={{ background: "rgba(255,255,255,0.2)", border: "1.5px solid rgba(255,255,255,0.5)", padding: "6px 14px", left: "50%", top: 20, transform: window.innerWidth >= 640 ? "translateX(-190px)" : "translateX(-100px)" }}>
+                  <div className="flex flex-col items-center justify-center rounded-2xl absolute" style={{ background: "rgba(255,255,255,0.2)", border: "1.5px solid rgba(255,255,255,0.5)", padding: "6px 14px", left: 20, top: 20 }}>
                     <span style={{ fontSize: 10, opacity: 0.85, fontWeight: 700 }}>이번 달</span>
                     <span style={{ fontSize: 20, fontWeight: 900, fontFamily: MONO_FONT }}>{myRank}위</span>
                   </div>
