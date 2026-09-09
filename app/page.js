@@ -4532,14 +4532,31 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 <ZoomIn size={13} /> 탭하여 크게 보기
               </div>
             </div>
-            <select value={mapCategory || ""} onChange={(e) => setMapCategory(e.target.value || null)} className="w-full rounded-xl px-4 py-3 mb-5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
+<select value={mapCategory || ""} onChange={(e) => setMapCategory(e.target.value || null)} className="w-full rounded-xl px-4 py-3 mb-3 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }}>
               <option value="">전체 카테고리</option>
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
+            <div className="flex items-center gap-2 mb-5 flex-wrap">
+              {[3, 5, 10].map((km) => (
+                <button key={km} onClick={() => {
+                  const newVal = distanceFilter === km ? null : km;
+                  setDistanceFilter(newVal);
+                  if (newVal && !myLocation) locateMe();
+                }} className="text-xs font-bold rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: distanceFilter === km ? TEAL : "#fff", color: distanceFilter === km ? "#fff" : TEAL }}>
+                  📍 {km}km 이내
+                </button>
+              ))}
+              {distanceFilter && (
+                <button onClick={() => setDistanceFilter(null)} className="text-xs font-bold flex items-center gap-1" style={{ color: INK_SOFT }}><X size={12} /> 해제</button>
+              )}
+            </div>
                     <div className="grid sm:grid-cols-2 gap-3 min-w-0">
-             {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).slice().sort((a, b) => {
+             {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).filter((p) => {
+                if (!distanceFilter || !myLocation) return true;
+                return p.lat && p.lng && calcDistanceKm(myLocation.lat, myLocation.lng, p.lat, p.lng) <= distanceFilter;
+              }).slice().sort((a, b) => {
                 if (!myLocation) return 0;
                 if (!a.lat || !a.lng) return 1;
                 if (!b.lat || !b.lng) return -1;
