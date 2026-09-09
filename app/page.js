@@ -1631,7 +1631,8 @@ const [myRank, setMyRank] = useState(0);
             .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
             .join("")
         );
-        const payload = JSON.parse(decodedPayload);
+ const payload = JSON.parse(decodedPayload);
+        alert("이메일: " + payload.email + " / 인증됨: " + payload.email_verified);
         const { data, error } = await supabase.functions.invoke("kakao-auth", {
           body: {
             kakaoId: payload.sub,
