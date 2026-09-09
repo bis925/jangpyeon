@@ -947,11 +947,48 @@ function processVoiceCommand(text) {
     } else if (text.includes("등록")) {
       setTab("register");
       showToast("등록 화면으로 이동할게요");
-    } else if (text.includes("공지")) {
+ } else if (text.includes("공지")) {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
     } else {
-      searchFaqByVoice(text);
+      tryFaqThenSearch(text);
+    }
+  }
+
+  function tryFaqThenSearch(text) {
+    if (faqs && faqs.length > 0) {
+      const stopwords = ["어떻게", "하나요", "해요", "인가요", "무엇", "뭐", "좀", "요", "은", "는", "이", "가", "을", "를", "에", "의", "고", "싶어요", "싶어", "해줘", "알려줘", "찾아줘", "검색해줘", "검색"];
+      function extractKeywords(str) {
+        let cleaned = str.replace(/[?!.,]/g, "");
+        stopwords.forEach((w) => { cleaned = cleaned.split(w).join(" "); });
+        return cleaned.split(/\s+/).filter((w) => w.length >= 2);
+      }
+      const inputKeywords = extractKeywords(text);
+      let bestMatch = null;
+      let bestScore = 0;
+      faqs.forEach((f) => {
+        const faqKeywords = extractKeywords(f.question);
+        const score = inputKeywords.filter((k) => faqKeywords.some((fk) => fk.includes(k) || k.includes(fk))).length;
+        if (score > bestScore) { bestScore = score; bestMatch = f; }
+      });
+      if (bestScore > 0) {
+        setVoiceFaqAnswer(bestMatch);
+        if (typeof window !== "undefined" && window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(`${bestMatch.question.replace(/[?!.]+$/, "")}. ${bestMatch.answer}`);
+          utterance.lang = "ko-KR";
+          window.speechSynthesis.speak(utterance);
+        }
+        return;
+      }
+    }
+    const keyword = text.replace(/찾아줘|검색해줘|검색|해줘|줘/g, "").trim();
+    if (keyword) {
+      setQuery(keyword);
+      setTab("home");
+      showToast(`"${keyword}" 검색결과를 보여드릴게요`);
+    } else {
+      showToast("무엇을 찾으시는지 말씀해주세요");
     }
   }
 
