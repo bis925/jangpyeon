@@ -3388,8 +3388,8 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
       {/* ===== VOICE COMMAND FLOATING BUTTON ===== */}
 {session && typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform() && (
-       <div className="fixed z-40 transition-all duration-300 flex flex-col items-center" style={{ bottom: 200, right: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
-    <div className="rounded-full px-2.5 py-1 mb-1.5 voice-hint-float" style={{ background: "rgba(0,0,0,0.6)", whiteSpace: "nowrap", marginRight: 8 }}>
+<div className="fixed z-40 transition-all duration-300 flex flex-col items-center" style={{ bottom: 100, left: "50%", opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "translateX(-50%) scale(1)" : "translateX(-50%) scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
+    <div className="rounded-full px-2.5 py-1 mb-1.5 voice-hint-float" style={{ background: "rgba(0,0,0,0.6)", whiteSpace: "nowrap" }}>
  <span className="text-white" style={{ fontSize: 10, fontWeight: 700 }}>눌러서 말해보세요</span>
           </div>
           <button onClick={startVoiceCommand} className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90 voice-btn-glow" style={{ width: 64, height: 64, background: isVoiceCommandListening ? CORAL : TEAL, border: "3px solid #FFC13B" }} aria-label="음성 명령">
