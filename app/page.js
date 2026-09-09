@@ -3388,7 +3388,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
       {/* ===== VOICE COMMAND FLOATING BUTTON ===== */}
 {session && typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform() && (
-<div className="fixed z-40 transition-all duration-300 flex flex-col items-center" style={{ bottom: 75, left: "50%", opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "translateX(-50%) scale(1)" : "translateX(-50%) scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
+<div className="fixed z-40 transition-all duration-300 flex flex-col items-center" style={{ bottom: 55, left: "50%", opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "translateX(-50%) scale(1)" : "translateX(-50%) scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
     <div className="rounded-full px-2.5 py-1 mb-1.5 voice-hint-float" style={{ background: "rgba(0,0,0,0.6)", whiteSpace: "nowrap" }}>
  <span className="text-white" style={{ fontSize: 10, fontWeight: 700 }}>눌러서 말해보세요</span>
           </div>
