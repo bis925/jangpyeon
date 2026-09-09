@@ -921,10 +921,11 @@ async function startVoiceSearch() {
       });
       if (!photo?.base64String) return;
       setIsOcrProcessing(true);
-      const { data, error } = await supabase.functions.invoke("ocr-place-name", {
+const { data, error } = await supabase.functions.invoke("ocr-place-name", {
         body: { image: photo.base64String },
       });
       if (error || !data?.text) {
+        alert("에러 상세: " + JSON.stringify(error) + " / data: " + JSON.stringify(data));
         showToast("글자를 인식하지 못했어요, 다시 시도해주세요");
         return;
       }
