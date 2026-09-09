@@ -938,7 +938,54 @@ const { data, error } = await supabase.functions.invoke("ocr-place-name", {
       setIsOcrProcessing(false);
     }
   }
-  
+
+    const [showVoiceHint, setShowVoiceHint] = useState(false);
+
+  async function startVoiceCommand() {
+    setShowVoiceHint(true);
+    try {
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
+        setIsVoiceCommandListening(true);
+        const result = await SpeechRecognition.start({ language: "ko-KR", popup: true });
+        setIsVoiceCommandListening(false);
+        setShowVoiceHint(false);
+        const text = (result?.matches?.[0] || "").trim();
+        processVoiceCommand(text);
+      } else {
+        showToast("음성 명령은 모바일 앱에서 사용 가능해요");
+        setShowVoiceHint(false);
+      }
+    } catch (err) {
+      setIsVoiceCommandListening(false);
+      setShowVoiceHint(false);
+      showToast("음성을 인식하지 못했어요, 다시 시도해주세요");
+    }
+  }
+
+  function processVoiceCommand(text) {
+    if (!text) { showToast("아무 말도 들리지 않았어요"); return; }
+    if (text.includes("로그아웃")) {
+      handleLogout();
+    } else if (text.includes("마이페이지") || text.includes("내 페이지")) {
+      setTab("my");
+      showToast("마이페이지로 이동할게요");
+    } else if (text.includes("홈")) {
+      setTab("home");
+      showToast("홈으로 이동할게요");
+    } else if (text.includes("지도")) {
+      setTab("map");
+      showToast("지도로 이동할게요");
+    } else if (text.includes("등록")) {
+      setTab("register");
+      showToast("등록 화면으로 이동할게요");
+    } else if (text.includes("공지")) {
+      setTab("notice");
+      showToast("공지사항으로 이동할게요");
+    } else {
+      showToast(`"${text}"는 알 수 없는 명령이에요`);
+    }
+  }
   
   function showToast(message) {
     setToast(message);
@@ -1125,7 +1172,17 @@ const viewingReviewsPlaceRef = useRef(null);
   useEffect(() => { viewingReviewsPlaceRef.current = viewingReviewsPlace; }, [viewingReviewsPlace]);
 const showFAQRef = useRef(false);
   
-  useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
+useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
+  useEffect(() => {
+    let scrollTimer;
+    function handleScroll() {
+      setShowVoiceButton(false);
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => setShowVoiceButton(true), 400);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", handleScroll); clearTimeout(scrollTimer); };
+  }, []);
   const showRankingPolicyRef = useRef(false);
   useEffect(() => { showRankingPolicyRef.current = showRankingPolicy; }, [showRankingPolicy]);
    const showFavoritesOnlyRef = useRef(false);
@@ -1613,7 +1670,9 @@ const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
 const [isOcrProcessing, setIsOcrProcessing] = useState(false);
 const [isNameInputManual, setIsNameInputManual] = useState(false);
 const [showFullEmail, setShowFullEmail] = useState(false);
-  const [noticePage, setNoticePage] = useState(1);
+const [noticePage, setNoticePage] = useState(1);
+  const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
+  const [showVoiceButton, setShowVoiceButton] = useState(true);
 const [myRank, setMyRank] = useState(0);
   const [showRankToggle, setShowRankToggle] = useState(false);
   async function signInWithKakao() {
@@ -3132,6 +3191,37 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
         </div>
         </div>
 </div>
+
+      {/* ===== VOICE COMMAND FLOATING BUTTON ===== */}
+      {session && (
+        <div className="fixed z-40 transition-all duration-300" style={{ bottom: 90, right: 16, opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "scale(1)" : "scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
+          <button onClick={startVoiceCommand} className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90" style={{ width: 52, height: 52, background: isVoiceCommandListening ? CORAL : TEAL }} aria-label="음성 명령">
+            {isVoiceCommandListening ? (
+              <div className="rounded-full animate-pulse" style={{ width: 14, height: 14, background: "#fff" }} />
+            ) : (
+              <Mic size={22} color="#fff" />
+            )}
+          </button>
+        </div>
+      )}
+
+      {showVoiceHint && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-8" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="rounded-2xl p-5 text-center" style={{ background: CARD, maxWidth: 300 }}>
+            <div className="rounded-full flex items-center justify-center mx-auto mb-3" style={{ width: 56, height: 56, background: isVoiceCommandListening ? CORAL : TEAL_TINT }}>
+              <Mic size={26} color={isVoiceCommandListening ? "#fff" : TEAL} />
+            </div>
+            <div className="font-extrabold text-sm mb-2" style={{ color: INK }}>{isVoiceCommandListening ? "듣고 있어요..." : "잠시만 기다려주세요"}</div>
+            <div className="text-xs leading-relaxed" style={{ color: INK_SOFT }}>
+              이렇게 말해보세요<br />
+              <b>"홈으로 가기" · "지도로 가기"</b><br />
+              <b>"등록하기" · "마이페이지로 가기"</b><br />
+              <b>"로그아웃"</b>
+            </div>
+          </div>
+        </div>
+      )}
+
              {/* ===== MOBILE TABS ===== */}
       <div className="flex sm:hidden justify-between px-2 py-2" style={{ background: "#fff", borderBottom: `1px solid ${LINE}` }}>
         {NAV.map((n) => {
