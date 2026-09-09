@@ -953,7 +953,9 @@ function processVoiceCommand(text) {
     } else if (text.includes("공지")) {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
-} else if (text.includes("검색해줘") || text.includes("찾아줘") || (text.length <= 6 && !text.includes(" "))) {
+} else if (voiceQaList && voiceQaList.length > 0 && voiceQaList.some((qa) => qa.keywords.some((k) => text.includes(k)))) {
+      searchFaqByVoice(text);
+    } else if (text.includes("검색해줘") || text.includes("찾아줘") || (text.length <= 6 && !text.includes(" "))) {
       const keyword = text.replace(/찾아줘|검색해줘|검색|해줘|줘/g, "").trim();
       if (keyword) {
         setQuery(keyword);
@@ -1014,13 +1016,15 @@ function searchFaqByVoice(text) {
     const cleanedText = cleanForVoiceQa(text);
     if (voiceQaList && voiceQaList.length > 0) {
       const qaMatch = voiceQaList.find((qa) => qa.keywords.some((k) => text.includes(k) || cleanedText.includes(k)));
-      if (qaMatch) {
+ if (qaMatch) {
         setVoiceFaqAnswer({ question: text, answer: qaMatch.answer });
         if (typeof window !== "undefined" && window.speechSynthesis) {
           window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(qaMatch.answer);
-          utterance.lang = "ko-KR";
-          window.speechSynthesis.speak(utterance);
+          setTimeout(() => {
+            const utterance = new SpeechSynthesisUtterance(qaMatch.answer);
+            utterance.lang = "ko-KR";
+            window.speechSynthesis.speak(utterance);
+          }, 400);
         }
         return;
       }
@@ -1048,13 +1052,15 @@ const stopwords = ["어떻게", "하나요", "해요", "인가요", "무엇", "�
       if (score > bestScore) { bestScore = score; bestMatch = f; }
     });
 const matched = bestScore > 0 ? bestMatch : null;
-    if (matched) {
+ if (matched) {
       setVoiceFaqAnswer(matched);
       if (typeof window !== "undefined" && window.speechSynthesis) {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(`${matched.question.replace(/[?!.]+$/, "")}. ${matched.answer}`);
-        utterance.lang = "ko-KR";
-        window.speechSynthesis.speak(utterance);
+        setTimeout(() => {
+          const utterance = new SpeechSynthesisUtterance(`${matched.question.replace(/[?!.]+$/, "")}. ${matched.answer}`);
+          utterance.lang = "ko-KR";
+          window.speechSynthesis.speak(utterance);
+        }, 400);
       }
 } else {
       setVoiceFaqAnswer({ question: text, answer: "__NOT_FOUND__" });
