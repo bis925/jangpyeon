@@ -4470,7 +4470,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </button>
                   {showDistancePicker && (
                     <div className="absolute top-full right-0 mt-1.5 rounded-xl overflow-hidden z-10" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                 {[3, 5, 10].map((km) => (
+     {[3, 5, 10].map((km) => (
                         <button key={km} onClick={() => {
                           setDistanceFilter(distanceFilter === km ? null : km);
                           setShowDistancePicker(false);
@@ -4479,6 +4479,9 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                           {km}km 이내
                         </button>
                       ))}
+                      <button onClick={() => { setDistanceFilter(null); setShowDistancePicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: !distanceFilter ? TEAL : INK, background: !distanceFilter ? TEAL_TINT : "transparent", borderTop: `1px solid ${LINE}` }}>
+                        전체보기
+                      </button>
                     </div>
                   )}
                 </div>
