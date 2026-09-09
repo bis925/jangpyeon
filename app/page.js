@@ -4539,7 +4539,12 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               ))}
             </select>
                     <div className="grid sm:grid-cols-2 gap-3 min-w-0">
-              {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).map((p) => (
+             {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).slice().sort((a, b) => {
+                if (!myLocation) return 0;
+                if (!a.lat || !a.lng) return 1;
+                if (!b.lat || !b.lng) return -1;
+                return calcDistanceKm(myLocation.lat, myLocation.lng, a.lat, a.lng) - calcDistanceKm(myLocation.lat, myLocation.lng, b.lat, b.lng);
+              }).map((p) => (
                 <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer min-w-0">
               <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} onOpenMenu={setPlaceContextMenu} />
                 </div>
