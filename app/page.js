@@ -947,7 +947,10 @@ function processVoiceCommand(text) {
     } else if (text.includes("등록")) {
       setTab("register");
       showToast("등록 화면으로 이동할게요");
-} else if (text.includes("공지")) {
+} else if ((text.includes("지워줘") || text.includes("지워") || text.includes("초기화")) && !text.includes("검색해줘")) {
+      setQuery("");
+      showToast("검색어를 지웠어요");
+    } else if (text.includes("공지")) {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
 } else if (text.includes("검색해줘") || text.includes("찾아줘") || (text.length <= 6 && !text.includes(" "))) {
