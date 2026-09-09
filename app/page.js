@@ -1006,6 +1006,19 @@ function processVoiceCommand(text) {
     }
   }
 
+async function speakVoiceAnswer(text) {
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
+      await TextToSpeech.speak({ text, lang: "ko-KR", rate: 1.0, pitch: 1.0, volume: 1.0, category: "ambient" });
+    } else if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "ko-KR";
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  
 function searchFaqByVoice(text) {
     const stopwords0 = ["어떻게", "하나요", "해요", "인가요", "무엇", "뭐", "좀", "요", "은", "는", "이", "가", "을", "를", "에", "의", "고"];
     function cleanForVoiceQa(str) {
@@ -1016,18 +1029,9 @@ function searchFaqByVoice(text) {
     const cleanedText = cleanForVoiceQa(text);
     if (voiceQaList && voiceQaList.length > 0) {
       const qaMatch = voiceQaList.find((qa) => qa.keywords.some((k) => text.includes(k) || cleanedText.includes(k)));
- if (qaMatch) {
+if (qaMatch) {
         setVoiceFaqAnswer({ question: text, answer: qaMatch.answer });
-        if (typeof window !== "undefined" && window.speechSynthesis) {
-       window.speechSynthesis.cancel();
-          setTimeout(() => {
-            const utterance = new SpeechSynthesisUtterance(qaMatch.answer);
-            utterance.lang = "ko-KR";
-            utterance.volume = 1;
-            utterance.rate = 1;
-            window.speechSynthesis.speak(utterance);
-          }, 1000);
-        }
+        speakVoiceAnswer(qaMatch.answer);
         return;
       }
     }
@@ -1054,16 +1058,9 @@ const stopwords = ["어떻게", "하나요", "해요", "인가요", "무엇", "�
       if (score > bestScore) { bestScore = score; bestMatch = f; }
     });
 const matched = bestScore > 0 ? bestMatch : null;
- if (matched) {
+if (matched) {
       setVoiceFaqAnswer(matched);
-      if (typeof window !== "undefined" && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        setTimeout(() => {
-          const utterance = new SpeechSynthesisUtterance(`${matched.question.replace(/[?!.]+$/, "")}. ${matched.answer}`);
-          utterance.lang = "ko-KR";
-          window.speechSynthesis.speak(utterance);
-        }, 400);
-      }
+      speakVoiceAnswer(`${matched.question.replace(/[?!.]+$/, "")}. ${matched.answer}`);
 } else {
       setVoiceFaqAnswer({ question: text, answer: "__NOT_FOUND__" });
 if (session?.user?.id) {
