@@ -1007,7 +1007,21 @@ function processVoiceCommand(text) {
       showToast(`"${text}"는 알 수 없는 명령이에요`);
       return;
     }
-    const matched = faqs.find((f) => text.includes(f.question.replace(/[?!.]+$/, "")) || f.question.includes(text));
+const stopwords = ["어떻게", "하나요", "해요", "인가요", "무엇", "뭐", "좀", "요", "은", "는", "이", "가", "을", "를", "에", "의", "고", "싶어요", "싶어", "해줘", "알려줘"];
+    function extractKeywords(str) {
+      let cleaned = str.replace(/[?!.,]/g, "");
+      stopwords.forEach((w) => { cleaned = cleaned.split(w).join(" "); });
+      return cleaned.split(/\s+/).filter((w) => w.length >= 2);
+    }
+    const inputKeywords = extractKeywords(text);
+    let bestMatch = null;
+    let bestScore = 0;
+    faqs.forEach((f) => {
+      const faqKeywords = extractKeywords(f.question);
+      const score = inputKeywords.filter((k) => faqKeywords.some((fk) => fk.includes(k) || k.includes(fk))).length;
+      if (score > bestScore) { bestScore = score; bestMatch = f; }
+    });
+    const matched = bestScore > 0 ? bestMatch : null;
     if (matched) {
       setVoiceFaqAnswer(matched);
       if (typeof window !== "undefined" && window.speechSynthesis) {
