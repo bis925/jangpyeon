@@ -1001,7 +1001,31 @@ function processVoiceCommand(text) {
     }
   }
 
-  function searchFaqByVoice(text) {
+function searchFaqByVoice(text) {
+    const stopwords0 = ["어떻게", "하나요", "해요", "인가요", "무엇", "뭐", "좀", "요", "은", "는", "이", "가", "을", "를", "에", "의", "고"];
+    function cleanForVoiceQa(str) {
+      let c = str;
+      stopwords0.forEach((w) => { c = c.split(w).join(""); });
+      return c;
+    }
+    const cleanedText = cleanForVoiceQa(text);
+    if (voiceQaList && voiceQaList.length > 0) {
+      const qaMatch = voiceQaList.find((qa) => qa.keywords.some((k) => text.includes(k) || cleanedText.includes(k)));
+      if (qaMatch) {
+        setVoiceFaqAnswer({ question: text, answer: qaMatch.answer });
+        if (typeof window !== "undefined" && window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(qaMatch.answer);
+          utterance.lang = "ko-KR";
+          window.speechSynthesis.speak(utterance);
+        }
+        return;
+      }
+    }
+    searchFaqByVoiceOriginal(text);
+  }
+
+  function searchFaqByVoiceOriginal(text) {
     if (!faqs || faqs.length === 0) {
       showToast(`"${text}"는 알 수 없는 명령이에요`);
       return;
@@ -1069,6 +1093,29 @@ if (session?.user?.id) {
     setMaintenanceUploading(false);
     showToast("점검 안내 이미지가 변경됐어요!");
   }
+  
+  async function fetchVoiceQaList() {
+    const { data } = await supabase.from("voice_qa").select("*").order("created_at", { ascending: false });
+    setVoiceQaList(data || []);
+  }
+
+  async function addVoiceQa() {
+    if (!newVoiceQaKeywords.trim() || !newVoiceQaAnswer.trim()) { showToast("키워드와 답변을 모두 입력해주세요"); return; }
+    const keywords = newVoiceQaKeywords.split(",").map((k) => k.trim()).filter((k) => k);
+    const { error } = await supabase.from("voice_qa").insert({ keywords, answer: newVoiceQaAnswer.trim() });
+    if (error) { showToast("등록 실패: " + error.message); return; }
+    setNewVoiceQaKeywords("");
+    setNewVoiceQaAnswer("");
+    fetchVoiceQaList();
+    showToast("음성 질문-답변이 등록됐어요!");
+  }
+
+  async function deleteVoiceQa(id) {
+    if (!window.confirm("삭제하시겠어요?")) return;
+    await supabase.from("voice_qa").delete().eq("id", id);
+    fetchVoiceQaList();
+  }
+  
   
   function showToast(message) {
     setToast(message);
@@ -1759,7 +1806,10 @@ const [isOcrProcessing, setIsOcrProcessing] = useState(false);
 const [isNameInputManual, setIsNameInputManual] = useState(false);
 const [showFullEmail, setShowFullEmail] = useState(false);
 const [noticePage, setNoticePage] = useState(1);
-  const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
+const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
+  const [voiceQaList, setVoiceQaList] = useState([]);
+  const [newVoiceQaKeywords, setNewVoiceQaKeywords] = useState("");
+  const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
   const [showVoiceButton, setShowVoiceButton] = useState(true);
 const [myRank, setMyRank] = useState(0);
   const [showRankToggle, setShowRankToggle] = useState(false);
@@ -2229,8 +2279,9 @@ useEffect(() => {
       fetchReports();
       fetchAllCoupons();
       fetchSplashImage();
-      fetchUnrecognizedVoiceCommands();
+fetchUnrecognizedVoiceCommands();
     }
+    fetchVoiceQaList();
   }, [session, profile]);
 
   async function fetchRankingCouponResponses(monthStr) {
@@ -5457,6 +5508,53 @@ if (maintenanceMode && session?.user?.email !== ADMIN_EMAIL) {
                 모든 사용자에게 발송
               </button>
             </div>
+
+<div id="admin-voice-qa" className="font-extrabold text-sm mb-3" style={{ color: INK }}>💬 음성 질문-답변 등록</div>
+            <div className="rounded-2xl p-4 mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs mb-3" style={{ color: INK_SOFT }}>여러 표현을 쉼표(,)로 구분해서 등록하면, 그중 하나라도 말하면 답변이 나와요</div>
+              <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>트리거 키워드 (쉼표로 구분)</label>
+              <input
+                value={newVoiceQaKeywords}
+                onChange={(e) => setNewVoiceQaKeywords(e.target.value)}
+                placeholder="예) 탈퇴, 회원 나가기, 계정 지우기"
+                className="w-full rounded-xl px-3 py-2.5 mb-3 text-sm outline-none"
+                style={{ border: `1.4px solid ${LINE}`, color: INK }}
+              />
+              <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>답변</label>
+              <textarea
+                value={newVoiceQaAnswer}
+                onChange={(e) => setNewVoiceQaAnswer(e.target.value)}
+                placeholder="예) 마이페이지 하단에서 회원 탈퇴를 하실 수 있어요"
+                rows={3}
+                className="w-full rounded-xl px-3 py-2.5 mb-3 text-sm outline-none resize-none"
+                style={{ border: `1.4px solid ${LINE}`, color: INK }}
+              />
+              <button onClick={addVoiceQa} className="w-full rounded-xl py-2.5 text-sm font-bold text-white" style={{ background: TEAL }}>
+                등록하기
+              </button>
+            </div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {voiceQaList.length === 0 && (
+                <div className="text-center py-6 text-sm" style={{ color: INK_SOFT }}>등록된 음성 질문-답변이 없어요</div>
+              )}
+              {voiceQaList.map((qa) => (
+                <div key={qa.id} className="px-4 py-3 flex items-start justify-between gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap gap-1 mb-1.5">
+                      {qa.keywords.map((k, i) => (
+                        <span key={i} className="text-[10px] font-bold rounded-full px-2 py-0.5" style={{ background: TEAL_TINT, color: TEAL_DARK }}>{k}</span>
+                      ))}
+                    </div>
+                    <div className="text-xs" style={{ color: INK_SOFT }}>{qa.answer}</div>
+                  </div>
+                  <button onClick={() => deleteVoiceQa(qa.id)} className="flex-shrink-0" aria-label="삭제">
+                    <X size={16} color={INK_SOFT} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+                  
      <div id="admin-voice-commands" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎤 답변 못한 음성 질문 ({unrecognizedCommands.length})</div>
             <div className="rounded-2xl overflow-hidden mb-3" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               {unrecognizedCommands.length === 0 && (
