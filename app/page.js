@@ -4,7 +4,8 @@ import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css";
 import { supabase } from "../lib/supabaseClient";
 
-const ReactQuill = dynamic(() => import {
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
+import {
   Search, MapPin, Plus, User, Check, ChevronRight,
     Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle, Palette, Mic,
 } from "lucide-react";
