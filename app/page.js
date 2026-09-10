@@ -4886,7 +4886,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 {showAccessPicker && (
                   <div className="absolute top-full left-0 mt-1.5 rounded-xl overflow-hidden z-10" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
                     <button onClick={() => { setMapAccessFilter(null); setShowAccessPicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: !mapAccessFilter ? TEAL : INK, background: !mapAccessFilter ? TEAL_TINT : "transparent" }}>전체보기</button>
-                    {[{ key: "wheelchair", label: "휠체어 출입" }, { key: "stroller", label: "유모차 가능" }, { key: "toilet", label: "장애인 화장실" }].map((opt) => (
+               {[{ key: "wheelchair", label: "휠체어 출입" }, { key: "stroller", label: "유모차 가능" }, { key: "toilet", label: "장애인 화장실" }, { key: "parking", label: "장애인 주차" }].map((opt) => (
                       <button key={opt.key} onClick={() => { setMapAccessFilter(mapAccessFilter === opt.key ? null : opt.key); setShowAccessPicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: mapAccessFilter === opt.key ? TEAL : INK, background: mapAccessFilter === opt.key ? TEAL_TINT : "transparent" }}>{opt.label}</button>
                     ))}
                   </div>
