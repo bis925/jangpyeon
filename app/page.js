@@ -120,7 +120,7 @@ const CATEGORY_MARKERS = {
   카페: { emoji: "☕", color: "#B08A5A" },
   문화시설: { emoji: "🎭", color: "#9B59B6" },
   쇼핑: { emoji: "🛍️", color: "#E8A800" },
-  병원: { emoji: "🏥", color: "#E74C3C" },
+  병원: { emoji: "🏥", color: "#00A896" },
 };
 const WEEKDAYS = [
   { key: "mon", label: "월" }, { key: "tue", label: "화" }, { key: "wed", label: "수" },
