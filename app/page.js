@@ -2072,6 +2072,7 @@ const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
 const [voiceQaPage, setVoiceQaPage] = useState(1);
 const [openFilterActive, setOpenFilterActive] = useState(false);
 const [showShopExplainCard, setShowShopExplainCard] = useState(false);
+  const [mapAccessFilter, setMapAccessFilter] = useState(null);
 const [viewingDetailPlace, setViewingDetailPlace] = useState(null);
   const viewingDetailPlaceRef = useRef(null);
   useEffect(() => { viewingDetailPlaceRef.current = viewingDetailPlace; }, [viewingDetailPlace]);
@@ -4860,7 +4861,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               ))}
             </select>
             <div className="flex items-center gap-2 mb-5 flex-wrap">
-        <button onClick={() => setDistanceFilter(null)} className="text-xs font-bold rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: !distanceFilter ? TEAL : "#fff", color: !distanceFilter ? "#fff" : TEAL }}>
+<button onClick={() => setDistanceFilter(null)} className="text-xs font-bold rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: !distanceFilter ? TEAL : "#fff", color: !distanceFilter ? "#fff" : TEAL }}>
                 전체보기
               </button>
               {[3, 5, 10].map((km) => (
@@ -4873,10 +4874,32 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 </button>
               ))}
             </div>
+            <div className="flex items-center gap-2 mb-5 flex-wrap">
+              {[
+                { key: "wheelchair", label: "휠체어 출입", icon: Accessibility },
+                { key: "stroller", label: "유모차 가능", icon: Baby },
+                { key: "toilet", label: "장애인 화장실", icon: DoorOpen },
+              ].map((opt) => {
+                const Icon = opt.icon;
+                const active = mapAccessFilter === opt.key;
+                return (
+                  <button key={opt.key} onClick={() => setMapAccessFilter(active ? null : opt.key)} className="flex items-center gap-1.5 text-xs font-bold rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: active ? TEAL : "#fff", color: active ? "#fff" : TEAL }}>
+                    <Icon size={13} />
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
                     <div className="grid sm:grid-cols-2 gap-3 min-w-0">
-             {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).filter((p) => {
+{(mapCategory ? places.filter((p) => p.category === mapCategory) : places).filter((p) => {
                 if (!distanceFilter || !myLocation) return true;
                 return p.lat && p.lng && calcDistanceKm(myLocation.lat, myLocation.lng, p.lat, p.lng) <= distanceFilter;
+              }).filter((p) => {
+                if (!mapAccessFilter) return true;
+                if (mapAccessFilter === "wheelchair") return p.entrance_step === "ramp" || p.entrance_step === "none";
+                if (mapAccessFilter === "stroller") return p.has_stroller_access;
+                if (mapAccessFilter === "toilet") return p.accessible_toilet === "yes";
+                return true;
               }).slice().sort((a, b) => {
                 if (!myLocation) return 0;
                 if (!a.lat || !a.lng) return 1;
