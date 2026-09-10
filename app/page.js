@@ -603,23 +603,18 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast, kak
           </div>
         </div>
 
-        <div className="text-center mb-4">
-          <div className="font-extrabold text-lg" style={{ color: INK, fontFamily: DISPLAY_FONT }}>이런 곳을 확인할 수 있어요</div>
-        </div>
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {CATEGORIES.map((c) => (
-            <span key={c} className="rounded-full px-4 py-2 text-xs font-bold" style={{ background: TEAL_TINT, color: TEAL_DARK }}>{c}</span>
-          ))}
-        </div>
-
-        <div className="text-center">
+ <div className="text-center">
           <p className="text-xs" style={{ color: '#B8B1A0' }}>제작 · 코드람쥐</p>
+          <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: '#C9C2B2' }}>
+            상호: 코드람쥐 · 대표: 조은찬 · 사업자등록번호: 303-18-93738<br />
+            사업장 소재지: 경기도 평택시 산단로16번길 26, A동 14층 1408호<br />
+            (모곡동, 엠에스원타워 지식산업센터)
+          </p>
         </div>
       </div>
     </div>
   );
 }
-
 
 /* ===================== 온보딩 ===================== */
 const ONBOARDING_SLIDES = [
