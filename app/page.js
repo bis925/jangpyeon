@@ -502,15 +502,7 @@ return (
           <div className="font-extrabold truncate" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
         </div>
       </div>
-<div className="flex items-center justify-between gap-2 mb-2">
-        <div className="text-xs truncate" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
-        {place.created_at && (() => {
-          const recency = getRecencyInfo(place.created_at, place.last_confirmed_at);
-          return (
-            <span className="text-[10px] font-bold flex-shrink-0" style={{ color: recency.color }}>{recency.label}</span>
-          );
-        })()}
-      </div>
+<div className="text-xs mb-2 truncate" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
