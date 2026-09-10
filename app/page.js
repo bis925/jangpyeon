@@ -949,7 +949,7 @@ function processVoiceCommand(text) {
 } else if (text.includes("안내문") || text.includes("안내 문") || text.includes("매장 안내") || text.includes("설명 카드")) {
       setShowShopExplainCard(true);
       showToast("안내문을 보여드릴게요");
-} else if (text.includes("앱 종료") || text.includes("어플 종료") || text.includes("어플 꺼줘") || text.includes("앱 꺼줘") || text.includes("종료해줘")) {
+} else if (text.replace(/\s/g, "").includes("앱종료") || text.replace(/\s/g, "").includes("어플종료") || text.replace(/\s/g, "").includes("어플꺼") || text.replace(/\s/g, "").includes("앱꺼") || text.replace(/\s/g, "").includes("종료해") || text.replace(/\s/g, "").includes("웹꺼")) {
       showToast("앱을 종료할게요");
       setTimeout(async () => {
         if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
