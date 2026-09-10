@@ -1422,7 +1422,7 @@ function getWeatherEffect(weather) {
     return "날씨 정보를 확인했어요";
   }
 
-  async function announceTodayWeather() {
+async function announceTodayWeather() {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       showToast("위치 정보를 사용할 수 없어요");
       return;
@@ -1436,7 +1436,19 @@ function getWeatherEffect(weather) {
           if (data.current) {
             const desc = getWeatherDescription(data.current.weather_code);
             const temp = Math.round(data.current.temperature_2m);
-            const text = `오늘 날씨는 ${temp}도, ${desc}`;
+            let locationText = "";
+            if (typeof window !== "undefined" && window.kakao && window.kakao.maps && window.kakao.maps.services) {
+              const geocoder = new window.kakao.maps.services.Geocoder();
+              await new Promise((resolve) => {
+                geocoder.coord2RegionCode(longitude, latitude, (result, status) => {
+                  if (status === window.kakao.maps.services.Status.OK && result[0]) {
+                    locationText = result[0].region_2depth_name + " " + result[0].region_3depth_name + ", ";
+                  }
+                  resolve();
+                });
+              });
+            }
+            const text = `${locationText}오늘 날씨는 ${temp}도, ${desc}`;
             setVoiceFaqAnswer({ question: "오늘 날씨", answer: text });
             speakVoiceAnswer(text);
           }
