@@ -1380,6 +1380,33 @@ function handleMicDragEnd() {
     setShowMicSavedBadge(true);
     setTimeout(() => setShowMicSavedBadge(false), 1500);
   }
+
+    async function fetchMyPageWeather() {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,is_day`);
+          const data = await res.json();
+          if (data.current) {
+            setMyPageWeather({ code: data.current.weather_code, isDay: data.current.is_day === 1 });
+          }
+        } catch (e) {}
+      },
+      () => {},
+      { enableHighAccuracy: false, timeout: 10000 }
+    );
+  }
+
+  function getWeatherEffect(weather) {
+    if (!weather) return null;
+    const { code, isDay } = weather;
+    if ([51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(code)) return "rain";
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return "snow";
+    if ([1, 2, 3, 45, 48].includes(code)) return isDay ? "cloudy_day" : "cloudy_night";
+    return isDay ? "sunny" : "clear_night";
+  }
   
   function showToast(message) {
     setToast(message);
@@ -2092,7 +2119,8 @@ const [showShopExplainCard, setShowShopExplainCard] = useState(false);
 const [mapAccessFilter, setMapAccessFilter] = useState(null);
 const [showAccessPicker, setShowAccessPicker] = useState(false);
 const [faqPage, setFaqPage] = useState(1);
-const [showElevatorHelp, setShowElevatorHelp] = useState(false);
+  const [showElevatorHelp, setShowElevatorHelp] = useState(false);
+  const [myPageWeather, setMyPageWeather] = useState(null);
   const showElevatorHelpRef = useRef(false);
   useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
 const [showTurningHelp, setShowTurningHelp] = useState(false);
@@ -2499,6 +2527,10 @@ useEffect(() => {
   }, []);
 
 useEffect(() => {
+    if (session && tab === "my" && !myPageWeather) fetchMyPageWeather();
+  }, [session, tab]);
+
+  useEffect(() => {
     if (session && tab === "home" && !myLocation) locateMe();
   }, [session, tab]);
 
@@ -5513,7 +5545,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
         {/* ===================== 마이페이지 ===================== */}
         {tab === "my" && (
           <div className="max-w-2xl mx-auto">
-                  <div
+<div
               onClick={() => { if (showThemePicker) setShowThemePicker(false); }}
               className="rounded-2xl p-6 mb-5 text-white relative overflow-hidden"
               style={{
@@ -5522,6 +5554,48 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   : CARD_THEMES[profile?.card_theme || "default"].gradient,
               }}
             >
+              {(() => {
+                const effect = getWeatherEffect(myPageWeather);
+                if (!effect) return null;
+                return (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+                    {effect === "sunny" && (
+                      <div className="absolute rounded-full" style={{ top: 14, right: 18, width: 36, height: 36, background: "radial-gradient(circle, #FFE99A, #FFC13B)", boxShadow: "0 0 20px 8px rgba(255,193,59,0.5)" }} />
+                    )}
+                    {effect === "clear_night" && (
+                      <>
+                        <div className="absolute rounded-full" style={{ top: 16, right: 22, width: 26, height: 26, background: "#F4F1D3", boxShadow: "0 0 14px 4px rgba(244,241,211,0.5)" }} />
+                        {[...Array(6)].map((_, i) => (
+                          <div key={i} className="absolute rounded-full weather-twinkle" style={{ top: `${10 + (i * 11) % 40}%`, left: `${(i * 37) % 90}%`, width: 3, height: 3, background: "#fff", animationDelay: `${i * 0.4}s` }} />
+                        ))}
+                      </>
+                    )}
+                    {(effect === "cloudy_day" || effect === "cloudy_night") && (
+                      <>
+                        {effect === "cloudy_night" && <div className="absolute rounded-full" style={{ top: 18, right: 30, width: 20, height: 20, background: "#F4F1D3", opacity: 0.7 }} />}
+                        <div className="absolute" style={{ top: 14, right: 10, width: 60, height: 26, background: "rgba(255,255,255,0.55)", borderRadius: 999 }} />
+                        <div className="absolute" style={{ top: 28, right: 40, width: 44, height: 20, background: "rgba(255,255,255,0.4)", borderRadius: 999 }} />
+                      </>
+                    )}
+                    {effect === "rain" && (
+                      <>
+                        <div className="absolute" style={{ top: 10, right: 20, width: 56, height: 22, background: "rgba(255,255,255,0.35)", borderRadius: 999 }} />
+                        {[...Array(10)].map((_, i) => (
+                          <div key={i} className="absolute weather-rain" style={{ top: -10, left: `${(i * 10) % 100}%`, width: 2, height: 14, background: "rgba(255,255,255,0.6)", borderRadius: 2, animationDelay: `${(i % 5) * 0.25}s`, animationDuration: `${0.8 + (i % 3) * 0.2}s` }} />
+                        ))}
+                      </>
+                    )}
+                    {effect === "snow" && (
+                      <>
+                        <div className="absolute" style={{ top: 10, right: 20, width: 56, height: 22, background: "rgba(255,255,255,0.35)", borderRadius: 999 }} />
+                        {[...Array(10)].map((_, i) => (
+                          <div key={i} className="absolute rounded-full weather-snow" style={{ top: -10, left: `${(i * 10) % 100}%`, width: 5, height: 5, background: "#fff", animationDelay: `${(i % 5) * 0.4}s`, animationDuration: `${2.5 + (i % 3) * 0.5}s` }} />
+                        ))}
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
                               <div onClick={(e) => e.stopPropagation()} className="absolute top-4 right-4 flex items-center gap-1.5 z-10" style={{ maxWidth: showThemePicker ? "calc(100% - 32px)" : "70%", overflowX: showThemePicker ? "auto" : "visible", background: showThemePicker ? "rgba(0,0,0,0.25)" : "transparent", borderRadius: 999, padding: showThemePicker ? "4px 6px" : 0 }}>
                                <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
