@@ -528,9 +528,14 @@ return (
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
+      <button onClick={(e) => { e.stopPropagation(); onHelpful(place.id); }} className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ background: CORAL_TINT, color: CORAL }}>
+        <Heart size={14} fill={CORAL} />
+        도움이 됐어요 {place.helpful_count}
+      </button>
 </div>
   );
 }
+
 function TierBar({ points }) {
   const pct = Math.min(100, (points / 5000) * 100);
   return (
