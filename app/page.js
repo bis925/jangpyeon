@@ -2161,7 +2161,8 @@ const [mapAccessFilter, setMapAccessFilter] = useState(null);
 const [showAccessPicker, setShowAccessPicker] = useState(false);
 const [faqPage, setFaqPage] = useState(1);
   const [showElevatorHelp, setShowElevatorHelp] = useState(false);
-  const [myPageWeather, setMyPageWeather] = useState(null);
+const [myPageWeather, setMyPageWeather] = useState(null);
+  const [weatherEffectOn, setWeatherEffectOn] = useState(true);
   const showElevatorHelpRef = useRef(false);
   useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
 const [showTurningHelp, setShowTurningHelp] = useState(false);
@@ -2561,10 +2562,12 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("mic_position_percent");
     if (saved) setMicPositionPercent(parseFloat(saved));
+    const savedWeather = localStorage.getItem("weather_effect_on");
+    if (savedWeather === "false") setWeatherEffectOn(false);
   }, []);
 
 useEffect(() => {
@@ -5595,8 +5598,8 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   : CARD_THEMES[profile?.card_theme || "default"].gradient,
               }}
             >
-              {(() => {
-                const effect = getWeatherEffect(myPageWeather);
+        {(() => {
+                const effect = weatherEffectOn ? getWeatherEffect(myPageWeather) : null;
                 if (!effect) return null;
                 return (
                   <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
@@ -5638,13 +5641,27 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 );
               })()}
                               <div onClick={(e) => e.stopPropagation()} className="absolute top-4 right-4 flex items-center gap-1.5 z-10" style={{ maxWidth: showThemePicker ? "calc(100% - 32px)" : "70%", overflowX: showThemePicker ? "auto" : "visible", background: showThemePicker ? "rgba(0,0,0,0.25)" : "transparent", borderRadius: 999, padding: showThemePicker ? "4px 6px" : 0 }}>
-                               <button
+                  <button
+                  onClick={() => {
+                    const newVal = !weatherEffectOn;
+                    setWeatherEffectOn(newVal);
+                    if (typeof window !== "undefined") localStorage.setItem("weather_effect_on", newVal.toString());
+                    showToast(newVal ? "날씨 효과를 켰어요" : "날씨 효과를 껐어요");
+                  }}
+                  className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                  style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
+                  aria-label="날씨 효과 켜고 끄기"
+                >
+                  {weatherEffectOn ? <Sparkles size={20} color="#fff" /> : <X size={20} color="#fff" />}
+                </button>
+                <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
                   style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
                   aria-label="배경 꾸미기"
                 >
                   <Palette size={20} color="#fff" />
+                </button>
                 </button>
                      {showThemePicker && (
                   <>
