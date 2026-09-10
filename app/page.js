@@ -277,6 +277,7 @@ function getOverallAccessSummary(place) {
 }
 
 function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onGoToMap }) {
+  const [showSummaryHelp, setShowSummaryHelp] = useState(false);
   if (!place) return null;
   const openStatus = isOpenNow(place.business_hours, holidays);
   const summary = getOverallAccessSummary(place);
@@ -307,9 +308,10 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
                   <span style={{ color: "#888", fontSize: 11, fontWeight: 800 }}>영업종료</span>
                 </div>
               )}
-              <div className="rounded-full px-2.5 py-1" style={{ background: summary.bg }}>
+           <button onClick={() => setShowSummaryHelp(true)} className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: summary.bg }}>
                 <span style={{ color: summary.color, fontSize: 11, fontWeight: 800 }}>{summary.text}</span>
-              </div>
+                <span className="flex items-center justify-center rounded-full text-[9px] font-extrabold flex-shrink-0" style={{ width: 14, height: 14, background: summary.color, color: "#fff" }}>?</span>
+              </button>
             </div>
 
             <div className="font-extrabold text-lg mb-1" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
@@ -384,12 +386,28 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
           <button onClick={() => onShare(place)} className="flex items-center justify-center rounded-full p-3" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
             <MessageCircle size={18} color="#3C1E1E" fill="#3C1E1E" />
           </button>
-       <button onClick={() => { onGoToMap(place); onClose(); }} className="flex-1 flex items-center justify-center gap-1.5 rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
+  <button onClick={() => { onGoToMap(place); onClose(); }} className="flex-1 flex items-center justify-center gap-1.5 rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
             <MapPin size={16} />
             지도로 보기
           </button>
         </div>
       </div>
+      {showSummaryHelp && (
+        <div onClick={(e) => { e.stopPropagation(); setShowSummaryHelp(false); }} className="fixed inset-0 z-[60] flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-5" style={{ background: CARD }}>
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>이 표시는 무슨 뜻인가요?</div>
+            <div className="flex flex-col gap-2.5 text-xs" style={{ color: INK_SOFT, lineHeight: 1.6 }}>
+              <div><b style={{ color: "#1F7A4D" }}>휠체어 진입 가능</b> — 경사로가 있고, 화장실도 문제없이 이용할 수 있어요</div>
+              <div><b style={{ color: "#B4620F" }}>조건부 가능</b> — 진입은 가능하지만, 일부 시설이 불편할 수 있어요</div>
+              <div><b style={{ color: "#C0392B" }}>휠체어 진입 불가</b> — 계단만 있어 진입이 어려워요</div>
+              <div><b style={{ color: "#8A6D1F" }}>확인 필요</b> — 아직 정보가 등록되지 않았어요. 방문하신 적 있다면 정보를 등록해주세요!</div>
+            </div>
+            <button onClick={() => setShowSummaryHelp(false)} className="w-full rounded-full py-2.5 mt-4 text-sm font-bold text-white" style={{ background: TEAL }}>
+              확인했어요
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -495,13 +513,15 @@ return (
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
-   <div className="flex items-center justify-end">
-        <ChevronRight size={18} color={INK_SOFT} />
+<div className="flex items-center justify-end">
+        <button onClick={(e) => { e.stopPropagation(); onOpenDetail(place); }} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+          상세 정보 보기
+          <ChevronRight size={14} />
+        </button>
       </div>
     </div>
   );
 }
-
 function TierBar({ points }) {
   const pct = Math.min(100, (points / 5000) * 100);
   return (
