@@ -4411,9 +4411,10 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
             <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: CORAL_TINT }}>
               <Trash2 size={26} color={CORAL} />
             </div>
-            <div className="font-extrabold text-base mb-2" style={{ color: INK }}>정말 탈퇴하시겠어요?</div>
+<div className="font-extrabold text-base mb-2" style={{ color: INK }}>정말 탈퇴하시겠어요?</div>
             <div className="text-sm mb-6" style={{ color: INK_SOFT }}>
-              탈퇴하시면 포인트, 등록한 장소, 즐겨찾기 등<br />모든 정보가 삭제되며 되돌릴 수 없어요.
+              탈퇴하시면 포인트, 등록한 장소, 즐겨찾기 등<br />모든 정보가 삭제되며 되돌릴 수 없어요.<br /><br />
+              <b style={{ color: CORAL }}>탈퇴 후 7일간은 같은 이메일로 다시 가입하실 수 없어요.</b>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowDeleteAccount(false)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
