@@ -4683,8 +4683,8 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                     <div className="text-xs" style={{ color: INK_SOFT }}>{isAdminEditingPlace ? "🛠️ 관리자 권한으로 신고된 정보를 수정하고 있어요" : editingPlaceId ? "정보를 최신으로 업데이트해주세요" : "접근성 정보를 등록하고 포인트를 받으세요"}</div>
                   </div>
                 </div>
-                {!editingPlaceId && (
-                  <button type="button" onClick={() => setShowShopExplainCard(true)} className="w-full flex items-center justify-center gap-2 rounded-xl py-3 mb-5 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+        {!editingPlaceId && (
+                  <button type="button" onClick={() => setShowShopExplainCard(true)} className="w-full flex items-center justify-center gap-2 rounded-xl py-3 mb-5 text-sm font-bold transition-all duration-200 active:scale-95 shop-explain-blink" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
                     <Camera size={16} />
                     촬영 전, 매장에 이 화면 보여주기
                   </button>
