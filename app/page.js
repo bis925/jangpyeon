@@ -1135,6 +1135,8 @@ function processVoiceCommand(text) {
           App.exitApp();
         }
       }, 800);
+} else if (text.includes("날씨")) {
+      announceTodayWeather();
     } else if (text.includes("공지")) {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
@@ -1399,13 +1401,52 @@ function handleMicDragEnd() {
     );
   }
 
-  function getWeatherEffect(weather) {
+function getWeatherEffect(weather) {
     if (!weather) return null;
     const { code, isDay } = weather;
     if ([51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(code)) return "rain";
     if ([71, 73, 75, 77, 85, 86].includes(code)) return "snow";
     if ([1, 2, 3, 45, 48].includes(code)) return isDay ? "cloudy_day" : "cloudy_night";
     return isDay ? "sunny" : "clear_night";
+  }
+
+  function getWeatherDescription(code) {
+    if ([0].includes(code)) return "맑아요";
+    if ([1, 2, 3].includes(code)) return "구름이 있어요";
+    if ([45, 48].includes(code)) return "안개가 꼈어요";
+    if ([51, 53, 55].includes(code)) return "이슬비가 내려요";
+    if ([61, 63, 65].includes(code)) return "비가 내려요";
+    if ([80, 81, 82].includes(code)) return "소나기가 내려요";
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return "눈이 내려요";
+    if ([95, 96, 99].includes(code)) return "천둥번개가 쳐요";
+    return "날씨 정보를 확인했어요";
+  }
+
+  async function announceTodayWeather() {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      showToast("위치 정보를 사용할 수 없어요");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,temperature_2m,is_day`);
+          const data = await res.json();
+          if (data.current) {
+            const desc = getWeatherDescription(data.current.weather_code);
+            const temp = Math.round(data.current.temperature_2m);
+            const text = `오늘 날씨는 ${temp}도, ${desc}`;
+            setVoiceFaqAnswer({ question: "오늘 날씨", answer: text });
+            speakVoiceAnswer(text);
+          }
+        } catch (e) {
+          showToast("날씨 정보를 가져오지 못했어요");
+        }
+      },
+      () => showToast("위치 권한을 확인해주세요"),
+      { enableHighAccuracy: false, timeout: 10000 }
+    );
   }
   
   function showToast(message) {
