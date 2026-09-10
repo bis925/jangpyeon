@@ -322,13 +322,13 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
 
 <div className="font-extrabold text-lg mb-1" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
             <div className="text-sm mb-2" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
-            {recency && (
-              <button onClick={() => onShowRecencyHelp()} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 mb-3" style={{ background: recency.bg }}>
-                <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
-                <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
-              </button>
-            )}
-            <div className="flex items-center justify-end gap-1.5 mb-4">
+            <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+              {recency && (
+                <button onClick={() => onShowRecencyHelp()} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: recency.bg }}>
+                  <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
+                  <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
+                </button>
+              )}
               <button onClick={() => onConfirmInfo(place.id)} className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: "#E5F0FB" }}>
                 <CheckCircle size={11} color="#2563EB" />
                 <span className="text-[10px] font-bold" style={{ color: "#2563EB" }}>정보 확인했어요</span>
@@ -337,6 +337,7 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
                 <span className="flex items-center justify-center rounded-full text-[9px] font-extrabold" style={{ width: 15, height: 15, background: TEAL, color: "#fff" }}>?</span>
               </button>
             </div>
+
 
             <div className="rounded-2xl p-4 mb-4" style={{ background: PAPER }}>
               <div className="text-xs font-extrabold mb-3" style={{ color: INK }}>접근성 정보</div>
