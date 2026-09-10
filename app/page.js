@@ -1364,9 +1364,11 @@ useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
     return () => { window.removeEventListener("scroll", handleScroll); clearTimeout(scrollTimer); };
   }, []);
 const showRankingPolicyRef = useRef(false);
-  const voiceFaqAnswerRef = useRef(null);
+const voiceFaqAnswerRef = useRef(null);
+  const showShopExplainCardRef = useRef(false);
   useEffect(() => { showRankingPolicyRef.current = showRankingPolicy; }, [showRankingPolicy]);
-  useEffect(() => { voiceFaqAnswerRef.current = voiceFaqAnswer; }, [voiceFaqAnswer]);
+useEffect(() => { voiceFaqAnswerRef.current = voiceFaqAnswer; }, [voiceFaqAnswer]);
+  useEffect(() => { showShopExplainCardRef.current = showShopExplainCard; }, [showShopExplainCard]);
    const showFavoritesOnlyRef = useRef(false);
   useEffect(() => { showFavoritesOnlyRef.current = showFavoritesOnly; }, [showFavoritesOnly]);
   const isMapFullscreenRef = useRef(false);
@@ -1464,7 +1466,9 @@ const showRankingPolicyRef = useRef(false);
           setShowFAQ(false);
           if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
           setSpeakingFaqId(null);
-} else if (voiceFaqAnswerRef.current) {
+} else if (showShopExplainCardRef.current) {
+          setShowShopExplainCard(false);
+        } else if (voiceFaqAnswerRef.current) {
           setVoiceFaqAnswer(null);
           if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
         } else if (showRankingPolicyRef.current) {
@@ -1862,6 +1866,7 @@ const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
 const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
 const [voiceQaPage, setVoiceQaPage] = useState(1);
 const [openFilterActive, setOpenFilterActive] = useState(false);
+  const [showShopExplainCard, setShowShopExplainCard] = useState(false);
   const [distanceFilter, setDistanceFilter] = useState(null);
   const [showDistancePicker, setShowDistancePicker] = useState(false);
   const [editingVoiceQaId, setEditingVoiceQaId] = useState(null);
@@ -3476,7 +3481,14 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
         </div>
       )}
 
-
+{showShopExplainCard && (
+        <div onClick={() => setShowShopExplainCard(false)} className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "#000" }}>
+          <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/paa.png" alt="장편 안내" className="w-full h-full object-contain" />
+          <button onClick={(e) => { e.stopPropagation(); setShowShopExplainCard(false); }} className="absolute top-4 right-4 rounded-full flex items-center justify-center" style={{ width: 40, height: 40, background: "rgba(255,255,255,0.2)" }} aria-label="닫기">
+            <X size={22} color="#fff" />
+          </button>
+        </div>
+      )}
 {showVoiceListeningUI && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8" style={{ background: "rgba(15,110,98,0.95)" }}>
           <div className="relative flex items-center justify-center mb-6" style={{ width: 140, height: 140 }}>
@@ -4611,10 +4623,16 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                     <Plus size={22} color={TEAL} />
                   </div>
                   <div>
-                  <h2 className="font-extrabold text-xl" style={{ color: INK }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
+              <h2 className="font-extrabold text-xl" style={{ color: INK }}>{editingPlaceId ? "장소 수정" : "장소 등록"}</h2>
                     <div className="text-xs" style={{ color: INK_SOFT }}>{isAdminEditingPlace ? "🛠️ 관리자 권한으로 신고된 정보를 수정하고 있어요" : editingPlaceId ? "정보를 최신으로 업데이트해주세요" : "접근성 정보를 등록하고 포인트를 받으세요"}</div>
                   </div>
                 </div>
+                {!editingPlaceId && (
+                  <button type="button" onClick={() => setShowShopExplainCard(true)} className="w-full flex items-center justify-center gap-2 rounded-xl py-3 mb-5 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                    <Camera size={16} />
+                    촬영 전, 매장에 이 화면 보여주기
+                  </button>
+                )}
 
                 <div className="rounded-2xl p-4 mb-4" style={{ background: CARD, border: `1px solid ${LINE}` }}>
                   <div className="text-xs font-bold mb-3" style={{ color: TEAL }}>📍 기본 정보</div>
