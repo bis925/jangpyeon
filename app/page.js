@@ -1427,8 +1427,20 @@ async function announceTodayWeather() {
       showToast("위치 정보를 사용할 수 없어요");
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
+    function tryGetPosition(retriesLeft) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => handlePositionSuccess(pos),
+        (err) => {
+          if (retriesLeft > 0) {
+            setTimeout(() => tryGetPosition(retriesLeft - 1), 500);
+          } else {
+            showToast("위치 권한을 확인해주세요");
+          }
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      );
+    }
+    async function handlePositionSuccess(pos) {
         try {
           const { latitude, longitude } = pos.coords;
           const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,temperature_2m,is_day`);
@@ -1455,10 +1467,8 @@ async function announceTodayWeather() {
 } catch (e) {
           showToast("날씨 정보를 가져오지 못했어요");
         }
-      },
-      () => showToast("위치 권한을 확인해주세요"),
-      { enableHighAccuracy: false, timeout: 10000 }
-    );
+    }
+    tryGetPosition(2);
   }
   
   function showToast(message) {
