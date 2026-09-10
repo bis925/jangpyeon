@@ -354,19 +354,7 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
                     </div>
                   );
                 })}
-                {place.threshold_cm != null && (
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs" style={{ color: INK_SOFT }}>문턱 높이</span>
-                    <span className="text-xs font-bold" style={{ color: INK }}>{place.threshold_cm}cm</span>
-                  </div>
-                )}
-                {place.toilet_floor != null && place.accessible_toilet === "yes" && (
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs" style={{ color: INK_SOFT }}>화장실 위치</span>
-                    <span className="text-xs font-bold" style={{ color: INK }}>{place.toilet_floor}층</span>
-                  </div>
-                )}
-             {place.threshold_cm != null && (
+{place.threshold_cm != null && (
                   <div className="rounded-xl p-2.5" style={{ background: "#F1F1F1" }}>
                     <div className="text-[10px] font-bold mb-0.5" style={{ color: "#888", opacity: 0.85 }}>문턱 높이</div>
                     <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.threshold_cm}cm</div>
