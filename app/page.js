@@ -1501,7 +1501,9 @@ useEffect(() => {
   const [newInquiryCount, setNewInquiryCount] = useState(0);
   const [newRankingResponseCount, setNewRankingResponseCount] = useState(0);
   const [fullscreenCenter, setFullscreenCenter] = useState(null);
-  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const showDeleteAccountRef = useRef(false);
+  useEffect(() => { showDeleteAccountRef.current = showDeleteAccount; }, [showDeleteAccount]);
   const [logoWeather, setLogoWeather] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [mySessionToken, setMySessionToken] = useState(null);
@@ -1663,7 +1665,9 @@ const showFavoritesOnlyRef = useRef(false);
           setSpeakingFaqId(null);
 } else if (showShopExplainCardRef.current) {
           setShowShopExplainCard(false);
-} else if (viewingDetailPlaceRef.current) {
+} else if (showDeleteAccountRef.current) {
+          setShowDeleteAccount(false);
+        } else if (viewingDetailPlaceRef.current) {
           setViewingDetailPlace(null);
         } else if (voiceFaqAnswerRef.current) {
           setVoiceFaqAnswer(null);
