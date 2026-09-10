@@ -2069,7 +2069,8 @@ const [voiceQaPage, setVoiceQaPage] = useState(1);
 const [openFilterActive, setOpenFilterActive] = useState(false);
 const [showShopExplainCard, setShowShopExplainCard] = useState(false);
 const [mapAccessFilter, setMapAccessFilter] = useState(null);
-  const [showAccessPicker, setShowAccessPicker] = useState(false);
+const [showAccessPicker, setShowAccessPicker] = useState(false);
+  const [faqPage, setFaqPage] = useState(1);
 const [viewingDetailPlace, setViewingDetailPlace] = useState(null);
   const viewingDetailPlaceRef = useRef(null);
   useEffect(() => { viewingDetailPlaceRef.current = viewingDetailPlace; }, [viewingDetailPlace]);
@@ -4336,11 +4337,11 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-5 py-5">
+<div className="flex-1 overflow-y-auto px-5 py-5">
             {faqs.length === 0 && (
               <div className="text-center py-12 text-sm" style={{ color: INK_SOFT }}>아직 등록된 질문이 없어요</div>
             )}
-            {faqs.map((faq) => {
+            {faqs.slice((faqPage - 1) * 5, faqPage * 5).map((faq) => {
               const isExpanded = expandedFaqId === faq.id;
               const isSpeaking = speakingFaqId === faq.id;
               return (
@@ -4380,9 +4381,20 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                       </div>
                     </div>
                   )}
-                </div>
+</div>
               );
             })}
+            {faqs.length > 5 && (
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <button onClick={() => setFaqPage((p) => Math.max(1, p - 1))} disabled={faqPage === 1} className="rounded-full p-2" style={{ background: PAPER, opacity: faqPage === 1 ? 0.4 : 1 }} aria-label="이전 페이지">
+                  <ChevronRight size={16} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+                </button>
+                <span className="text-xs font-bold" style={{ color: INK_SOFT }}>{faqPage} / {Math.max(1, Math.ceil(faqs.length / 5))}</span>
+                <button onClick={() => setFaqPage((p) => Math.min(Math.ceil(faqs.length / 5), p + 1))} disabled={faqPage >= Math.ceil(faqs.length / 5)} className="rounded-full p-2" style={{ background: PAPER, opacity: faqPage >= Math.ceil(faqs.length / 5) ? 0.4 : 1 }} aria-label="다음 페이지">
+                  <ChevronRight size={16} color={INK_SOFT} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
