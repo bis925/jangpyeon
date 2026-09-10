@@ -1452,11 +1452,11 @@ async function announceTodayWeather() {
             setVoiceFaqAnswer({ question: "오늘 날씨", answer: text });
             speakVoiceAnswer(text);
           }
-        } catch (e) {
-          showToast("날씨 정보를 가져오지 못했어요");
+} catch (e) {
+          alert("날씨 에러: " + e.message);
         }
       },
-      () => showToast("위치 권한을 확인해주세요"),
+      (err) => alert("위치 에러: " + err.message + " / 코드: " + err.code),
       { enableHighAccuracy: false, timeout: 10000 }
     );
   }
