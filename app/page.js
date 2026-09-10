@@ -65,10 +65,10 @@ const BODY_FONT = "'Nanum Gothic', sans-serif";
 const MONO_FONT = "'JetBrains Mono', monospace";
 
 const BADGE_META = {
-  ramp: { label: "휠체어 출입", icon: Accessibility, field: "has_ramp" },
-  door: { label: "장애인 화장실", icon: DoorOpen, field: "has_restroom" },
-  stroller: { label: "유모차 가능", icon: Baby, field: "has_stroller_access" },
-  lift: { label: "엘리베이터", icon: MoveVertical, field: "has_elevator" },
+  ramp: { label: "휠체어 출입", icon: Accessibility, field: "entrance_step", matchValue: "ramp" },
+  door: { label: "장애인 화장실", icon: DoorOpen, field: "accessible_toilet", matchValue: "yes" },
+  stroller: { label: "유모차 가능", icon: Baby, field: "has_stroller_access", matchValue: true },
+  lift: { label: "엘리베이터", icon: MoveVertical, field: "elevator", matchValue: "yes" },
 };
 
 const CARD_THEMES = {
@@ -3117,11 +3117,15 @@ useEffect(() => {
       businessHours: place.business_hours || DEFAULT_HOURS,
       useHours: !!place.business_hours,
       openHolidays: place.business_hours?.openHolidays || [],
+     entrance_step: place.entrance_step || "unknown",
+      door_type: place.door_type || "unknown",
+      threshold_cm: place.threshold_cm ?? "",
+      accessible_toilet: place.accessible_toilet || "unknown",
+      toilet_floor: place.toilet_floor ?? "",
+      elevator: place.elevator || "unknown",
+      parking_disabled: place.parking_disabled || "unknown",
       badges: {
-        ramp: place.has_ramp,
-        door: place.has_restroom,
         stroller: place.has_stroller_access,
-        lift: place.has_elevator,
       },
     });
     setTab("register");
@@ -3142,30 +3146,38 @@ useEffect(() => {
     }
        let error;
     if (isAdminEditingPlace) {
-      ({ error } = await supabase.rpc("admin_update_place", {
+({ error } = await supabase.rpc("admin_update_place", {
         p_place_id: editingPlaceId,
         p_name: form.name.trim(),
         p_address: fullAddress,
         p_category: form.category,
-        p_has_ramp: form.badges.ramp,
-        p_has_restroom: form.badges.door,
+        p_entrance_step: form.entrance_step,
+        p_door_type: form.door_type,
+        p_threshold_cm: form.threshold_cm === "" ? null : parseInt(form.threshold_cm),
+        p_accessible_toilet: form.accessible_toilet,
+        p_toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
+        p_elevator: form.elevator,
+        p_parking_disabled: form.parking_disabled,
         p_has_stroller_access: form.badges.stroller,
-        p_has_elevator: form.badges.lift,
         p_keywords: form.keywords.trim() || null,
         p_phone: form.phone.trim() || null,
         p_business_hours: finalBusinessHours,
       }));
     } else {
-      ({ error } = await supabase
+({ error } = await supabase
         .from("places")
         .update({
           name: form.name.trim(),
           address: fullAddress,
           category: form.category,
-          has_ramp: form.badges.ramp,
-          has_restroom: form.badges.door,
+          entrance_step: form.entrance_step,
+          door_type: form.door_type,
+          threshold_cm: form.threshold_cm === "" ? null : parseInt(form.threshold_cm),
+          accessible_toilet: form.accessible_toilet,
+          toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
+          elevator: form.elevator,
+          parking_disabled: form.parking_disabled,
           has_stroller_access: form.badges.stroller,
-          has_elevator: form.badges.lift,
           keywords: form.keywords.trim() || null,
                  phone: form.phone.trim() || null,
           business_hours: finalBusinessHours,
@@ -3226,14 +3238,18 @@ setForm({ name: "", address: "", addressDetail: "", category: "공공기관", ke
       });
     }
 
-    const { data, error } = await supabase.rpc("register_place", {
+const { data, error } = await supabase.rpc("register_place", {
       p_name: form.name.trim(),
       p_address: fullAddress,
       p_category: form.category,
-      p_has_ramp: form.badges.ramp,
-      p_has_restroom: form.badges.door,
+      p_entrance_step: form.entrance_step,
+      p_door_type: form.door_type,
+      p_threshold_cm: form.threshold_cm === "" ? null : parseInt(form.threshold_cm),
+      p_accessible_toilet: form.accessible_toilet,
+      p_toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
+      p_elevator: form.elevator,
+      p_parking_disabled: form.parking_disabled,
       p_has_stroller_access: form.badges.stroller,
-      p_has_elevator: form.badges.lift,
       p_keywords: form.keywords.trim() || null,
       p_phone: form.phone.trim() || null,
       p_business_hours: finalBusinessHours,
