@@ -946,11 +946,9 @@ export default function Page() {
 async function addFaq() {
     if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) { showToast("질문과 답변을 모두 입력해주세요"); return; }
     const maxOrder = faqs.length > 0 ? Math.max(...faqs.map((f) => f.display_order)) : 0;
-    const cleanQuestion = newFaqQuestion.trim().replace(/^Q\.\s*/i, "");
-    const cleanAnswer = newFaqAnswer.trim().replace(/^A\.\s*/i, "");
     const { error } = await supabase.from("faqs").insert({
-      question: `Q. ${cleanQuestion}`,
-      answer: `A. ${cleanAnswer}`,
+      question: newFaqQuestion.trim(),
+      answer: newFaqAnswer.trim(),
       display_order: maxOrder + 1,
     });
     if (error) { showToast("추가 실패: " + error.message); return; }
@@ -4358,12 +4356,18 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                     }}
                     className="w-full flex items-center justify-between gap-2 px-4 py-3.5 text-left"
                   >
-                    <span className="text-sm font-bold" style={{ color: INK }}>{faq.question}</span>
+<div className="flex items-center gap-2 min-w-0">
+                      <span className="flex items-center justify-center rounded-full text-[11px] font-extrabold flex-shrink-0" style={{ width: 20, height: 20, background: TEAL, color: "#fff" }}>Q</span>
+                      <span className="text-sm font-bold truncate" style={{ color: INK }}>{faq.question}</span>
+                    </div>
                     <ChevronRight size={16} color={INK_SOFT} className="flex-shrink-0" style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </button>
                           {isExpanded && (
                     <div className="px-4 pb-4">
-                      <div className="text-sm mb-3" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{faq.answer}</div>
+                      <div className="flex items-start gap-2 mb-3">
+                        <span className="flex items-center justify-center rounded-full text-[11px] font-extrabold flex-shrink-0 mt-0.5" style={{ width: 20, height: 20, background: CORAL, color: "#fff" }}>A</span>
+                        <div className="text-sm" style={{ color: INK_SOFT, lineHeight: 1.6 }}>{faq.answer}</div>
+                      </div>
                       <div className="rounded-xl p-3" style={{ background: TEAL_TINT }}>
                         <div className="flex items-center gap-1.5 mb-2">
                           <Headset size={14} color={TEAL_DARK} />
