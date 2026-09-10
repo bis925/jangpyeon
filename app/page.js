@@ -320,8 +320,8 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
             </div>
 
 <div className="font-extrabold text-lg mb-1" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
-            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-              <div className="text-sm truncate" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
+            <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+              <span className="text-sm" style={{ color: INK_SOFT }}>{place.category} · {place.address}</span>
               {recency && (
                 <button onClick={() => onShowRecencyHelp()} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 flex-shrink-0" style={{ background: recency.bg }}>
                   <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
