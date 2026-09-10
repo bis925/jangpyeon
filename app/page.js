@@ -3491,8 +3491,6 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               <span className="text-xs font-extrabold" style={{ color: TEAL_DARK }}>여기에 저장됐어요!</span>
             </div>
           )}
-          <button
-            onClick={() => { if (!isMicDragMode) startVoiceCommand(); }}
 <button
             onClick={() => { if (!isMicDragMode) startVoiceCommand(); }}
             onTouchStart={handleMicPressStart}
