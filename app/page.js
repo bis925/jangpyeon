@@ -4877,20 +4877,27 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </div>
                 )}
               </div>
-              <div className="relative">
-                <button onClick={() => setShowAccessPicker(!showAccessPicker)} className="text-xs font-bold flex items-center gap-1 rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: mapAccessFilter ? TEAL : "#fff", color: mapAccessFilter ? "#fff" : TEAL }}>
-                  ♿ {mapAccessFilter ? { wheelchair: "휠체어 출입", stroller: "유모차 가능", toilet: "장애인 화장실" }[mapAccessFilter] : "접근성"}
+            <div className="relative">
+                <button onClick={() => setShowAccessPicker(!showAccessPicker)} className="text-xs font-bold flex items-center gap-1.5 rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: mapAccessFilter ? TEAL : "#fff", color: mapAccessFilter ? "#fff" : TEAL }}>
+                  <Accessibility size={13} />
+                  {mapAccessFilter ? { wheelchair: "휠체어 출입", stroller: "유모차 가능", toilet: "장애인 화장실", parking: "장애인 주차" }[mapAccessFilter] : "접근성"}
                 </button>
                 {showAccessPicker && (
                   <div className="absolute top-full left-0 mt-1.5 rounded-xl overflow-hidden z-10" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
                     <button onClick={() => { setMapAccessFilter(null); setShowAccessPicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: !mapAccessFilter ? TEAL : INK, background: !mapAccessFilter ? TEAL_TINT : "transparent" }}>전체보기</button>
-               {[{ key: "wheelchair", label: "휠체어 출입" }, { key: "stroller", label: "유모차 가능" }, { key: "toilet", label: "장애인 화장실" }, { key: "parking", label: "장애인 주차" }].map((opt) => (
-                      <button key={opt.key} onClick={() => { setMapAccessFilter(mapAccessFilter === opt.key ? null : opt.key); setShowAccessPicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: mapAccessFilter === opt.key ? TEAL : INK, background: mapAccessFilter === opt.key ? TEAL_TINT : "transparent" }}>{opt.label}</button>
-                    ))}
+               {[{ key: "wheelchair", label: "휠체어 출입", icon: Accessibility }, { key: "stroller", label: "유모차 가능", icon: Baby }, { key: "toilet", label: "장애인 화장실", icon: Accessibility }, { key: "parking", label: "장애인 주차", icon: Accessibility }].map((opt) => {
+                      const OptIcon = opt.icon;
+                      return (
+                        <button key={opt.key} onClick={() => { setMapAccessFilter(mapAccessFilter === opt.key ? null : opt.key); setShowAccessPicker(false); }} className="flex items-center gap-2 w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: mapAccessFilter === opt.key ? TEAL : INK, background: mapAccessFilter === opt.key ? TEAL_TINT : "transparent" }}>
+                          <OptIcon size={14} />
+                          {opt.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
-            </div>   
+            </div>
                     <div className="grid sm:grid-cols-2 gap-3 min-w-0">
 {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).filter((p) => {
                 if (!distanceFilter || !myLocation) return true;
