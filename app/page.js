@@ -1347,13 +1347,11 @@ async function addVoiceQa() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  function fetchMyLocation() {
-    if (typeof navigator === "undefined" || !navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setMyLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {},
-      { enableHighAccuracy: false, timeout: 5000 }
-    );
+async function fetchMyLocation() {
+    try {
+      const pos = await getCurrentPositionSmart({ enableHighAccuracy: false, timeout: 5000 });
+      setMyLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+    } catch (e) {}
   }
 
     const micLongPressTimer = useRef(null);
@@ -1396,25 +1394,19 @@ async function fetchMyPageWeather() {
         } catch (e) {}
       }
     }
-    if (typeof navigator === "undefined" || !navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,is_day`);
-          const data = await res.json();
-          if (data.current) {
-            const weatherData = { code: data.current.weather_code, isDay: data.current.is_day === 1 };
-            setMyPageWeather(weatherData);
-            if (typeof window !== "undefined") {
-              localStorage.setItem("mypage_weather_cache", JSON.stringify({ ...weatherData, timestamp: Date.now() }));
-            }
-          }
-        } catch (e) {}
-      },
-      () => {},
-      { enableHighAccuracy: false, timeout: 10000 }
-    );
+    try {
+      const pos = await getCurrentPositionSmart({ enableHighAccuracy: false, timeout: 10000 });
+      const { latitude, longitude } = pos.coords;
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,is_day`);
+      const data = await res.json();
+      if (data.current) {
+        const weatherData = { code: data.current.weather_code, isDay: data.current.is_day === 1 };
+        setMyPageWeather(weatherData);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("mypage_weather_cache", JSON.stringify({ ...weatherData, timestamp: Date.now() }));
+        }
+      }
+    } catch (e) {}
   }
 
 function getWeatherEffect(weather) {
@@ -1707,14 +1699,8 @@ const showFavoritesOnlyRef = useRef(false);
   const [isPulling, setIsPulling] = useState(false);
   const touchStartY = useRef(0);
 
-    useEffect(() => {
-    if (typeof navigator !== "undefined" && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        () => {},
-        () => {},
-        { enableHighAccuracy: false, timeout: 5000 }
-      );
-    }
+useEffect(() => {
+    getCurrentPositionSmart({ enableHighAccuracy: false, timeout: 5000 }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -2074,32 +2060,30 @@ const showFavoritesOnlyRef = useRef(false);
     showToast(`압축 완료! 성공 ${totalDone}장, 실패 ${totalFailed}장`);
   }
 
-  async function setHomeLocation() {
-    if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
+async function setHomeLocation() {
     showToast("위치를 확인하고 있어요...");
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        let addr = "내 동네";
-        if (window.kakao) {
-          const geocoder = new window.kakao.maps.services.Geocoder();
-          await new Promise((resolve) => {
-            geocoder.coord2Address(longitude, latitude, (result, status) => {
-              if (status === window.kakao.maps.services.Status.OK && result[0]) {
-                addr = result[0].address?.region_2depth_name + " " + (result[0].address?.region_3depth_name || "");
-              }
-              resolve();
-            });
+    try {
+      const pos = await getCurrentPositionSmart({ timeout: 15000 });
+      const { latitude, longitude } = pos.coords;
+      let addr = "내 동네";
+      if (window.kakao) {
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        await new Promise((resolve) => {
+          geocoder.coord2Address(longitude, latitude, (result, status) => {
+            if (status === window.kakao.maps.services.Status.OK && result[0]) {
+              addr = result[0].address?.region_2depth_name + " " + (result[0].address?.region_3depth_name || "");
+            }
+            resolve();
           });
-        }
-        const { error } = await supabase.from("profiles").update({ home_lat: latitude, home_lng: longitude, home_address: addr }).eq("id", session.user.id);
-        if (error) { showToast("설정 실패: " + error.message); return; }
-        setProfile((prev) => ({ ...prev, home_lat: latitude, home_lng: longitude, home_address: addr }));
-        showToast(`내 동네가 "${addr}"(으)로 설정됐어요!`);
-      },
-      () => showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
+        });
+      }
+      const { error } = await supabase.from("profiles").update({ home_lat: latitude, home_lng: longitude, home_address: addr }).eq("id", session.user.id);
+      if (error) { showToast("설정 실패: " + error.message); return; }
+      setProfile((prev) => ({ ...prev, home_lat: latitude, home_lng: longitude, home_address: addr }));
+      showToast(`내 동네가 "${addr}"(으)로 설정됐어요!`);
+    } catch (err) {
+      showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요");
+    }
   }
   
   function reportPlace(place) {
@@ -2365,47 +2349,45 @@ const idToken = res.result.idToken;
     showToast("삭제됐어요");
   }
 
-  async function sendSOSAlert() {
-    if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
+ async function sendSOSAlert() {
     if (!window.confirm("등록된 보호자에게 현재 위치와 함께 도움 요청 알림을 보낼까요?")) return;
     setSendingSOS(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const { data: guardianList } = await supabase.rpc("get_my_guardian_user_ids");
-        if (!guardianList || guardianList.length === 0) {
-          setSendingSOS(false);
-          showToast("등록된 보호자가 없어요. 마이페이지에서 먼저 보호자를 등록해주세요");
-          return;
-        }
-        const userIds = guardianList.map((g) => g.guardian_user_id);
-        const mapLink = `https://map.kakao.com/link/map/${latitude},${longitude}`;
-        const nickname = profile?.nickname || session.user.email;
-        try {
-          await fetch("https://xyyewfqfurtrzfonplat.supabase.co/functions/v1/swift-endpoint", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({
-              title: "🆘 긴급 도움 요청",
-              body: `${nickname}님이 도움이 필요해요. 위치: ${mapLink}`,
-              userIds,
-              target: "home",
-            }),
-          });
-          showToast("보호자에게 위치를 전송했어요!");
-        } catch (err) {
-          showToast("전송에 실패했어요, 다시 시도해주세요");
-        }
+    try {
+      const pos = await getCurrentPositionSmart({ timeout: 15000 });
+      const { latitude, longitude } = pos.coords;
+      const { data: guardianList } = await supabase.rpc("get_my_guardian_user_ids");
+      if (!guardianList || guardianList.length === 0) {
         setSendingSOS(false);
-      },
-      () => { setSendingSOS(false); showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"); },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
+        showToast("등록된 보호자가 없어요. 마이페이지에서 먼저 보호자를 등록해주세요");
+        return;
+      }
+      const userIds = guardianList.map((g) => g.guardian_user_id);
+      const mapLink = `https://map.kakao.com/link/map/${latitude},${longitude}`;
+      const nickname = profile?.nickname || session.user.email;
+      try {
+        await fetch("https://xyyewfqfurtrzfonplat.supabase.co/functions/v1/swift-endpoint", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            title: "🆘 긴급 도움 요청",
+            body: `${nickname}님이 도움이 필요해요. 위치: ${mapLink}`,
+            userIds,
+            target: "home",
+          }),
+        });
+        showToast("보호자에게 위치를 전송했어요!");
+      } catch (err) {
+        showToast("전송에 실패했어요, 다시 시도해주세요");
+      }
+      setSendingSOS(false);
+    } catch (err) {
+      setSendingSOS(false);
+      showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요");
+    }
   }
-  
    async function changeCardTheme(themeKey) {
     const { error } = await supabase.from("profiles").update({ card_theme: themeKey }).eq("id", session.user.id);
     if (error) { showToast("변경 실패: " + error.message); return; }
@@ -2435,53 +2417,52 @@ async function handleAvatarChange(e) {
     setAvatarUrl(newUrl);
     showToast("프로필 사진이 변경됐어요!");
   }
-    function locateMe() {
-    if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setMyLocation(coords);
-        if (mapInstanceRef.current && window.kakao) {
-          const position = new window.kakao.maps.LatLng(coords.lat, coords.lng);
-          mapInstanceRef.current.setCenter(position);
-          mapInstanceRef.current.setLevel(4);
-          if (myMarkerRef.current) myMarkerRef.current.setMap(null);
-          myMarkerRef.current = new window.kakao.maps.Marker({
-            position,
-            map: mapInstanceRef.current,
-            image: new window.kakao.maps.MarkerImage(
-              "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#4285F4" stroke="white" stroke-width="3"/></svg>'),
-              new window.kakao.maps.Size(24, 24)
-            ),
-          });
-        }
-      },
-      () => { showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"); },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  }
-  function locateMeForRegister() {
-    if (!navigator.geolocation) { showToast("이 기기에서는 위치 확인이 안 돼요"); return; }
-    setLocatingAddress(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        if (!window.kakao) { setLocatingAddress(false); return; }
-        const geocoder = new window.kakao.maps.services.Geocoder();
-        geocoder.coord2Address(longitude, latitude, (result, status) => {
-          setLocatingAddress(false);
-          if (status === window.kakao.maps.services.Status.OK && result[0]) {
-            const addr = result[0].road_address ? result[0].road_address.address_name : result[0].address.address_name;
-            setForm((prev) => ({ ...prev, address: addr }));
-            showToast("현재 위치로 주소를 찾았어요");
-          } else {
-            showToast("주소를 찾을 수 없어요");
-          }
+
+  async function locateMe() {
+    try {
+      const pos = await getCurrentPositionSmart({ timeout: 15000 });
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setMyLocation(coords);
+      if (mapInstanceRef.current && window.kakao) {
+        const position = new window.kakao.maps.LatLng(coords.lat, coords.lng);
+        mapInstanceRef.current.setCenter(position);
+        mapInstanceRef.current.setLevel(4);
+        if (myMarkerRef.current) myMarkerRef.current.setMap(null);
+        myMarkerRef.current = new window.kakao.maps.Marker({
+          position,
+          map: mapInstanceRef.current,
+          image: new window.kakao.maps.MarkerImage(
+            "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#4285F4" stroke="white" stroke-width="3"/></svg>'),
+            new window.kakao.maps.Size(24, 24)
+          ),
         });
-      },
-           () => { setLocatingAddress(false); showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요"); },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
+      }
+    } catch (err) {
+      showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요");
+    }
+  }
+  
+async function locateMeForRegister() {
+    setLocatingAddress(true);
+    try {
+      const pos = await getCurrentPositionSmart({ timeout: 15000 });
+      const { latitude, longitude } = pos.coords;
+      if (!window.kakao) { setLocatingAddress(false); return; }
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      geocoder.coord2Address(longitude, latitude, (result, status) => {
+        setLocatingAddress(false);
+        if (status === window.kakao.maps.services.Status.OK && result[0]) {
+          const addr = result[0].road_address ? result[0].road_address.address_name : result[0].address.address_name;
+          setForm((prev) => ({ ...prev, address: addr }));
+          showToast("현재 위치로 주소를 찾았어요");
+        } else {
+          showToast("주소를 찾을 수 없어요");
+        }
+      });
+    } catch (err) {
+      setLocatingAddress(false);
+      showToast("위치 정보를 가져올 수 없어요, 위치 권한을 확인해주세요");
+    }
   }
 
   function createCategoryMarkerImage(kakao, category) {
@@ -2645,25 +2626,21 @@ useEffect(() => {
     }
   }, []);
 
-    useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code`);
-          const data = await res.json();
-          const code = data?.current?.weather_code;
-          if (code >= 71 && code <= 77) setLogoWeather("snow");
-          else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) setLogoWeather("rain");
-          else setLogoWeather(null);
-        } catch (err) {
-          setLogoWeather(null);
-        }
-      },
-      () => setLogoWeather(null),
-      { timeout: 5000 }
-    );
+useEffect(() => {
+    (async () => {
+      try {
+        const pos = await getCurrentPositionSmart({ timeout: 5000 });
+        const { latitude, longitude } = pos.coords;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code`);
+        const data = await res.json();
+        const code = data?.current?.weather_code;
+        if (code >= 71 && code <= 77) setLogoWeather("snow");
+        else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) setLogoWeather("rain");
+        else setLogoWeather(null);
+      } catch (err) {
+        setLogoWeather(null);
+      }
+    })();
   }, []);
 
   /* --- 인증 상태 감지 --- */
