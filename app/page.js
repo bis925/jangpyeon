@@ -948,6 +948,14 @@ function processVoiceCommand(text) {
 } else if (text.includes("안내문") || text.includes("안내 문") || text.includes("매장 안내") || text.includes("설명 카드")) {
       setShowShopExplainCard(true);
       showToast("안내문을 보여드릴게요");
+} else if (text.includes("앱 종료") || text.includes("어플 종료") || text.includes("어플 꺼줘") || text.includes("앱 꺼줘") || text.includes("종료해줘")) {
+      showToast("앱을 종료할게요");
+      setTimeout(async () => {
+        if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+          const { App } = await import("@capacitor/app");
+          App.exitApp();
+        }
+      }, 800);
     } else if (text.includes("공지")) {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
