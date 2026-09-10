@@ -1383,7 +1383,19 @@ function handleMicDragEnd() {
     setTimeout(() => setShowMicSavedBadge(false), 1500);
   }
 
-    async function fetchMyPageWeather() {
+async function fetchMyPageWeather() {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("mypage_weather_cache");
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
+            setMyPageWeather({ code: parsed.code, isDay: parsed.isDay });
+            return;
+          }
+        } catch (e) {}
+      }
+    }
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -1392,7 +1404,11 @@ function handleMicDragEnd() {
           const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,is_day`);
           const data = await res.json();
           if (data.current) {
-            setMyPageWeather({ code: data.current.weather_code, isDay: data.current.is_day === 1 });
+            const weatherData = { code: data.current.weather_code, isDay: data.current.is_day === 1 };
+            setMyPageWeather(weatherData);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("mypage_weather_cache", JSON.stringify({ ...weatherData, timestamp: Date.now() }));
+            }
           }
         } catch (e) {}
       },
