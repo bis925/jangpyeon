@@ -285,7 +285,10 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
 
   return (
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden" style={{ background: CARD, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
+<div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden relative" style={{ background: CARD, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
+        <button onClick={onClose} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 32, height: 32, background: "rgba(0,0,0,0.4)" }} aria-label="닫기">
+          <X size={18} color="#fff" />
+        </button>
         <div className="overflow-y-auto">
 {place.photo_urls && place.photo_urls.length > 0 ? (
             <div className="flex gap-1.5 overflow-x-auto p-4 pb-0">
