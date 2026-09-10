@@ -3711,6 +3711,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           onShare={shareToKakao}
           onDirections={openDirections}
           onGoToMap={(p) => { setPendingFocusId(p.id); setTab("map"); setTimeout(() => focusOnPlace(p.id), 100); }}
+          onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }}
         />
       )}
 
