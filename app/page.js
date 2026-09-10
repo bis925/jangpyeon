@@ -950,6 +950,9 @@ function processVoiceCommand(text) {
 } else if ((text.includes("지워줘") || text.includes("지워") || text.includes("초기화")) && !text.includes("검색해줘")) {
       setQuery("");
       showToast("검색어를 지웠어요");
+} else if (text.includes("안내문") || text.includes("안내 문") || text.includes("매장 안내") || text.includes("설명 카드")) {
+      setShowShopExplainCard(true);
+      showToast("안내문을 보여드릴게요");
     } else if (text.includes("공지")) {
       setTab("notice");
       showToast("공지사항으로 이동할게요");
@@ -3483,7 +3486,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
 {showShopExplainCard && (
         <div onClick={() => setShowShopExplainCard(false)} className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "#000" }}>
-<img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/splash_1788976910271.jpg" alt="장편 안내" className="w-full h-full object-cover" />
+<img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/f9f62a49-f38a-4f53-8369-044857e51e03.png" alt="장편 안내" className="w-full h-full object-cover" />
           <button onClick={(e) => { e.stopPropagation(); setShowShopExplainCard(false); }} className="absolute top-4 right-4 rounded-full flex items-center justify-center" style={{ width: 40, height: 40, background: "rgba(255,255,255,0.2)" }} aria-label="닫기">
             <X size={22} color="#fff" />
           </button>
