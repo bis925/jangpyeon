@@ -349,8 +349,9 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
                 {Object.entries(ACCESS_INFO_META).map(([key, meta]) => {
                   const val = place[key] || "unknown";
                   const info = meta.values[val] || meta.values.unknown;
-const bgColor = info.ok === true ? "#FCE4EC" : info.ok === false ? "#C0392B" : "#F1F1F1";
-                  const textColor = info.ok === true ? "#D6336C" : info.ok === false ? "#fff" : "#888";
+const bgColor = info.ok === true ? "#C0392B" : info.ok === false ? "transparent" : "#F1F1F1";
+                  const textColor = info.ok === true ? "#fff" : info.ok === false ? "#C0392B" : "#888";
+                  const cardBorder = info.ok === false ? "1.4px solid #C0392B" : "none";
                   return (
                     <div key={key} className="rounded-xl p-2.5" style={{ background: bgColor }}>
                       <div className="text-[10px] font-bold mb-0.5" style={{ color: textColor, opacity: 0.85 }}>{meta.label}</div>
