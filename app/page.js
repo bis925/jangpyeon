@@ -3483,7 +3483,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
 {showShopExplainCard && (
         <div onClick={() => setShowShopExplainCard(false)} className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "#000" }}>
-          <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/paa.png" alt="장편 안내" className="w-full h-full object-contain" />
+  <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/ir.png" alt="장편 안내" className="w-full h-full object-contain" />
           <button onClick={(e) => { e.stopPropagation(); setShowShopExplainCard(false); }} className="absolute top-4 right-4 rounded-full flex items-center justify-center" style={{ width: 40, height: 40, background: "rgba(255,255,255,0.2)" }} aria-label="닫기">
             <X size={22} color="#fff" />
           </button>
@@ -3494,7 +3494,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           <div className="relative flex items-center justify-center mb-6" style={{ width: 140, height: 140 }}>
             <div className="absolute rounded-full voice-pulse-ring" style={{ width: 140, height: 140, border: "3px solid rgba(255,255,255,0.4)" }} />
             <div className="absolute rounded-full voice-pulse-ring" style={{ width: 140, height: 140, border: "3px solid rgba(255,255,255,0.4)", animationDelay: "0.5s" }} />
-            <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편 캐릭터" style={{ width: 110, height: 110, objectFit: "contain" }} />
+         <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/ir.png" alt="장편 캐릭터" style={{ width: 110, height: 110, objectFit: "contain" }} />
           </div>
 <div className="text-white text-xs font-bold mb-1" style={{ opacity: 0.8 }}>편이</div>
           <div className="text-white font-extrabold text-xl mb-1">무엇이든 물어보세요</div>
