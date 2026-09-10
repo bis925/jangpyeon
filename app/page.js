@@ -4896,19 +4896,71 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   ))}
                 </select>
 
-                <label className="block text-xs font-bold mb-2" style={{ color: INK_SOFT }}>접근성 체크리스트</label>
-                <div className="grid grid-cols-2 gap-2 mb-6">
-                  {Object.entries(BADGE_META).map(([key, meta]) => {
-                    const Icon = meta.icon;
-                    const checked = form.badges[key];
-                    return (
-                      <button type="button" key={key} onClick={() => setForm({ ...form, badges: { ...form.badges, [key]: !checked } })}
-                        className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold border transition-all duration-200 active:scale-95"
-                        style={{ borderColor: checked ? TEAL : LINE, background: checked ? TEAL_TINT : "#fff", color: checked ? TEAL_DARK : INK_SOFT }}>
-                        <Icon size={14} />{meta.label}
-                      </button>
-                    );
-                  })}
+               <label className="block text-xs font-bold mb-3" style={{ color: INK_SOFT }}>접근성 정보 (모르면 "미확인"으로 두셔도 괜찮아요)</label>
+
+                <div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>입구 진입</div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[{ v: "none", l: "턱 없음" }, { v: "ramp", l: "경사로" }, { v: "steps", l: "계단만" }, { v: "unknown", l: "미확인" }].map((o) => (
+                      <button type="button" key={o.v} onClick={() => setForm({ ...form, entrance_step: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.entrance_step === o.v ? TEAL : LINE, background: form.entrance_step === o.v ? TEAL_TINT : "#fff", color: form.entrance_step === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>출입문 종류</div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[{ v: "auto", l: "자동문" }, { v: "swing", l: "여닫이" }, { v: "slide", l: "미닫이" }, { v: "unknown", l: "미확인" }].map((o) => (
+                      <button type="button" key={o.v} onClick={() => setForm({ ...form, door_type: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.door_type === o.v ? TEAL : LINE, background: form.door_type === o.v ? TEAL_TINT : "#fff", color: form.door_type === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>문턱 높이 (cm, 모르면 비워두세요)</div>
+                  <input type="number" value={form.threshold_cm} onChange={(e) => setForm({ ...form, threshold_cm: e.target.value })} placeholder="예: 3" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                </div>
+
+                <div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실</div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "unknown", l: "미확인" }].map((o) => (
+                      <button type="button" key={o.v} onClick={() => setForm({ ...form, accessible_toilet: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.accessible_toilet === o.v ? TEAL : LINE, background: form.accessible_toilet === o.v ? TEAL_TINT : "#fff", color: form.accessible_toilet === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {form.accessible_toilet === "yes" && (
+                  <div className="mb-4">
+                    <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실 위치 (층수)</div>
+                    <input type="number" value={form.toilet_floor} onChange={(e) => setForm({ ...form, toilet_floor: e.target.value })} placeholder="예: 1" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                  </div>
+                )}
+
+                <div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>엘리베이터</div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "none_needed", l: "1층뿐" }, { v: "unknown", l: "미확인" }].map((o) => (
+                      <button type="button" key={o.v} onClick={() => setForm({ ...form, elevator: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.elevator === o.v ? TEAL : LINE, background: form.elevator === o.v ? TEAL_TINT : "#fff", color: form.elevator === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 주차구역</div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "unknown", l: "미확인" }].map((o) => (
+                      <button type="button" key={o.v} onClick={() => setForm({ ...form, parking_disabled: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.parking_disabled === o.v ? TEAL : LINE, background: form.parking_disabled === o.v ? TEAL_TINT : "#fff", color: form.parking_disabled === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <button type="button" onClick={() => setForm({ ...form, badges: { ...form.badges, stroller: !form.badges.stroller } })}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold border transition-all duration-200 active:scale-95"
+                    style={{ borderColor: form.badges.stroller ? TEAL : LINE, background: form.badges.stroller ? TEAL_TINT : "#fff", color: form.badges.stroller ? TEAL_DARK : INK_SOFT }}>
+                    <Baby size={14} />유모차 가능
+                  </button>
                 </div>
                 <label className="block text-xs font-bold mb-2" style={{ color: INK_SOFT }}>사진 (선택)</label>
                                        {photoPreviews.length > 0 && (
