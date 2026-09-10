@@ -458,16 +458,22 @@ return (
         </div>
       )}
  
-        <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-        {openStatus === true && (
-          <div className="flex items-center gap-1 rounded-full px-2 py-1" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
-            <div className="rounded-full" style={{ width: 7, height: 7, background: "#22C55E" }} />
-            <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
-          </div>
-        )}
-        <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 rounded-full px-2 py-1.5" style={{ background: TEAL_TINT }}>
-          <MessageSquare size={14} color={TEAL_DARK} />
-          <span style={{ fontSize: 10, fontWeight: 700, color: TEAL_DARK }}>리뷰</span>
+<div className="flex items-center justify-between gap-1.5 mb-2">
+        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+          {openStatus === true && (
+            <div className="flex items-center gap-1 rounded-full px-2 py-1 flex-shrink-0" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
+              <div className="rounded-full" style={{ width: 7, height: 7, background: "#22C55E" }} />
+              <span style={{ color: "#16A34A", fontSize: 10, fontWeight: 800 }}>영업중</span>
+            </div>
+          )}
+          <button onClick={(e) => { e.stopPropagation(); onViewReviews(place); }} className="flex items-center gap-1 rounded-full px-2 py-1.5 flex-shrink-0" style={{ background: TEAL_TINT }}>
+            <MessageSquare size={14} color={TEAL_DARK} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: TEAL_DARK }}>리뷰</span>
+          </button>
+        </div>
+<button onClick={(e) => { e.stopPropagation(); onOpenDetail(place); }} className="flex items-center gap-1 rounded-full px-3 py-2 text-xs font-extrabold flex-shrink-0 transition-all duration-200 active:scale-95" style={{ background: "#FCE4EC", color: "#D6336C" }}>
+          상세보기
+          <ChevronRight size={14} />
         </button>
       </div>
       <div className="mb-3 min-w-0">
@@ -515,13 +521,7 @@ return (
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
-<div className="flex items-center justify-end">
-        <button onClick={(e) => { e.stopPropagation(); onOpenDetail(place); }} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
-          상세 정보 보기
-          <ChevronRight size={14} />
-        </button>
-      </div>
-    </div>
+</div>
   );
 }
 function TierBar({ points }) {
