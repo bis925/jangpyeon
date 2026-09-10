@@ -502,25 +502,15 @@ return (
           <div className="font-extrabold truncate" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
         </div>
       </div>
-      <div className="text-xs mb-2 truncate" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
-      {place.created_at && (() => {
-        const recency = getRecencyInfo(place.created_at, place.last_confirmed_at);
-        return (
-                 <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <button onClick={(e) => { e.stopPropagation(); onShowRecencyHelp(); }} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: recency.bg }}>
-              <div className="rounded-full" style={{ width: 6, height: 6, background: recency.color }} />
-              <span className="text-[10px] font-bold" style={{ color: recency.color }}>{recency.label}</span>
-            </button>
-                         <button onClick={(e) => { e.stopPropagation(); onConfirmInfo(place.id); }} className="flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: TEAL_TINT }}>
-              <CheckCircle size={11} color={TEAL_DARK} />
-              <span className="text-[10px] font-bold" style={{ color: TEAL_DARK }}>정보 확인했어요</span>
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); onShowRecencyHelp(); }} className="rounded-full flex-shrink-0" aria-label="정보 최신성 안내">
-              <span className="flex items-center justify-center rounded-full text-[9px] font-extrabold" style={{ width: 15, height: 15, background: TEAL, color: "#fff" }}>?</span>
-            </button>
-          </div>
-        );
-      })()}
+<div className="flex items-center justify-between gap-2 mb-2">
+        <div className="text-xs truncate" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
+        {place.created_at && (() => {
+          const recency = getRecencyInfo(place.created_at, place.last_confirmed_at);
+          return (
+            <span className="text-[10px] font-bold flex-shrink-0" style={{ color: recency.color }}>{recency.label}</span>
+          );
+        })()}
+      </div>
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
@@ -570,11 +560,17 @@ function LoginScreen({ onSent, signInWithGoogle, signInWithKakao, showToast, kak
   const [otp, setOtp] = useState("");
   const [verifying, setVerifying] = useState(false);
 
-  async function handleSubmit(e) {
+async function handleSubmit(e) {
     e.preventDefault();
     if (!email.trim()) return;
     setLoading(true);
     setErrorMsg("");
+    const { data: canSignup } = await supabase.rpc("can_signup", { p_email: email.trim() });
+    if (canSignup === false) {
+      setLoading(false);
+      setErrorMsg("탈퇴 후 7일간은 같은 이메일로 다시 가입하실 수 없어요.");
+      return;
+    }
       const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
     setLoading(false);
     if (error) { setErrorMsg(error.message); return; }
@@ -2100,6 +2096,13 @@ const [myRank, setMyRank] = useState(0);
             .join("")
         );
 const payload = JSON.parse(decodedPayload);
+        if (payload.email) {
+          const { data: canSignup } = await supabase.rpc("can_signup", { p_email: payload.email });
+          if (canSignup === false) {
+            showToast("탈퇴 후 7일간은 같은 계정으로 다시 가입하실 수 없어요");
+            return;
+          }
+        }
         const { data, error } = await supabase.functions.invoke("kakao-auth", {
           body: {
             kakaoId: payload.sub,
@@ -2144,7 +2147,15 @@ const payload = JSON.parse(decodedPayload);
           provider: "google",
           options: { scopes: ["email", "profile"], style: "standard", filterByAuthorizedAccounts: false },
         });
-        const idToken = res.result.idToken;
+const idToken = res.result.idToken;
+        const emailPayload = JSON.parse(atob(idToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+        if (emailPayload.email) {
+          const { data: canSignup } = await supabase.rpc("can_signup", { p_email: emailPayload.email });
+          if (canSignup === false) {
+            showToast("탈퇴 후 7일간은 같은 계정으로 다시 가입하실 수 없어요");
+            return;
+          }
+        }
         const { error } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: idToken,
