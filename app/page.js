@@ -3483,7 +3483,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
 {showShopExplainCard && (
         <div onClick={() => setShowShopExplainCard(false)} className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "#000" }}>
-  <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/ir.png" alt="장편 안내" className="w-full h-full object-contain" />
+<img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/splash_1788976910271.jpg" alt="장편 안내" className="w-full h-full object-cover" />
           <button onClick={(e) => { e.stopPropagation(); setShowShopExplainCard(false); }} className="absolute top-4 right-4 rounded-full flex items-center justify-center" style={{ width: 40, height: 40, background: "rgba(255,255,255,0.2)" }} aria-label="닫기">
             <X size={22} color="#fff" />
           </button>
