@@ -259,9 +259,13 @@ const ACCESS_INFO_META = {
     label: "엘리베이터",
     values: { yes: { text: "있음", ok: true }, no: { text: "없음", ok: false }, none_needed: { text: "1층뿐이라 필요 없음", ok: true }, unknown: { text: "확인된 정보 없음", ok: null } },
   },
-  parking_disabled: {
+parking_disabled: {
     label: "장애인 주차구역",
     values: { yes: { text: "있음", ok: true }, no: { text: "없음", ok: false }, unknown: { text: "확인된 정보 없음", ok: null } },
+  },
+  turning_space: {
+    label: "내부 회전 공간",
+    values: { yes: { text: "여유 있음", ok: true }, no: { text: "비좁음", ok: false }, unknown: { text: "확인된 정보 없음", ok: null } },
   },
 };
 
@@ -358,6 +362,12 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
                   <div className="rounded-xl p-2.5" style={{ background: "#F1F1F1" }}>
                     <div className="text-[10px] font-bold mb-0.5" style={{ color: "#888", opacity: 0.85 }}>문턱 높이</div>
                     <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.threshold_cm}cm</div>
+                  </div>
+                )}
+                {place.door_width_cm != null && (
+                  <div className="rounded-xl p-2.5" style={{ background: "#F1F1F1" }}>
+                    <div className="text-[10px] font-bold mb-0.5" style={{ color: "#888", opacity: 0.85 }}>출입문 유효폭</div>
+                    <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.door_width_cm}cm</div>
                   </div>
                 )}
                 {place.toilet_floor != null && place.accessible_toilet === "yes" && (
@@ -3313,8 +3323,10 @@ useEffect(() => {
       threshold_cm: place.threshold_cm ?? "",
       accessible_toilet: place.accessible_toilet || "unknown",
       toilet_floor: place.toilet_floor ?? "",
-      elevator: place.elevator || "unknown",
+elevator: place.elevator || "unknown",
       parking_disabled: place.parking_disabled || "unknown",
+      door_width_cm: place.door_width_cm ?? "",
+      turning_space: place.turning_space || "unknown",
       badges: {
         stroller: place.has_stroller_access,
       },
@@ -3347,8 +3359,10 @@ useEffect(() => {
         p_threshold_cm: form.threshold_cm === "" ? null : parseInt(form.threshold_cm),
         p_accessible_toilet: form.accessible_toilet,
         p_toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
-        p_elevator: form.elevator,
+p_elevator: form.elevator,
         p_parking_disabled: form.parking_disabled,
+        p_door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
+        p_turning_space: form.turning_space,
         p_has_stroller_access: form.badges.stroller,
         p_keywords: form.keywords.trim() || null,
         p_phone: form.phone.trim() || null,
@@ -3366,8 +3380,10 @@ useEffect(() => {
           threshold_cm: form.threshold_cm === "" ? null : parseInt(form.threshold_cm),
           accessible_toilet: form.accessible_toilet,
           toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
-          elevator: form.elevator,
+elevator: form.elevator,
           parking_disabled: form.parking_disabled,
+          door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
+          turning_space: form.turning_space,
           has_stroller_access: form.badges.stroller,
           keywords: form.keywords.trim() || null,
                  phone: form.phone.trim() || null,
@@ -3438,8 +3454,10 @@ const { data, error } = await supabase.rpc("register_place", {
       p_threshold_cm: form.threshold_cm === "" ? null : parseInt(form.threshold_cm),
       p_accessible_toilet: form.accessible_toilet,
       p_toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
-      p_elevator: form.elevator,
+p_elevator: form.elevator,
       p_parking_disabled: form.parking_disabled,
+      p_door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
+      p_turning_space: form.turning_space,
       p_has_stroller_access: form.badges.stroller,
       p_keywords: form.keywords.trim() || null,
       p_phone: form.phone.trim() || null,
@@ -5172,9 +5190,23 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </div>
                 </div>
 
-                <div className="mb-4">
+     <div className="mb-4">
                   <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>문턱 높이 (cm, 모르면 비워두세요)</div>
                   <input type="number" value={form.threshold_cm} onChange={(e) => setForm({ ...form, threshold_cm: e.target.value })} placeholder="예: 3" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                </div>
+
+                <div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>출입문 유효폭 (cm, 모르면 비워두세요)</div>
+                  <input type="number" value={form.door_width_cm} onChange={(e) => setForm({ ...form, door_width_cm: e.target.value })} placeholder="예: 80" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                </div>
+
+                <div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>내부 휠체어 회전 공간</div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[{ v: "yes", l: "여유 있음" }, { v: "no", l: "비좁음" }, { v: "unknown", l: "미확인" }].map((o) => (
+                      <button type="button" key={o.v} onClick={() => setForm({ ...form, turning_space: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.turning_space === o.v ? TEAL : LINE, background: form.turning_space === o.v ? TEAL_TINT : "#fff", color: form.turning_space === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="mb-4">
