@@ -1431,6 +1431,12 @@ function getWeatherEffect(weather) {
   }
 
 async function announceTodayWeather() {
+    if (voiceWeatherCache && Date.now() - voiceWeatherCache.timestamp < 6 * 60 * 1000) {
+      setVoiceFaqAnswer({ question: "오늘 날씨", answer: voiceWeatherCache.text });
+      speakVoiceAnswer(voiceWeatherCache.text);
+      backgroundFetchVoiceWeather();
+      return;
+    }
     try {
       const pos = await getCurrentPositionSmart();
       try {
@@ -1481,6 +1487,33 @@ async function announceTodayWeather() {
         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: options.enableHighAccuracy ?? true, timeout: options.timeout ?? 8000, maximumAge: 0 });
       });
     }
+  }
+
+    async function backgroundFetchVoiceWeather() {
+    try {
+      const pos = await getCurrentPositionSmart({ enableHighAccuracy: false, timeout: 10000 });
+      const { latitude, longitude } = pos.coords;
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,temperature_2m`);
+      const data = await res.json();
+      let locationText = "";
+      if (typeof window !== "undefined" && window.kakao && window.kakao.maps && window.kakao.maps.services) {
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        await new Promise((resolve) => {
+          geocoder.coord2RegionCode(longitude, latitude, (result, status) => {
+            if (status === window.kakao.maps.services.Status.OK && result[0]) {
+              locationText = result[0].region_2depth_name + " " + result[0].region_3depth_name + ", ";
+            }
+            resolve();
+          });
+        });
+      }
+      if (data.current) {
+        const desc = getWeatherDescription(data.current.weather_code);
+        const temp = Math.round(data.current.temperature_2m);
+        const text = `${locationText}오늘 날씨는 ${temp}도, ${desc}`;
+        setVoiceWeatherCache({ text, timestamp: Date.now() });
+      }
+    } catch (e) {}
   }
   
   function showToast(message) {
@@ -2188,6 +2221,7 @@ const [showAccessPicker, setShowAccessPicker] = useState(false);
 const [faqPage, setFaqPage] = useState(1);
   const [showElevatorHelp, setShowElevatorHelp] = useState(false);
 const [myPageWeather, setMyPageWeather] = useState(null);
+  const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
   const showElevatorHelpRef = useRef(false);
   useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
@@ -2596,6 +2630,13 @@ useEffect(() => {
 useEffect(() => {
     if (session && tab === "my" && !myPageWeather) fetchMyPageWeather();
   }, [session, tab]);
+
+  useEffect(() => {
+    if (!session) return;
+    backgroundFetchVoiceWeather();
+    const interval = setInterval(backgroundFetchVoiceWeather, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [session]);
 
   useEffect(() => {
     if (session && tab === "home" && !myLocation) locateMe();
