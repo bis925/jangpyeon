@@ -20,6 +20,14 @@ body {
   animation: mic-saved-pop 0.3s ease-out;
 }
 
+@keyframes shop-explain-blink {
+  0%, 100% { background-color: var(--teal-tint, #E1F5EE); }
+  50% { background-color: #FFC13B33; }
+}
+.shop-explain-blink {
+  animation: shop-explain-blink 1.8s ease-in-out infinite;
+}
+
 @keyframes mic-shake {
   0%, 100% { transform: rotate(-3deg); }
   50% { transform: rotate(3deg); }
