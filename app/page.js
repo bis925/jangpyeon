@@ -285,7 +285,7 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
 
   return (
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-<div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden relative" style={{ background: CARD, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
+<div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden relative" style={{ background: CARD, maxHeight: "88vh", display: "flex", flexDirection: "column", border: `3px solid ${CATEGORY_MARKERS[place.category]?.color || TEAL}` }}>
         <button onClick={onClose} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 32, height: 32, background: "rgba(0,0,0,0.4)" }} aria-label="닫기">
           <X size={18} color="#fff" />
         </button>
@@ -339,20 +339,18 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
             </div>
 
 
-            <div className="rounded-2xl p-4 mb-4" style={{ background: PAPER }}>
-              <div className="text-xs font-extrabold mb-3" style={{ color: INK }}>접근성 정보</div>
-              <div className="flex flex-col gap-2.5">
+<div className="rounded-2xl p-4 mb-4" style={{ background: PAPER }}>
+              <div className="text-sm font-extrabold mb-3" style={{ color: INK }}>♿ 접근성 정보</div>
+              <div className="grid grid-cols-2 gap-2">
                 {Object.entries(ACCESS_INFO_META).map(([key, meta]) => {
                   const val = place[key] || "unknown";
                   const info = meta.values[val] || meta.values.unknown;
-                  const dotColor = info.ok === true ? "#22C55E" : info.ok === false ? "#E74C3C" : "#B8B1A0";
+                  const bgColor = info.ok === true ? "#E5F4EC" : info.ok === false ? "#FBEAE8" : "#F1F1F1";
+                  const textColor = info.ok === true ? "#1F7A4D" : info.ok === false ? "#C0392B" : "#888";
                   return (
-                    <div key={key} className="flex items-center justify-between gap-2">
-                      <span className="text-xs" style={{ color: INK_SOFT }}>{meta.label}</span>
-                      <div className="flex items-center gap-1.5">
-                        <div className="rounded-full" style={{ width: 7, height: 7, background: dotColor }} />
-                        <span className="text-xs font-bold" style={{ color: INK }}>{info.text}</span>
-                      </div>
+                    <div key={key} className="rounded-xl p-2.5" style={{ background: bgColor }}>
+                      <div className="text-[10px] font-bold mb-0.5" style={{ color: textColor, opacity: 0.85 }}>{meta.label}</div>
+                      <div className="text-sm font-extrabold" style={{ color: textColor }}>{info.text}</div>
                     </div>
                   );
                 })}
