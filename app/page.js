@@ -1673,7 +1673,13 @@ const showFavoritesOnlyRef = useRef(false);
           setShowFAQ(false);
           if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
           setSpeakingFaqId(null);
-} else if (showShopExplainCardRef.current) {
+} else if (showDoorTypeHelpRef.current) {
+          setShowDoorTypeHelp(false);
+        } else if (showTurningHelpRef.current) {
+          setShowTurningHelp(false);
+        } else if (showElevatorHelpRef.current) {
+          setShowElevatorHelp(false);
+        } else if (showShopExplainCardRef.current) {
           setShowShopExplainCard(false);
 } else if (showDeleteAccountRef.current) {
           setShowDeleteAccount(false);
@@ -2080,7 +2086,16 @@ const [openFilterActive, setOpenFilterActive] = useState(false);
 const [showShopExplainCard, setShowShopExplainCard] = useState(false);
 const [mapAccessFilter, setMapAccessFilter] = useState(null);
 const [showAccessPicker, setShowAccessPicker] = useState(false);
-  const [faqPage, setFaqPage] = useState(1);
+const [faqPage, setFaqPage] = useState(1);
+const [showElevatorHelp, setShowElevatorHelp] = useState(false);
+  const showElevatorHelpRef = useRef(false);
+  useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
+const [showTurningHelp, setShowTurningHelp] = useState(false);
+  const showTurningHelpRef = useRef(false);
+  useEffect(() => { showTurningHelpRef.current = showTurningHelp; }, [showTurningHelp]);
+  const [showDoorTypeHelp, setShowDoorTypeHelp] = useState(false);
+  const showDoorTypeHelpRef = useRef(false);
+  useEffect(() => { showDoorTypeHelpRef.current = showDoorTypeHelp; }, [showDoorTypeHelp]);
 const [viewingDetailPlace, setViewingDetailPlace] = useState(null);
   const viewingDetailPlaceRef = useRef(null);
   useEffect(() => { viewingDetailPlaceRef.current = viewingDetailPlace; }, [viewingDetailPlace]);
@@ -3786,6 +3801,61 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
         </div>
       )}
 
+{showDoorTypeHelp && (
+        <div onClick={() => setShowDoorTypeHelp(false)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-5" style={{ background: CARD }}>
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>출입문 종류가 뭔가요?</div>
+            <div className="flex flex-col gap-2.5 text-xs" style={{ color: INK_SOFT, lineHeight: 1.6 }}>
+              <div><b style={{ color: TEAL_DARK }}>자동문</b> — 센서로 저절로 열리는 문이에요. 손댈 필요가 없어요</div>
+              <div><b style={{ color: TEAL_DARK }}>여닫이</b> — 손잡이를 밀거나 당겨서 여는 문이에요. 문이 앞이나 뒤로 열려요</div>
+              <div><b style={{ color: TEAL_DARK }}>미닫이</b> — 옆으로 밀어서 여는 문이에요. 문이 좌우로 스르륵 움직여요</div>
+              <div><b style={{ color: INK_SOFT }}>미확인</b> — 아직 확인된 정보가 없어요</div>
+            </div>
+            <button onClick={() => setShowDoorTypeHelp(false)} className="w-full rounded-full py-2.5 mt-4 text-sm font-bold text-white" style={{ background: TEAL }}>
+              확인했어요
+            </button>
+          </div>
+        </div>
+      )}
+
+
+{showTurningHelp && (
+        <div onClick={() => setShowTurningHelp(false)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-5" style={{ background: CARD }}>
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>"내부 휠체어 회전 공간"은 뭔가요?</div>
+            <div className="text-xs mb-3" style={{ color: INK_SOFT, lineHeight: 1.6 }}>
+              문을 통과해서 <b>들어간 이후에도</b>, 휠체어가 자유롭게 움직이고 방향을 바꿀 수 있는 공간이 있는지를 말해요.
+            </div>
+            <div className="flex flex-col gap-2.5 text-xs" style={{ color: INK_SOFT, lineHeight: 1.6 }}>
+              <div><b style={{ color: TEAL_DARK }}>여유 있음</b> — 테이블, 진열대 등에 부딪히지 않고 방향을 바꿀 수 있는 공간이 있어요</div>
+              <div><b style={{ color: CORAL }}>비좁음</b> — 통로가 좁거나 짐이 많아서, 휠체어가 움직이기 어려워요</div>
+              <div><b style={{ color: INK_SOFT }}>미확인</b> — 아직 확인된 정보가 없어요</div>
+            </div>
+            <button onClick={() => setShowTurningHelp(false)} className="w-full rounded-full py-2.5 mt-4 text-sm font-bold text-white" style={{ background: TEAL }}>
+              확인했어요
+            </button>
+          </div>
+        </div>
+      )}
+
+
+{showElevatorHelp && (
+        <div onClick={() => setShowElevatorHelp(false)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-5" style={{ background: CARD }}>
+            <div className="font-extrabold text-sm mb-3" style={{ color: INK }}>"1층뿐"은 무슨 뜻인가요?</div>
+            <div className="flex flex-col gap-2.5 text-xs" style={{ color: INK_SOFT, lineHeight: 1.6 }}>
+              <div><b style={{ color: TEAL_DARK }}>있음</b> — 이 건물에 엘리베이터가 있어요</div>
+              <div><b style={{ color: CORAL }}>없음</b> — 여러 층 건물인데 엘리베이터가 없어요. 계단으로만 올라갈 수 있어요</div>
+              <div><b style={{ color: TEAL_DARK }}>1층뿐</b> — 건물 자체가 1층짜리라서, 엘리베이터가 필요 없어요</div>
+              <div><b style={{ color: INK_SOFT }}>미확인</b> — 아직 확인된 정보가 없어요</div>
+            </div>
+            <button onClick={() => setShowElevatorHelp(false)} className="w-full rounded-full py-2.5 mt-4 text-sm font-bold text-white" style={{ background: TEAL }}>
+              확인했어요
+            </button>
+          </div>
+        </div>
+      )}
+
 {showShopExplainCard && (
         <div onClick={() => setShowShopExplainCard(false)} className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "#000" }}>
 <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/f9f62a49-f38a-4f53-8369-044857e51e03.png" alt="장편 안내" className="w-full h-full object-cover" />
@@ -5181,8 +5251,13 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>출입문 종류</div>
+ <div className="mb-4">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className="text-xs font-bold" style={{ color: INK }}>출입문 종류</div>
+                    <button type="button" onClick={() => setShowDoorTypeHelp(true)} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 15, height: 15, background: TEAL }} aria-label="출입문 종류 안내">
+                      <span className="text-[9px] font-extrabold" style={{ color: "#fff" }}>?</span>
+                    </button>
+                  </div>
                   <div className="grid grid-cols-4 gap-1.5">
                     {[{ v: "auto", l: "자동문" }, { v: "swing", l: "여닫이" }, { v: "slide", l: "미닫이" }, { v: "unknown", l: "미확인" }].map((o) => (
                       <button type="button" key={o.v} onClick={() => setForm({ ...form, door_type: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.door_type === o.v ? TEAL : LINE, background: form.door_type === o.v ? TEAL_TINT : "#fff", color: form.door_type === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
@@ -5200,8 +5275,13 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   <input type="number" value={form.door_width_cm} onChange={(e) => setForm({ ...form, door_width_cm: e.target.value })} placeholder="예: 80" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
                 </div>
 
-                <div className="mb-4">
-                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>내부 휠체어 회전 공간</div>
+<div className="mb-4">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className="text-xs font-bold" style={{ color: INK }}>내부 휠체어 회전 공간</div>
+                    <button type="button" onClick={() => setShowTurningHelp(true)} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 15, height: 15, background: TEAL }} aria-label="내부 회전 공간 안내">
+                      <span className="text-[9px] font-extrabold" style={{ color: "#fff" }}>?</span>
+                    </button>
+                  </div>
                   <div className="grid grid-cols-3 gap-1.5">
                     {[{ v: "yes", l: "여유 있음" }, { v: "no", l: "비좁음" }, { v: "unknown", l: "미확인" }].map((o) => (
                       <button type="button" key={o.v} onClick={() => setForm({ ...form, turning_space: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.turning_space === o.v ? TEAL : LINE, background: form.turning_space === o.v ? TEAL_TINT : "#fff", color: form.turning_space === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
@@ -5209,10 +5289,15 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실</div>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "unknown", l: "미확인" }].map((o) => (
+      <div className="mb-4">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className="text-xs font-bold" style={{ color: INK }}>엘리베이터</div>
+                    <button type="button" onClick={() => setShowElevatorHelp(true)} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 15, height: 15, background: TEAL }} aria-label="엘리베이터 안내">
+                      <span className="text-[9px] font-extrabold" style={{ color: "#fff" }}>?</span>
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "none_needed", l: "1층뿐" }, { v: "unknown", l: "미확인" }].map((o) => (
                       <button type="button" key={o.v} onClick={() => setForm({ ...form, accessible_toilet: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.accessible_toilet === o.v ? TEAL : LINE, background: form.accessible_toilet === o.v ? TEAL_TINT : "#fff", color: form.accessible_toilet === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
                     ))}
                   </div>
