@@ -1439,25 +1439,9 @@ function getWeatherEffect(weather) {
   }
 
 async function announceTodayWeather() {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      showToast("위치 정보를 사용할 수 없어요");
-      return;
-    }
-    function tryGetPosition(retriesLeft) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => handlePositionSuccess(pos),
-        (err) => {
-          if (retriesLeft > 0) {
-            setTimeout(() => tryGetPosition(retriesLeft - 1), 500);
-          } else {
-            showToast("위치 권한을 확인해주세요");
-          }
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-      );
-    }
-    async function handlePositionSuccess(pos) {
-        try {
+    try {
+      const pos = await getCurrentPositionSmart();
+      try {
           const { latitude, longitude } = pos.coords;
           const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code,temperature_2m,is_day`);
           const data = await res.json();
@@ -1481,10 +1465,30 @@ async function announceTodayWeather() {
             speakVoiceAnswer(text);
           }
 } catch (e) {
-          showToast("날씨 정보를 가져오지 못했어요");
-        }
+        showToast("날씨 정보를 가져오지 못했어요");
+      }
+    } catch (err) {
+      showToast("위치 권한을 확인해주세요");
     }
-    tryGetPosition(2);
+  }
+
+    async function getCurrentPositionSmart(options = {}) {
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const { Geolocation } = await import("@capacitor/geolocation");
+      const perm = await Geolocation.checkPermissions();
+      if (perm.location !== "granted" && perm.coarseLocation !== "granted") {
+        const req = await Geolocation.requestPermissions();
+        if (req.location !== "granted" && req.coarseLocation !== "granted") {
+          throw new Error("permission_denied");
+        }
+      }
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: options.enableHighAccuracy ?? true, timeout: options.timeout ?? 8000 });
+      return pos;
+    } else {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: options.enableHighAccuracy ?? true, timeout: options.timeout ?? 8000, maximumAge: 0 });
+      });
+    }
   }
   
   function showToast(message) {
