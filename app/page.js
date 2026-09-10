@@ -291,9 +291,9 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
         </button>
         <div className="overflow-y-auto">
 {place.photo_urls && place.photo_urls.length > 0 ? (
-            <div className="flex gap-1.5 overflow-x-auto p-4 pb-0">
+            <div className="grid gap-1.5 p-4 pb-0" style={{ gridTemplateColumns: `repeat(${Math.min(place.photo_urls.length, 5)}, 1fr)` }}>
               {place.photo_urls.map((url, i) => (
-                <button key={i} type="button" onClick={() => onImageClick(place.photo_urls, i)} className={`w-24 h-24 rounded-xl flex-shrink-0 overflow-hidden ${i >= 4 ? "hidden sm:block" : ""}`}>
+                <button key={i} type="button" onClick={() => onImageClick(place.photo_urls, i)} className="aspect-square rounded-xl overflow-hidden min-w-0">
                   <img src={url} alt={`${place.name} ${i + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
