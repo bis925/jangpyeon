@@ -1184,13 +1184,14 @@ async function addVoiceQa() {
     const clamped = Math.max(10, Math.min(90, percent));
     setMicPositionPercent(clamped);
   }
-  function handleMicDragEnd() {
+function handleMicDragEnd() {
     if (!isMicDragMode) return;
     setIsMicDragMode(false);
     if (typeof window !== "undefined") {
       localStorage.setItem("mic_position_percent", micPositionPercent.toString());
     }
-    showToast("마이크 위치가 저장됐어요");
+    setShowMicSavedBadge(true);
+    setTimeout(() => setShowMicSavedBadge(false), 1500);
   }
   
   function showToast(message) {
@@ -1890,7 +1891,8 @@ const [voiceQaPage, setVoiceQaPage] = useState(1);
 const [openFilterActive, setOpenFilterActive] = useState(false);
 const [showShopExplainCard, setShowShopExplainCard] = useState(false);
   const [micPositionPercent, setMicPositionPercent] = useState(50);
-  const [isMicDragMode, setIsMicDragMode] = useState(false);
+const [isMicDragMode, setIsMicDragMode] = useState(false);
+  const [showMicSavedBadge, setShowMicSavedBadge] = useState(false);
   const showShopExplainCardRef = useRef(false);
   useEffect(() => { showShopExplainCardRef.current = showShopExplainCard; }, [showShopExplainCard]);
   const [distanceFilter, setDistanceFilter] = useState(null);
@@ -3483,6 +3485,14 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
     <div className="rounded-full px-2.5 py-1 mb-1.5 voice-hint-float" style={{ background: "rgba(0,0,0,0.6)", whiteSpace: "nowrap" }}>
  <span className="text-white" style={{ fontSize: 10, fontWeight: 700 }}>눌러서 말해보세요</span>
           </div>
+          {showMicSavedBadge && (
+            <div className="rounded-full px-3 py-1.5 mb-2 flex items-center gap-1.5 mic-saved-pop" style={{ background: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+              <Check size={14} color={TEAL} />
+              <span className="text-xs font-extrabold" style={{ color: TEAL_DARK }}>여기에 저장됐어요!</span>
+            </div>
+          )}
+          <button
+            onClick={() => { if (!isMicDragMode) startVoiceCommand(); }}
 <button
             onClick={() => { if (!isMicDragMode) startVoiceCommand(); }}
             onTouchStart={handleMicPressStart}
