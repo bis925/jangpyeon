@@ -384,12 +384,17 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
           <button onClick={() => onShare(place)} className="flex items-center justify-center rounded-full p-3" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
             <MessageCircle size={18} color="#3C1E1E" fill="#3C1E1E" />
           </button>
-          <button onClick={() => { onGoToMap(place); onClose(); }} className="flex-1 flex items-center justify-center gap-1.5 rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
+       <button onClick={() => { onGoToMap(place); onClose(); }} className="flex-1 flex items-center justify-center gap-1.5 rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
             <MapPin size={16} />
+            지도로 보기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo, onShowRecencyHelp, onOpenMenu, onOpenDetail, onGoToMap }) {
-  const badges = getBadges(place);
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo, onShowRecencyHelp, onOpenMenu, onOpenDetail, onGoToMap }) {  const badges = getBadges(place);
   const openStatus = isOpenNow(place.business_hours, holidays);
   const longPressTimer = useRef(null);
   const didLongPress = useRef(false);
