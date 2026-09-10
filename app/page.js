@@ -290,8 +290,9 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
           <X size={18} color="#fff" />
         </button>
         <div className="overflow-y-auto">
+
 {place.photo_urls && place.photo_urls.length > 0 ? (
-            <div className="grid gap-1.5 p-4 pb-0" style={{ gridTemplateColumns: `repeat(${Math.min(place.photo_urls.length, 5)}, 1fr)` }}>
+            <div className="grid gap-1.5 p-4 pb-0" style={{ gridTemplateColumns: `repeat(${place.photo_urls.length}, 1fr)` }}>
               {place.photo_urls.map((url, i) => (
                 <button key={i} type="button" onClick={() => onImageClick(place.photo_urls, i)} className="aspect-square rounded-xl overflow-hidden min-w-0">
                   <img src={url} alt={`${place.name} ${i + 1}`} className="w-full h-full object-cover" />
