@@ -20,6 +20,24 @@ body {
   animation: mic-saved-pop 0.3s ease-out;
 }
 
+@keyframes weather-rain-fall {
+  0% { transform: translateY(0); opacity: 0.8; }
+  100% { transform: translateY(160px); opacity: 0; }
+}
+.weather-rain { animation: weather-rain-fall linear infinite; }
+
+@keyframes weather-snow-fall {
+  0% { transform: translateY(0) translateX(0); opacity: 0.9; }
+  100% { transform: translateY(160px) translateX(10px); opacity: 0; }
+}
+.weather-snow { animation: weather-snow-fall linear infinite; }
+
+@keyframes weather-twinkle-blink {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+.weather-twinkle { animation: weather-twinkle-blink 1.8s ease-in-out infinite; }
+
 @keyframes shop-explain-blink {
   0%, 100% { background-color: var(--teal-tint, #E1F5EE); }
   50% { background-color: #FFC13B33; }
