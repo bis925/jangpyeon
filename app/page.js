@@ -1453,10 +1453,10 @@ async function announceTodayWeather() {
             speakVoiceAnswer(text);
           }
 } catch (e) {
-          alert("날씨 에러: " + e.message);
+          showToast("날씨 정보를 가져오지 못했어요");
         }
       },
-      (err) => alert("위치 에러: " + err.message + " / 코드: " + err.code),
+      () => showToast("위치 권한을 확인해주세요"),
       { enableHighAccuracy: false, timeout: 10000 }
     );
   }
