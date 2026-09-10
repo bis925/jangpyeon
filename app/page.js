@@ -1532,8 +1532,10 @@ useEffect(() => { showFAQRef.current = showFAQ; }, [showFAQ]);
   }, []);
 const showRankingPolicyRef = useRef(false);
 const voiceFaqAnswerRef = useRef(null);
+  const viewingDetailPlaceRef = useRef(null);
   useEffect(() => { showRankingPolicyRef.current = showRankingPolicy; }, [showRankingPolicy]);
 useEffect(() => { voiceFaqAnswerRef.current = voiceFaqAnswer; }, [voiceFaqAnswer]);
+  useEffect(() => { viewingDetailPlaceRef.current = viewingDetailPlace; }, [viewingDetailPlace]);
    const showFavoritesOnlyRef = useRef(false);
   useEffect(() => { showFavoritesOnlyRef.current = showFavoritesOnly; }, [showFavoritesOnly]);
   const isMapFullscreenRef = useRef(false);
@@ -1633,6 +1635,8 @@ useEffect(() => { voiceFaqAnswerRef.current = voiceFaqAnswer; }, [voiceFaqAnswer
           setSpeakingFaqId(null);
 } else if (showShopExplainCardRef.current) {
           setShowShopExplainCard(false);
+} else if (viewingDetailPlaceRef.current) {
+          setViewingDetailPlace(null);
         } else if (voiceFaqAnswerRef.current) {
           setVoiceFaqAnswer(null);
           if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
@@ -2032,6 +2036,7 @@ const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
 const [voiceQaPage, setVoiceQaPage] = useState(1);
 const [openFilterActive, setOpenFilterActive] = useState(false);
 const [showShopExplainCard, setShowShopExplainCard] = useState(false);
+  const [viewingDetailPlace, setViewingDetailPlace] = useState(null);
   const [micPositionPercent, setMicPositionPercent] = useState(50);
 const [isMicDragMode, setIsMicDragMode] = useState(false);
   const [showMicSavedBadge, setShowMicSavedBadge] = useState(false);
@@ -3667,6 +3672,19 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           </button>
         </div>
       )}
+
+{viewingDetailPlace && (
+        <PlaceDetailModal
+          place={viewingDetailPlace}
+          onClose={() => setViewingDetailPlace(null)}
+          holidays={holidays}
+          onShare={shareToKakao}
+          onDirections={openDirections}
+          onGoToMap={(p) => { setPendingFocusId(p.id); setTab("map"); setTimeout(() => focusOnPlace(p.id), 100); }}
+        />
+      )}
+
+
 {voiceFaqAnswer && (
         <div onClick={() => { setVoiceFaqAnswer(null); if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel(); }} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-6" style={{ background: CARD }}>
@@ -4737,7 +4755,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                    <div className="grid sm:grid-cols-2 gap-3 min-w-0">
               {visiblePlaces.map((p) => (
                      <div key={p.id} onClick={() => { setPendingFocusId(p.id); setTab("map"); }} className="cursor-pointer min-w-0">
-<PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} onOpenMenu={setPlaceContextMenu} />
+<PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} onOpenMenu={setPlaceContextMenu} onOpenDetail={setViewingDetailPlace} onGoToMap={(p) => { setPendingFocusId(p.id); setTab("map"); }} />
                              </div>
                          ))}
               {filteredPlaces.length === 0 && (
@@ -4808,8 +4826,8 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 if (!b.lat || !b.lng) return -1;
                 return calcDistanceKm(myLocation.lat, myLocation.lng, a.lat, a.lng) - calcDistanceKm(myLocation.lat, myLocation.lng, b.lat, b.lng);
               }).map((p) => (
-                <div key={p.id} onClick={() => focusOnPlace(p.id)} className="cursor-pointer min-w-0">
-              <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} onOpenMenu={setPlaceContextMenu} />
+    <div key={p.id} className="min-w-0">
+              <PlaceCard place={p} onHelpful={markHelpful} isFavorite={favorites.has(p.id)} onToggleFavorite={toggleFavorite} onEdit={startEdit} isOwner={p.created_by === session.user.id} onImageClick={(urls, idx) => { setPreviewImages(urls); setPreviewIndex(idx); setShowSwipeHint(urls.length > 1); }} onShare={shareToKakao} onDirections={openDirections} onReport={reportPlace} onDelete={deletePlace} isAdminUser={isAdmin} onAdminEdit={adminEditPlace} onAdminDelete={(p) => setDeletingPlace({ ...p, isAdminAction: true })} holidays={holidays} onViewReviews={(p) => { setViewingReviewsPlace(p); fetchReviews(p.id); }} onConfirmInfo={confirmPlaceInfo} onShowRecencyHelp={() => setShowRecencyHelp(true)} onOpenMenu={setPlaceContextMenu} onOpenDetail={setViewingDetailPlace} onGoToMap={(p) => focusOnPlace(p.id)} />
                 </div>
               ))}
             </div>
