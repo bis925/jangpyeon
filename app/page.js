@@ -943,12 +943,14 @@ export default function Page() {
     setFaqs(data || []);
   }
 
-  async function addFaq() {
+async function addFaq() {
     if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) { showToast("질문과 답변을 모두 입력해주세요"); return; }
     const maxOrder = faqs.length > 0 ? Math.max(...faqs.map((f) => f.display_order)) : 0;
+    const cleanQuestion = newFaqQuestion.trim().replace(/^Q\.\s*/i, "");
+    const cleanAnswer = newFaqAnswer.trim().replace(/^A\.\s*/i, "");
     const { error } = await supabase.from("faqs").insert({
-      question: newFaqQuestion.trim(),
-      answer: newFaqAnswer.trim(),
+      question: `Q. ${cleanQuestion}`,
+      answer: `A. ${cleanAnswer}`,
       display_order: maxOrder + 1,
     });
     if (error) { showToast("추가 실패: " + error.message); return; }
