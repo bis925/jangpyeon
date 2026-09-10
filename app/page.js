@@ -242,7 +242,153 @@ function Badge({ badgeKey }) {
   );
 }
 
-function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo, onShowRecencyHelp, onOpenMenu }) {
+const ACCESS_INFO_META = {
+  entrance_step: {
+    label: "입구 진입",
+    values: { none: { text: "턱 없이 진입 가능", ok: true }, ramp: { text: "경사로 있음", ok: true }, steps: { text: "계단만 있음", ok: false }, unknown: { text: "확인된 정보 없음", ok: null } },
+  },
+  door_type: {
+    label: "출입문",
+    values: { auto: { text: "자동문", ok: true }, swing: { text: "여닫이문", ok: null }, slide: { text: "미닫이문", ok: true }, unknown: { text: "확인된 정보 없음", ok: null } },
+  },
+  accessible_toilet: {
+    label: "장애인 화장실",
+    values: { yes: { text: "있음", ok: true }, no: { text: "없음", ok: false }, unknown: { text: "확인된 정보 없음", ok: null } },
+  },
+  elevator: {
+    label: "엘리베이터",
+    values: { yes: { text: "있음", ok: true }, no: { text: "없음", ok: false }, none_needed: { text: "1층뿐이라 필요 없음", ok: true }, unknown: { text: "확인된 정보 없음", ok: null } },
+  },
+  parking_disabled: {
+    label: "장애인 주차구역",
+    values: { yes: { text: "있음", ok: true }, no: { text: "없음", ok: false }, unknown: { text: "확인된 정보 없음", ok: null } },
+  },
+};
+
+function getOverallAccessSummary(place) {
+  const critical = ["entrance_step", "accessible_toilet"];
+  const values = critical.map((k) => place[k]);
+  if (values.includes("steps") || place.entrance_step === "steps") return { text: "휠체어 진입 불가", color: "#C0392B", bg: "#FBEAE8" };
+  const hasUnknown = critical.some((k) => !place[k] || place[k] === "unknown");
+  const hasNo = place.accessible_toilet === "no";
+  if (hasUnknown) return { text: "확인 필요", color: "#8A6D1F", bg: "#FBF3DC" };
+  if (place.entrance_step === "ramp" && !hasNo) return { text: "휠체어 진입 가능", color: "#1F7A4D", bg: "#E5F4EC" };
+  return { text: "조건부 가능", color: "#B4620F", bg: "#FCEEDD" };
+}
+
+function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onGoToMap }) {
+  if (!place) return null;
+  const openStatus = isOpenNow(place.business_hours, holidays);
+  const summary = getOverallAccessSummary(place);
+  const recency = place.created_at ? getRecencyInfo(place.created_at, place.last_confirmed_at) : null;
+
+  return (
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden" style={{ background: CARD, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
+        <div className="overflow-y-auto">
+          {place.photo_urls && place.photo_urls.length > 0 ? (
+            <div className="flex gap-1.5 overflow-x-auto p-4 pb-0">
+              {place.photo_urls.map((url, i) => (
+                <img key={i} src={url} alt={`${place.name} ${i + 1}`} className="w-24 h-24 rounded-xl flex-shrink-0 object-cover" />
+              ))}
+            </div>
+          ) : null}
+
+          <div className="p-5">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              {openStatus === true && (
+                <div className="flex items-center gap-1 rounded-full px-2.5 py-1" style={{ background: "#E5F4EC" }}>
+                  <div className="rounded-full" style={{ width: 7, height: 7, background: "#22C55E" }} />
+                  <span style={{ color: "#16A34A", fontSize: 11, fontWeight: 800 }}>영업중</span>
+                </div>
+              )}
+              {openStatus === false && (
+                <div className="rounded-full px-2.5 py-1" style={{ background: "#F1F1F1" }}>
+                  <span style={{ color: "#888", fontSize: 11, fontWeight: 800 }}>영업종료</span>
+                </div>
+              )}
+              <div className="rounded-full px-2.5 py-1" style={{ background: summary.bg }}>
+                <span style={{ color: summary.color, fontSize: 11, fontWeight: 800 }}>{summary.text}</span>
+              </div>
+            </div>
+
+            <div className="font-extrabold text-lg mb-1" style={{ color: INK, fontFamily: BODY_FONT }}>{place.name}</div>
+            <div className="text-sm mb-1" style={{ color: INK_SOFT }}>{place.category} · {place.address}</div>
+            {recency && <div className="text-xs mb-4" style={{ color: recency.color }}>{recency.label}</div>}
+
+            <div className="rounded-2xl p-4 mb-4" style={{ background: PAPER }}>
+              <div className="text-xs font-extrabold mb-3" style={{ color: INK }}>접근성 정보</div>
+              <div className="flex flex-col gap-2.5">
+                {Object.entries(ACCESS_INFO_META).map(([key, meta]) => {
+                  const val = place[key] || "unknown";
+                  const info = meta.values[val] || meta.values.unknown;
+                  const dotColor = info.ok === true ? "#22C55E" : info.ok === false ? "#E74C3C" : "#B8B1A0";
+                  return (
+                    <div key={key} className="flex items-center justify-between gap-2">
+                      <span className="text-xs" style={{ color: INK_SOFT }}>{meta.label}</span>
+                      <div className="flex items-center gap-1.5">
+                        <div className="rounded-full" style={{ width: 7, height: 7, background: dotColor }} />
+                        <span className="text-xs font-bold" style={{ color: INK }}>{info.text}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+                {place.threshold_cm != null && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs" style={{ color: INK_SOFT }}>문턱 높이</span>
+                    <span className="text-xs font-bold" style={{ color: INK }}>{place.threshold_cm}cm</span>
+                  </div>
+                )}
+                {place.toilet_floor != null && place.accessible_toilet === "yes" && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs" style={{ color: INK_SOFT }}>화장실 위치</span>
+                    <span className="text-xs font-bold" style={{ color: INK }}>{place.toilet_floor}층</span>
+                  </div>
+                )}
+                {place.has_stroller_access && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs" style={{ color: INK_SOFT }}>유모차</span>
+                    <span className="text-xs font-bold" style={{ color: INK }}>가능</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {place.business_hours && (
+              <div className="rounded-2xl p-4 mb-4" style={{ background: PAPER }}>
+                <div className="text-xs font-extrabold mb-3" style={{ color: INK }}>영업시간</div>
+                <div className="flex flex-col gap-1.5">
+                  {WEEKDAYS.map((d) => {
+                    const h = place.business_hours[d.key];
+                    return (
+                      <div key={d.key} className="flex items-center justify-between">
+                        <span className="text-xs" style={{ color: INK_SOFT }}>{d.label}요일</span>
+                        <span className="text-xs font-bold" style={{ color: h?.closed ? "#C0392B" : INK }}>
+                          {h?.closed ? "휴무" : h?.open && h?.close ? `${h.open} ~ ${h.close}` : "정보 없음"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 flex items-center gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${LINE}` }}>
+          {place.phone && (
+            <a href={`tel:${place.phone}`} className="flex items-center justify-center rounded-full p-3" style={{ background: TEAL_TINT }} aria-label="전화 걸기">
+              <Phone size={18} color={TEAL_DARK} />
+            </a>
+          )}
+          <button onClick={() => onShare(place)} className="flex items-center justify-center rounded-full p-3" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
+            <MessageCircle size={18} color="#3C1E1E" fill="#3C1E1E" />
+          </button>
+          <button onClick={() => { onGoToMap(place); onClose(); }} className="flex-1 flex items-center justify-center gap-1.5 rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
+            <MapPin size={16} />
+
+
+function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isOwner, onImageClick, onShare, onDirections, onReport, onDelete, isAdminUser, onAdminEdit, onAdminDelete, holidays, onViewReviews, onConfirmInfo, onShowRecencyHelp, onOpenMenu, onOpenDetail, onGoToMap }) {
   const badges = getBadges(place);
   const openStatus = isOpenNow(place.business_hours, holidays);
   const longPressTimer = useRef(null);
@@ -263,8 +409,11 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
     e.preventDefault();
     onOpenMenu(place);
   }
-
-  return (
+  function handleCardClick() {
+    if (didLongPress.current) return;
+    onOpenDetail(place);
+  }
+return (
          <div
         onMouseDown={handlePressStart}
         onMouseUp={handlePressEnd}
@@ -273,9 +422,11 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
         onTouchEnd={handlePressEnd}
         onTouchMove={handlePressEnd}
         onContextMenu={handleContextMenu}
-        className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md select-none"
+        onClick={handleCardClick}
+        className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md active:scale-[0.98] select-none cursor-pointer"
         style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}
       >
+
       {openStatus === false && (
         <div className="absolute inset-0 flex items-center justify-center rounded-2xl z-20 pointer-events-none">
           <span className="rounded-full px-4 py-1.5 text-sm font-extrabold" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}>영업 종료</span>
@@ -339,26 +490,9 @@ function PlaceCard({ place, onHelpful, isFavorite, onToggleFavorite, onEdit, isO
       <div className="flex flex-wrap gap-1.5 mb-3">
         {badges.map((b) => <Badge key={b} badgeKey={b} />)}
       </div>
-      <div className="flex items-center gap-1 mb-3 flex-wrap">
-        {place.phone && (
-          <a href={`tel:${place.phone}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL_TINT }} aria-label="전화 걸기">
-            <Phone size={14} color={TEAL_DARK} />
-            <span style={{ fontSize: 10, fontWeight: 700, color: TEAL_DARK }}>전화</span>
-          </a>
-        )}
-        <button onClick={() => onShare(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: "#FEE500" }} aria-label="카카오톡으로 공유하기">
-          <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
-          <span style={{ fontSize: 10, fontWeight: 700, color: "#3C1E1E" }}>공유</span>
-        </button>
-        <button onClick={() => onDirections(place)} className="flex items-center gap-1 rounded-full pl-2 pr-2.5 py-1.5 transition-all duration-150 active:scale-90" style={{ background: TEAL }} aria-label="길찾기">
-          <Navigation size={14} color="#fff" />
-          <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>길찾기</span>
-        </button>
+   <div className="flex items-center justify-end">
+        <ChevronRight size={18} color={INK_SOFT} />
       </div>
-       <button onClick={() => onHelpful(place.id)} className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-bold w-full transition-all duration-200 active:scale-95" style={{ background: CORAL_TINT, color: CORAL }}>
-        <Heart size={14} fill={CORAL} />
-        도움이 됐어요 {place.helpful_count}
-      </button>
     </div>
   );
 }
