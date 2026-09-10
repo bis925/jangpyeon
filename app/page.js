@@ -5652,7 +5652,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </div>
                 );
               })()}
-                              <div onClick={(e) => e.stopPropagation()} className="absolute top-4 right-4 flex items-center gap-1.5 z-10" style={{ maxWidth: showThemePicker ? "calc(100% - 32px)" : "70%", overflowX: showThemePicker ? "auto" : "visible", background: showThemePicker ? "rgba(0,0,0,0.25)" : "transparent", borderRadius: 999, padding: showThemePicker ? "4px 6px" : 0 }}>
+    <div onClick={(e) => e.stopPropagation()} className="absolute top-4 left-4 flex items-center gap-1.5 z-10" style={{ maxWidth: showThemePicker ? "calc(100% - 32px)" : "70%", overflowX: showThemePicker ? "auto" : "visible", background: showThemePicker ? "rgba(0,0,0,0.25)" : "transparent", borderRadius: 999, padding: showThemePicker ? "4px 6px" : 0 }}>
                   <button
                   onClick={() => {
                     const newVal = !weatherEffectOn;
