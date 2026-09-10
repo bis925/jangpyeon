@@ -345,8 +345,8 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
                 {Object.entries(ACCESS_INFO_META).map(([key, meta]) => {
                   const val = place[key] || "unknown";
                   const info = meta.values[val] || meta.values.unknown;
-                  const bgColor = info.ok === true ? "#E5F4EC" : info.ok === false ? "#FBEAE8" : "#F1F1F1";
-                  const textColor = info.ok === true ? "#1F7A4D" : info.ok === false ? "#C0392B" : "#888";
+        const bgColor = info.ok === true ? "#FCE4EC" : info.ok === false ? "#FBEAE8" : "#F1F1F1";
+                  const textColor = info.ok === true ? "#D6336C" : info.ok === false ? "#C0392B" : "#888";
                   return (
                     <div key={key} className="rounded-xl p-2.5" style={{ background: bgColor }}>
                       <div className="text-[10px] font-bold mb-0.5" style={{ color: textColor, opacity: 0.85 }}>{meta.label}</div>
@@ -366,12 +366,22 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
                     <span className="text-xs font-bold" style={{ color: INK }}>{place.toilet_floor}층</span>
                   </div>
                 )}
-                {place.has_stroller_access && (
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs" style={{ color: INK_SOFT }}>유모차</span>
-                    <span className="text-xs font-bold" style={{ color: INK }}>가능</span>
+             {place.threshold_cm != null && (
+                  <div className="rounded-xl p-2.5" style={{ background: "#F1F1F1" }}>
+                    <div className="text-[10px] font-bold mb-0.5" style={{ color: "#888", opacity: 0.85 }}>문턱 높이</div>
+                    <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.threshold_cm}cm</div>
                   </div>
                 )}
+                {place.toilet_floor != null && place.accessible_toilet === "yes" && (
+                  <div className="rounded-xl p-2.5" style={{ background: "#F1F1F1" }}>
+                    <div className="text-[10px] font-bold mb-0.5" style={{ color: "#888", opacity: 0.85 }}>화장실 위치</div>
+                    <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.toilet_floor}층</div>
+                  </div>
+                )}
+                <div className="rounded-xl p-2.5" style={{ background: place.has_stroller_access ? "#FCE4EC" : "#F1F1F1" }}>
+                  <div className="text-[10px] font-bold mb-0.5" style={{ color: place.has_stroller_access ? "#D6336C" : "#888", opacity: 0.85 }}>유모차</div>
+                  <div className="text-sm font-extrabold" style={{ color: place.has_stroller_access ? "#D6336C" : "#888" }}>{place.has_stroller_access ? "가능" : "정보 없음"}</div>
+                </div>
               </div>
             </div>
 
