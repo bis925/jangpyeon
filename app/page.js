@@ -5662,8 +5662,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 >
                   <Palette size={20} color="#fff" />
                 </button>
-                </button>
-                     {showThemePicker && (
+                           {showThemePicker && (
                   <>
                     <input type="file" accept="image/*" onChange={uploadCardBackground} className="hidden" id="card-bg-upload" />
                     <label htmlFor="card-bg-upload" className="flex items-center justify-center rounded-full flex-shrink-0 cursor-pointer transition-all duration-150 active:scale-90" style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }} aria-label="사진으로 꾸미기">
