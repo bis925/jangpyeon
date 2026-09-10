@@ -3497,7 +3497,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           <div className="relative flex items-center justify-center mb-6" style={{ width: 140, height: 140 }}>
             <div className="absolute rounded-full voice-pulse-ring" style={{ width: 140, height: 140, border: "3px solid rgba(255,255,255,0.4)" }} />
             <div className="absolute rounded-full voice-pulse-ring" style={{ width: 140, height: 140, border: "3px solid rgba(255,255,255,0.4)", animationDelay: "0.5s" }} />
-         <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/ir.png" alt="장편 캐릭터" style={{ width: 110, height: 110, objectFit: "contain" }} />
+<img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/f9f62a49-f38a-4f53-8369-044857e51e03.png" alt="장편 캐릭터" style={{ width: 110, height: 110, objectFit: "contain" }} />
           </div>
 <div className="text-white text-xs font-bold mb-1" style={{ opacity: 0.8 }}>편이</div>
           <div className="text-white font-extrabold text-xl mb-1">무엇이든 물어보세요</div>
