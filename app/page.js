@@ -1166,6 +1166,32 @@ async function addVoiceQa() {
       { enableHighAccuracy: false, timeout: 5000 }
     );
   }
+
+    const micLongPressTimer = useRef(null);
+  function handleMicPressStart() {
+    micLongPressTimer.current = setTimeout(() => {
+      setIsMicDragMode(true);
+      if (navigator.vibrate) navigator.vibrate(30);
+    }, 600);
+  }
+  function handleMicPressEnd() {
+    clearTimeout(micLongPressTimer.current);
+  }
+  function handleMicDrag(e) {
+    if (!isMicDragMode) return;
+    const touch = e.touches ? e.touches[0] : e;
+    const percent = (touch.clientX / window.innerWidth) * 100;
+    const clamped = Math.max(10, Math.min(90, percent));
+    setMicPositionPercent(clamped);
+  }
+  function handleMicDragEnd() {
+    if (!isMicDragMode) return;
+    setIsMicDragMode(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("mic_position_percent", micPositionPercent.toString());
+    }
+    showToast("마이크 위치가 저장됐어요");
+  }
   
   function showToast(message) {
     setToast(message);
@@ -1862,7 +1888,9 @@ const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
 const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
 const [voiceQaPage, setVoiceQaPage] = useState(1);
 const [openFilterActive, setOpenFilterActive] = useState(false);
-  const [showShopExplainCard, setShowShopExplainCard] = useState(false);
+const [showShopExplainCard, setShowShopExplainCard] = useState(false);
+  const [micPositionPercent, setMicPositionPercent] = useState(50);
+  const [isMicDragMode, setIsMicDragMode] = useState(false);
   const showShopExplainCardRef = useRef(false);
   useEffect(() => { showShopExplainCardRef.current = showShopExplainCard; }, [showShopExplainCard]);
   const [distanceFilter, setDistanceFilter] = useState(null);
@@ -2231,6 +2259,12 @@ useEffect(() => {
     fetchMaintenanceMode();
     const interval = setInterval(fetchMaintenanceMode, 15000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem("mic_position_percent");
+    if (saved) setMicPositionPercent(parseFloat(saved));
   }, []);
 
 useEffect(() => {
@@ -3438,11 +3472,27 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
       {/* ===== VOICE COMMAND FLOATING BUTTON ===== */}
 {session && typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform() && (
-<div className="fixed z-40 transition-all duration-300 flex flex-col items-center" style={{ bottom: 55, left: "50%", opacity: showVoiceButton ? 1 : 0, transform: showVoiceButton ? "translateX(-50%) scale(1)" : "translateX(-50%) scale(0.7)", pointerEvents: showVoiceButton ? "auto" : "none" }}>
+<div
+          onTouchMove={handleMicDrag}
+          onTouchEnd={handleMicDragEnd}
+          onMouseMove={handleMicDrag}
+          onMouseUp={handleMicDragEnd}
+          className="fixed z-40 flex flex-col items-center"
+          style={{ bottom: 55, left: `${micPositionPercent}%`, transform: "translateX(-50%)", transition: isMicDragMode ? "none" : "all 0.3s", opacity: showVoiceButton ? 1 : 0, pointerEvents: showVoiceButton ? "auto" : "none" }}
+        >
     <div className="rounded-full px-2.5 py-1 mb-1.5 voice-hint-float" style={{ background: "rgba(0,0,0,0.6)", whiteSpace: "nowrap" }}>
  <span className="text-white" style={{ fontSize: 10, fontWeight: 700 }}>눌러서 말해보세요</span>
           </div>
-          <button onClick={startVoiceCommand} className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90 voice-btn-glow" style={{ width: 64, height: 64, background: isVoiceCommandListening ? CORAL : TEAL, border: "3px solid #FFC13B" }} aria-label="음성 명령">
+<button
+            onClick={() => { if (!isMicDragMode) startVoiceCommand(); }}
+            onTouchStart={handleMicPressStart}
+            onTouchEnd={handleMicPressEnd}
+            onMouseDown={handleMicPressStart}
+            onMouseUp={handleMicPressEnd}
+            className="rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90 voice-btn-glow"
+            style={{ width: 64, height: 64, background: isVoiceCommandListening ? CORAL : TEAL, border: isMicDragMode ? "3px solid #fff" : "3px solid #FFC13B", animation: isMicDragMode ? "mic-shake 0.3s infinite" : undefined }}
+            aria-label="음성 명령"
+          >
             {isVoiceCommandListening ? (
               <div className="rounded-full animate-pulse" style={{ width: 16, height: 16, background: "#fff" }} />
             ) : (
