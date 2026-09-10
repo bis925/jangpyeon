@@ -276,7 +276,7 @@ function getOverallAccessSummary(place) {
   return { text: "조건부 가능", color: "#B4620F", bg: "#FCEEDD" };
 }
 
-function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onGoToMap }) {
+function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onGoToMap, onImageClick }) {
   const [showSummaryHelp, setShowSummaryHelp] = useState(false);
   if (!place) return null;
   const openStatus = isOpenNow(place.business_hours, holidays);
