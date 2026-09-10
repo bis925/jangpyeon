@@ -4860,36 +4860,38 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
-            <div className="flex items-center gap-2 mb-5 flex-wrap">
-<button onClick={() => setDistanceFilter(null)} className="text-xs font-bold rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: !distanceFilter ? TEAL : "#fff", color: !distanceFilter ? "#fff" : TEAL }}>
-                전체보기
-              </button>
-              {[3, 5, 10].map((km) => (
-                <button key={km} onClick={() => {
-                  const newVal = distanceFilter === km ? null : km;
-                  setDistanceFilter(newVal);
-                  if (newVal && !myLocation) locateMe();
-                }} className="text-xs font-bold rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: distanceFilter === km ? TEAL : "#fff", color: distanceFilter === km ? "#fff" : TEAL }}>
-                  📍 {km}km 이내
+   <div className="flex items-center gap-2 mb-5 flex-wrap">
+              <div className="relative">
+                <button onClick={() => setShowDistancePicker(!showDistancePicker)} className="text-xs font-bold flex items-center gap-1 rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: distanceFilter ? TEAL : "#fff", color: distanceFilter ? "#fff" : TEAL }}>
+                  📍 {distanceFilter ? `${distanceFilter}km 이내` : "거리"}
                 </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-2 mb-5 flex-wrap">
-              {[
-                { key: "wheelchair", label: "휠체어 출입", icon: Accessibility },
-                { key: "stroller", label: "유모차 가능", icon: Baby },
-                { key: "toilet", label: "장애인 화장실", icon: DoorOpen },
-              ].map((opt) => {
-                const Icon = opt.icon;
-                const active = mapAccessFilter === opt.key;
-                return (
-                  <button key={opt.key} onClick={() => setMapAccessFilter(active ? null : opt.key)} className="flex items-center gap-1.5 text-xs font-bold rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: active ? TEAL : "#fff", color: active ? "#fff" : TEAL }}>
-                    <Icon size={13} />
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
+                {showDistancePicker && (
+                  <div className="absolute top-full left-0 mt-1.5 rounded-xl overflow-hidden z-10" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                    <button onClick={() => { setDistanceFilter(null); setShowDistancePicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: !distanceFilter ? TEAL : INK, background: !distanceFilter ? TEAL_TINT : "transparent" }}>전체보기</button>
+                    {[3, 5, 10].map((km) => (
+                      <button key={km} onClick={() => {
+                        setDistanceFilter(distanceFilter === km ? null : km);
+                        setShowDistancePicker(false);
+                        if (!myLocation) locateMe();
+                      }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: distanceFilter === km ? TEAL : INK, background: distanceFilter === km ? TEAL_TINT : "transparent" }}>{km}km 이내</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <button onClick={() => setShowAccessPicker(!showAccessPicker)} className="text-xs font-bold flex items-center gap-1 rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: mapAccessFilter ? TEAL : "#fff", color: mapAccessFilter ? "#fff" : TEAL }}>
+                  ♿ {mapAccessFilter ? { wheelchair: "휠체어 출입", stroller: "유모차 가능", toilet: "장애인 화장실" }[mapAccessFilter] : "접근성"}
+                </button>
+                {showAccessPicker && (
+                  <div className="absolute top-full left-0 mt-1.5 rounded-xl overflow-hidden z-10" style={{ background: CARD, border: `1px solid ${LINE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                    <button onClick={() => { setMapAccessFilter(null); setShowAccessPicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: !mapAccessFilter ? TEAL : INK, background: !mapAccessFilter ? TEAL_TINT : "transparent" }}>전체보기</button>
+                    {[{ key: "wheelchair", label: "휠체어 출입" }, { key: "stroller", label: "유모차 가능" }, { key: "toilet", label: "장애인 화장실" }].map((opt) => (
+                      <button key={opt.key} onClick={() => { setMapAccessFilter(mapAccessFilter === opt.key ? null : opt.key); setShowAccessPicker(false); }} className="block w-full px-4 py-2.5 text-xs font-bold text-left whitespace-nowrap" style={{ color: mapAccessFilter === opt.key ? TEAL : INK, background: mapAccessFilter === opt.key ? TEAL_TINT : "transparent" }}>{opt.label}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>   
                     <div className="grid sm:grid-cols-2 gap-3 min-w-0">
 {(mapCategory ? places.filter((p) => p.category === mapCategory) : places).filter((p) => {
                 if (!distanceFilter || !myLocation) return true;
