@@ -287,10 +287,12 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
       <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden" style={{ background: CARD, maxHeight: "88vh", display: "flex", flexDirection: "column" }}>
         <div className="overflow-y-auto">
-          {place.photo_urls && place.photo_urls.length > 0 ? (
+{place.photo_urls && place.photo_urls.length > 0 ? (
             <div className="flex gap-1.5 overflow-x-auto p-4 pb-0">
               {place.photo_urls.map((url, i) => (
-                <img key={i} src={url} alt={`${place.name} ${i + 1}`} className="w-24 h-24 rounded-xl flex-shrink-0 object-cover" />
+                <button key={i} type="button" onClick={() => onImageClick(place.photo_urls, i)} className={`w-24 h-24 rounded-xl flex-shrink-0 overflow-hidden ${i >= 4 ? "hidden sm:block" : ""}`}>
+                  <img src={url} alt={`${place.name} ${i + 1}`} className="w-full h-full object-cover" />
+                </button>
               ))}
             </div>
           ) : null}
