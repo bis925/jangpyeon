@@ -4878,8 +4878,8 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 )}
               </div>
             <div className="relative">
-                <button onClick={() => setShowAccessPicker(!showAccessPicker)} className="text-xs font-bold flex items-center gap-1.5 rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: mapAccessFilter ? TEAL : "#fff", color: mapAccessFilter ? "#fff" : TEAL }}>
-                  <Accessibility size={13} />
+<button onClick={() => setShowAccessPicker(!showAccessPicker)} className="text-xs font-bold flex items-center gap-1.5 rounded-full px-3.5 py-2 border transition-all duration-200" style={{ borderColor: TEAL, background: mapAccessFilter ? TEAL : "#fff", color: mapAccessFilter ? "#fff" : TEAL }}>
+                  {mapAccessFilter === "stroller" ? <Baby size={13} /> : <Accessibility size={13} />}
                   {mapAccessFilter ? { wheelchair: "휠체어 출입", stroller: "유모차 가능", toilet: "장애인 화장실", parking: "장애인 주차" }[mapAccessFilter] : "접근성"}
                 </button>
                 {showAccessPicker && (
