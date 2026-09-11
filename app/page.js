@@ -269,6 +269,16 @@ parking_disabled: {
   },
 };
 
+function getPerfectAccessStars(place) {
+  const entranceOk = place.entrance_step === "none" || place.entrance_step === "ramp";
+  const doorOk = place.door_type && place.door_type !== "unknown";
+  const toiletOk = place.accessible_toilet === "yes";
+  const elevatorOk = place.elevator === "yes" || place.elevator === "none_needed";
+  const parkingOk = place.parking_disabled === "yes";
+  const turningOk = place.turning_space === "yes";
+  return entranceOk && doorOk && toiletOk && elevatorOk && parkingOk && turningOk;
+}
+
 function getOverallAccessSummary(place) {
   const critical = ["entrance_step", "accessible_toilet"];
   const values = critical.map((k) => place[k]);
@@ -282,14 +292,36 @@ function getOverallAccessSummary(place) {
 
 function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onGoToMap, onImageClick, onConfirmInfo, onShowRecencyHelp }) {
   const [showSummaryHelp, setShowSummaryHelp] = useState(false);
+  const [showStars, setShowStars] = useState(false);
+  useEffect(() => {
+    if (place && getPerfectAccessStars(place)) {
+      setShowStars(true);
+      const timer = setTimeout(() => setShowStars(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [place?.id]);
   if (!place) return null;
   const openStatus = isOpenNow(place.business_hours, holidays);
+  const isPerfect = getPerfectAccessStars(place);
   const summary = getOverallAccessSummary(place);
   const recency = place.created_at ? getRecencyInfo(place.created_at, place.last_confirmed_at) : null;
 
   return (
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
 <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden relative" style={{ background: CARD, maxHeight: "88vh", display: "flex", flexDirection: "column", border: `3px solid ${CATEGORY_MARKERS[place.category]?.color || TEAL}` }}>
+          {showStars && (
+            <div className="absolute top-0 left-0 right-0 flex items-center justify-center gap-1.5 py-4 z-20 pointer-events-none" style={{ background: "rgba(255,193,59,0.95)" }}>
+              {[...Array(5)].map((_, i) => (
+                <span key={i} className="perfect-star-blink" style={{ fontSize: 28, animationDelay: `${i * 0.1}s` }}>⭐</span>
+              ))}
+            </div>
+          )}
+          {isPerfect && !showStars && (
+            <div className="flex items-center justify-center gap-1 py-1.5" style={{ background: "#FFF7E0" }}>
+              {[...Array(5)].map((_, i) => <span key={i} style={{ fontSize: 13 }}>⭐</span>)}
+              <span className="text-[11px] font-extrabold ml-1" style={{ color: "#B4620F" }}>접근성 완벽 확인</span>
+            </div>
+          )}
         <button onClick={onClose} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 32, height: 32, background: "rgba(0,0,0,0.4)" }} aria-label="닫기">
           <X size={18} color="#fff" />
         </button>
