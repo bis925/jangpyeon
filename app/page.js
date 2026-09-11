@@ -932,6 +932,59 @@ export default function Page() {
   }
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
+const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
+  const [showNameInputChoice, setShowNameInputChoice] = useState(false);
+const [isOcrProcessing, setIsOcrProcessing] = useState(false);
+const [isNameInputManual, setIsNameInputManual] = useState(false);
+const [showFullEmail, setShowFullEmail] = useState(false);
+const [noticePage, setNoticePage] = useState(1);
+const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
+  const [voiceQaList, setVoiceQaList] = useState([]);
+  const [newVoiceQaKeywords, setNewVoiceQaKeywords] = useState("");
+const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
+const [voiceQaPage, setVoiceQaPage] = useState(1);
+const [openFilterActive, setOpenFilterActive] = useState(false);
+const [showShopExplainCard, setShowShopExplainCard] = useState(false);
+const [mapAccessFilter, setMapAccessFilter] = useState(null);
+const [showAccessPicker, setShowAccessPicker] = useState(false);
+const [faqPage, setFaqPage] = useState(1);
+  const [showElevatorHelp, setShowElevatorHelp] = useState(false);
+const [myPageWeather, setMyPageWeather] = useState(null);
+const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
+  const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
+const [snowEventActive, setSnowEventActive] = useState(false);
+const [bgMusicList, setBgMusicList] = useState([]);
+  const [bgMusicOn, setBgMusicOn] = useState(false);
+  const bgMusicAudioRef = useRef(null);
+const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
+const [musicUploading, setMusicUploading] = useState(false);
+const [showAddressDetailChoice, setShowAddressDetailChoice] = useState(false);
+  const [isAddressDetailManual, setIsAddressDetailManual] = useState(false);
+  const [toiletFloorMax, setToiletFloorMax] = useState(5);
+  const [weatherEffectOn, setWeatherEffectOn] = useState(true);
+  const showElevatorHelpRef = useRef(false);
+  useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
+const [showTurningHelp, setShowTurningHelp] = useState(false);
+  const showTurningHelpRef = useRef(false);
+  useEffect(() => { showTurningHelpRef.current = showTurningHelp; }, [showTurningHelp]);
+  const [showDoorTypeHelp, setShowDoorTypeHelp] = useState(false);
+  const showDoorTypeHelpRef = useRef(false);
+  useEffect(() => { showDoorTypeHelpRef.current = showDoorTypeHelp; }, [showDoorTypeHelp]);
+const [viewingDetailPlace, setViewingDetailPlace] = useState(null);
+  const viewingDetailPlaceRef = useRef(null);
+  useEffect(() => { viewingDetailPlaceRef.current = viewingDetailPlace; }, [viewingDetailPlace]);
+  const [micPositionPercent, setMicPositionPercent] = useState(50);
+const [isMicDragMode, setIsMicDragMode] = useState(false);
+  const [showMicSavedBadge, setShowMicSavedBadge] = useState(false);
+  const showShopExplainCardRef = useRef(false);
+  useEffect(() => { showShopExplainCardRef.current = showShopExplainCard; }, [showShopExplainCard]);
+  const [distanceFilter, setDistanceFilter] = useState(null);
+  const [showDistancePicker, setShowDistancePicker] = useState(false);
+  const [editingVoiceQaId, setEditingVoiceQaId] = useState(null);
+  const [showVoiceButton, setShowVoiceButton] = useState(true);
+const [myRank, setMyRank] = useState(0);
+  const [showRankToggle, setShowRankToggle] = useState(false);
 
   const [profile, setProfile] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
@@ -1715,19 +1768,38 @@ async function deleteBgMusic(id, fileUrl) {
     bgMusicAudioRef.current = audio;
   }
 
-  function toggleBgMusic() {
+async function toggleBgMusic() {
     const newVal = !bgMusicOn;
     setBgMusicOn(newVal);
     if (typeof window !== "undefined") localStorage.setItem("bg_music_on", newVal.toString());
     if (newVal) {
       playRandomBgMusic();
       showToast("배경음악을 켰어요");
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+          const { ForegroundService } = await import("@capawesome-team/capacitor-android-foreground-service");
+          const { display } = await ForegroundService.checkPermissions();
+          if (display !== "granted") await ForegroundService.requestPermissions();
+          await ForegroundService.startForegroundService({
+            id: 1,
+            title: "장편",
+            body: "배경음악이 재생 중이에요",
+            smallIcon: "ic_launcher",
+          });
+        } catch (e) {}
+      }
     } else {
       if (bgMusicAudioRef.current) {
         bgMusicAudioRef.current.pause();
         bgMusicAudioRef.current = null;
       }
       showToast("배경음악을 껐어요");
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+          const { ForegroundService } = await import("@capawesome-team/capacitor-android-foreground-service");
+          await ForegroundService.stopForegroundService();
+        } catch (e) {}
+      }
     }
   }
   
@@ -1951,17 +2023,17 @@ useEffect(() => {
     getCurrentPositionSmart({ enableHighAccuracy: false, timeout: 5000 }).catch(() => {});
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     if (typeof window === "undefined" || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
-    let KeepAwakeModule;
-    import("@capacitor-community/keep-awake").then(({ KeepAwake }) => {
-      KeepAwakeModule = KeepAwake;
-      KeepAwake.keepAwake();
-    });
-    return () => {
-      if (KeepAwakeModule) KeepAwakeModule.allowSleep();
-    };
-  }, []);
+    (async () => {
+      const { KeepAwake } = await import("@capacitor-community/keep-awake");
+      if (showVoiceListeningUI || isVoiceCommandListening) {
+        await KeepAwake.keepAwake();
+      } else {
+        await KeepAwake.allowSleep();
+      }
+    })();
+  }, [showVoiceListeningUI, isVoiceCommandListening]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.Capacitor || !session) return;
@@ -2429,59 +2501,7 @@ async function setHomeLocation() {
     showToast("배경 사진이 변경됐어요!");
   }
 
-const [kakaoLoggingIn, setKakaoLoggingIn] = useState(false);
-const [showKakaoEmailInfo, setShowKakaoEmailInfo] = useState(false);
-  const [showNameInputChoice, setShowNameInputChoice] = useState(false);
-const [isOcrProcessing, setIsOcrProcessing] = useState(false);
-const [isNameInputManual, setIsNameInputManual] = useState(false);
-const [showFullEmail, setShowFullEmail] = useState(false);
-const [noticePage, setNoticePage] = useState(1);
-const [isVoiceCommandListening, setIsVoiceCommandListening] = useState(false);
-  const [voiceQaList, setVoiceQaList] = useState([]);
-  const [newVoiceQaKeywords, setNewVoiceQaKeywords] = useState("");
-const [newVoiceQaAnswer, setNewVoiceQaAnswer] = useState("");
-const [voiceQaPage, setVoiceQaPage] = useState(1);
-const [openFilterActive, setOpenFilterActive] = useState(false);
-const [showShopExplainCard, setShowShopExplainCard] = useState(false);
-const [mapAccessFilter, setMapAccessFilter] = useState(null);
-const [showAccessPicker, setShowAccessPicker] = useState(false);
-const [faqPage, setFaqPage] = useState(1);
-  const [showElevatorHelp, setShowElevatorHelp] = useState(false);
-const [myPageWeather, setMyPageWeather] = useState(null);
-const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
-  const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
-const [snowEventActive, setSnowEventActive] = useState(false);
-const [bgMusicList, setBgMusicList] = useState([]);
-  const [bgMusicOn, setBgMusicOn] = useState(false);
-  const bgMusicAudioRef = useRef(null);
-const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
-const [musicUploading, setMusicUploading] = useState(false);
-const [showAddressDetailChoice, setShowAddressDetailChoice] = useState(false);
-  const [isAddressDetailManual, setIsAddressDetailManual] = useState(false);
-  const [toiletFloorMax, setToiletFloorMax] = useState(5);
-  const [weatherEffectOn, setWeatherEffectOn] = useState(true);
-  const showElevatorHelpRef = useRef(false);
-  useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
-const [showTurningHelp, setShowTurningHelp] = useState(false);
-  const showTurningHelpRef = useRef(false);
-  useEffect(() => { showTurningHelpRef.current = showTurningHelp; }, [showTurningHelp]);
-  const [showDoorTypeHelp, setShowDoorTypeHelp] = useState(false);
-  const showDoorTypeHelpRef = useRef(false);
-  useEffect(() => { showDoorTypeHelpRef.current = showDoorTypeHelp; }, [showDoorTypeHelp]);
-const [viewingDetailPlace, setViewingDetailPlace] = useState(null);
-  const viewingDetailPlaceRef = useRef(null);
-  useEffect(() => { viewingDetailPlaceRef.current = viewingDetailPlace; }, [viewingDetailPlace]);
-  const [micPositionPercent, setMicPositionPercent] = useState(50);
-const [isMicDragMode, setIsMicDragMode] = useState(false);
-  const [showMicSavedBadge, setShowMicSavedBadge] = useState(false);
-  const showShopExplainCardRef = useRef(false);
-  useEffect(() => { showShopExplainCardRef.current = showShopExplainCard; }, [showShopExplainCard]);
-  const [distanceFilter, setDistanceFilter] = useState(null);
-  const [showDistancePicker, setShowDistancePicker] = useState(false);
-  const [editingVoiceQaId, setEditingVoiceQaId] = useState(null);
-  const [showVoiceButton, setShowVoiceButton] = useState(true);
-const [myRank, setMyRank] = useState(0);
-  const [showRankToggle, setShowRankToggle] = useState(false);
+
   async function signInWithKakao() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       setKakaoLoggingIn(true);
