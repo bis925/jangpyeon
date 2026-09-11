@@ -1620,6 +1620,18 @@ async function announceTodayWeather() {
     showToast(newValue ? "눈 내리기 이벤트를 켰어요" : "눈 내리기 이벤트를 껐어요");
   }
 
+  async function fetchBgMusicEvent() {
+    const { data } = await supabase.from("app_settings").select("value").eq("key", "bg_music_event_active").single();
+    setBgMusicEventActive(data?.value === "true");
+  }
+
+  async function toggleBgMusicEvent() {
+    const newValue = !bgMusicEventActive;
+    setBgMusicEventActive(newValue);
+    await supabase.from("app_settings").update({ value: newValue ? "true" : "false" }).eq("key", "bg_music_event_active");
+    showToast(newValue ? "배경음악 이벤트를 켰어요" : "배경음악 이벤트를 껐어요");
+  }
+
     async function fetchBgMusicList() {
     const { data } = await supabase.from("background_music").select("*").order("display_order");
     setBgMusicList(data || []);
@@ -2362,9 +2374,10 @@ const [faqPage, setFaqPage] = useState(1);
 const [myPageWeather, setMyPageWeather] = useState(null);
 const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
 const [snowEventActive, setSnowEventActive] = useState(false);
-  const [bgMusicList, setBgMusicList] = useState([]);
+const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
   const bgMusicAudioRef = useRef(null);
+  const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
 const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
   const [toiletFloorMax, setToiletFloorMax] = useState(5);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
@@ -2773,11 +2786,30 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     fetchSnowEvent();
     const interval = setInterval(fetchSnowEvent, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    fetchBgMusicEvent();
+    const interval = setInterval(fetchBgMusicEvent, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (bgMusicEventActive && bgMusicList.length > 0) {
+      setBgMusicOn(true);
+      if (!bgMusicAudioRef.current) playRandomBgMusic();
+    } else if (!bgMusicEventActive) {
+      setBgMusicOn(false);
+      if (bgMusicAudioRef.current) {
+        bgMusicAudioRef.current.pause();
+        bgMusicAudioRef.current = null;
+      }
+    }
+  }, [bgMusicEventActive, bgMusicList]);
 
 useEffect(() => {
     if (typeof window === "undefined") return;
@@ -5997,7 +6029,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 >
                   {weatherEffectOn ? <Sparkles size={20} color="#fff" /> : <X size={20} color="#fff" />}
                 </button>
-     {bgMusicList.length > 0 && (
+{bgMusicEventActive && bgMusicList.length > 0 && (
                   <button
                     onClick={toggleBgMusic}
                     className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
@@ -6723,9 +6755,9 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 </button>
               </div>
             )}
-
-              <div id="admin-snow" className="font-extrabold text-sm mb-3" style={{ color: INK }}>❄️ 눈 내리기 이벤트</div>
-            <div className="rounded-2xl p-4 mb-8 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              
+<div id="admin-snow" className="font-extrabold text-sm mb-3" style={{ color: INK }}>❄️ 눈 내리기 이벤트</div>
+            <div className="rounded-2xl p-4 mb-4 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자 화면에 눈이 내려요</div>
               <button
                 onClick={toggleSnowEvent}
@@ -6735,6 +6767,20 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: snowEventActive ? 23 : 3 }} />
               </button>
             </div>
+
+            <div id="admin-music" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎵 배경음악 이벤트 ({bgMusicList.length}곡 등록됨)</div>
+            <div className="rounded-2xl p-4 mb-8 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자에게 배경음악이 자동 재생돼요</div>
+              <button
+                onClick={toggleBgMusicEvent}
+                disabled={bgMusicList.length === 0}
+                className="relative rounded-full transition-all duration-200 flex-shrink-0"
+                style={{ width: 48, height: 28, background: bgMusicEventActive ? TEAL : LINE, opacity: bgMusicList.length === 0 ? 0.5 : 1 }}
+              >
+                <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: bgMusicEventActive ? 23 : 3 }} />
+              </button>
+            </div>
+
 
 <div id="admin-maintenance" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🚧 서비스 점검 모드</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
