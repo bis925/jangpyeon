@@ -378,15 +378,20 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
 <div className="rounded-2xl p-4 mb-4" style={{ background: PAPER }}>
               <div className="text-sm font-extrabold mb-3" style={{ color: INK }}>♿ 접근성 정보</div>
               <div className="grid grid-cols-2 gap-2">
-                {Object.entries(ACCESS_INFO_META).map(([key, meta]) => {
+{Object.entries(ACCESS_INFO_META).map(([key, meta]) => {
                   const val = place[key] || "unknown";
                   const info = meta.values[val] || meta.values.unknown;
-const bgColor = info.ok === true ? "#C0392B" : "#F1F1F1";
+        const bgColor = info.ok === true ? "#C0392B" : "#F1F1F1";
                   const textColor = info.ok === true ? "#fff" : "#888";
+                  let displayText = info.text;
+                  if (key === "accessible_toilet" && val === "yes" && place.toilet_floors && place.toilet_floors.length > 0) {
+                    const sorted = place.toilet_floors.slice().sort((a, b) => a - b);
+                    displayText = `있음 (${sorted.join(", ")}층)`;
+                  }
                   return (
                     <div key={key} className="rounded-xl p-2.5" style={{ background: bgColor }}>
                       <div className="text-[10px] font-bold mb-0.5" style={{ color: textColor, opacity: 0.85 }}>{meta.label}</div>
-                      <div className="text-sm font-extrabold" style={{ color: textColor }}>{info.text}</div>
+                      <div className="text-sm font-extrabold" style={{ color: textColor, wordBreak: "break-word" }}>{displayText}</div>
                     </div>
                   );
                 })}
@@ -402,12 +407,7 @@ const bgColor = info.ok === true ? "#C0392B" : "#F1F1F1";
                     <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.door_width_cm}cm</div>
                   </div>
                 )}
-{place.toilet_floors && place.toilet_floors.length > 0 && place.accessible_toilet === "yes" && (
-                  <div className="rounded-xl p-2.5" style={{ background: "#F1F1F1" }}>
-                    <div className="text-[10px] font-bold mb-0.5" style={{ color: "#888", opacity: 0.85 }}>화장실 위치</div>
-                    <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.toilet_floors.slice().sort((a, b) => a - b).join(", ")}층</div>
-                  </div>
-                )}
+
                 <div className="rounded-xl p-2.5" style={{ background: place.has_stroller_access ? "#FCE4EC" : "#F1F1F1" }}>
                   <div className="text-[10px] font-bold mb-0.5" style={{ color: place.has_stroller_access ? "#D6336C" : "#888", opacity: 0.85 }}>유모차</div>
                   <div className="text-sm font-extrabold" style={{ color: place.has_stroller_access ? "#D6336C" : "#888" }}>{place.has_stroller_access ? "가능" : "정보 없음"}</div>
