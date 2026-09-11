@@ -1576,6 +1576,38 @@ async function announceTodayWeather() {
     } catch (e) {}
   }
 
+  async function startVoiceAddressDetailInput() {
+    setShowAddressDetailChoice(false);
+    try {
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
+        const { available } = await SpeechRecognition.available();
+        if (!available) { showToast("이 기기에서는 음성 입력을 지원하지 않아요"); return; }
+        const permission = await SpeechRecognition.requestPermissions();
+        if (permission.speechRecognition !== "granted") {
+          showToast("마이크 권한을 허용해주세요");
+          return;
+        }
+        setShowVoiceListeningUI(true);
+        setIsSearchVoice(false);
+        const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
+        setShowVoiceListeningUI(false);
+        const text = (result?.matches?.[0] || "").trim();
+        if (text) {
+          setForm((prev) => ({ ...prev, addressDetail: text }));
+          showToast(`"${text}"(으)로 입력했어요`);
+        } else {
+          showToast("인식된 내용이 없어요");
+        }
+      } else {
+        showToast("음성 입력은 모바일 앱에서 사용 가능해요");
+      }
+    } catch (err) {
+      setShowVoiceListeningUI(false);
+      showToast("음성 인식에 실패했어요, 다시 시도해주세요");
+    }
+  }
+
     async function startVoiceNameInput() {
     setShowNameInputChoice(false);
     try {
@@ -2410,8 +2442,9 @@ const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
   const bgMusicAudioRef = useRef(null);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
-  const [musicUploading, setMusicUploading] = useState(false);
-const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
+const [musicUploading, setMusicUploading] = useState(false);
+const [showAddressDetailChoice, setShowAddressDetailChoice] = useState(false);
+  const [isAddressDetailManual, setIsAddressDetailManual] = useState(false);
   const [toiletFloorMax, setToiletFloorMax] = useState(5);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
   const showElevatorHelpRef = useRef(false);
@@ -5528,6 +5561,32 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           <div className="text-white font-bold text-sm">글자를 읽고 있어요...</div>
         </div>
       )}
+
+{showAddressDetailChoice && (
+        <div onClick={() => setShowAddressDetailChoice(false)} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl p-5" style={{ background: CARD }}>
+            <div className="font-extrabold text-base mb-4 text-center" style={{ color: INK }}>상세주소를 어떻게 입력할까요?</div>
+            <button onClick={startVoiceAddressDetailInput} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: "#FCE4EC" }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: "#D6336C" }}>
+                <Mic size={22} color="#fff" />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-sm" style={{ color: "#D6336C" }}>말해서 입력하기</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>동/호수, 층수를 말하면 자동으로 입력돼요</div>
+              </div>
+            </button>
+        <button onClick={() => { setIsAddressDetailManual(true); setShowAddressDetailChoice(false); setTimeout(() => document.getElementById("address-detail-manual-input")?.focus(), 100); }} className="w-full flex items-center gap-3 rounded-2xl p-4 transition-all duration-200 active:scale-[0.98]" style={{ background: PAPER }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: "#fff", border: `1.4px solid ${LINE}` }}>
+                <Pencil size={20} color={INK_SOFT} />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-sm" style={{ color: INK }}>직접 입력하기</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>키보드로 타이핑해서 입력해요</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
       {showNameInputChoice && (
         <div onClick={() => setShowNameInputChoice(false)} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl p-5" style={{ background: CARD }}>
@@ -5566,8 +5625,14 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                                                                                                               <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
                   <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
                     className="w-full rounded-xl px-4 py-3 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: PAPER }} />
-                  <input value={form.addressDetail} onChange={(e) => setForm({ ...form, addressDetail: e.target.value })} placeholder="상세주소 (동/호수, 층수 등, 선택)"
-                    className="w-full rounded-xl px-4 py-3 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+      {isAddressDetailManual ? (
+                    <input id="address-detail-manual-input" value={form.addressDetail} onChange={(e) => setForm({ ...form, addressDetail: e.target.value })} onBlur={() => setIsAddressDetailManual(false)} placeholder="상세주소 (동/호수, 층수 등, 선택)"
+                      className="w-full rounded-xl px-4 py-3 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                  ) : (
+                    <button type="button" onClick={() => setShowAddressDetailChoice(true)} className="w-full rounded-xl px-4 py-3 mb-2 text-sm text-left outline-none" style={{ border: `1.4px solid ${LINE}`, color: form.addressDetail ? INK : INK_SOFT }}>
+                      {form.addressDetail || "상세주소 (동/호수, 층수 등, 선택)"}
+                    </button>
+                  )}
                   <button type="button" onClick={openAddressSearch} className="w-full rounded-xl px-4 py-3 mb-2 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL, color: "#fff" }}>
                     주소 검색
                   </button>
