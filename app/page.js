@@ -1755,12 +1755,11 @@ async function deleteBgMusic(id, fileUrl) {
     const { data } = await supabase.from("background_music").select("*").order("display_order");
     setBgMusicList(data || []);
   }
-
- async function stopBgMusic() {
+async function stopBgMusic() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const { Playlist } = await import("capacitor-plugin-playlist");
-        await Playlist.stop();
+        const { NativeAudio } = await import("@mediagrid/capacitor-native-audio");
+        await NativeAudio.stop({ assetId: "" }).catch(() => {});
       } catch (e) {}
     }
     if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
@@ -1776,23 +1775,22 @@ async function playRandomBgMusic() {
     try {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const { Playlist } = await import("capacitor-plugin-playlist");
-        const state = await Playlist.getState().catch(() => null);
-        if (state && state.isPlaying) return;
-const tracks = bgMusicList.map((m, i) => ({
-          trackId: i,
-          assetUrl: m.file_url,
-          title: m.title,
-          album: "장편",
-          artist: "편이",
-          albumArt: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
-          isRadio: false,
-        }));
-        await Playlist.setItems({ items: tracks });
- try { await Playlist.setOptions({ verbose: false, options: { icon: "ic_stat_music" } }); } catch (e2) {}
-        await Playlist.setLoopAll({ loop: true });
-        await Playlist.setShuffle({ shuffle: true });
-        await Playlist.play();
+        const { NativeAudio } = await import("@mediagrid/capacitor-native-audio");
+        await NativeAudio.configure({ backgroundPlayback: true, showNotification: true });
+        for (const m of bgMusicList) {
+          await NativeAudio.preload({
+            assetId: m.id,
+            assetPath: m.file_url,
+            isUrl: true,
+            notificationMetadata: {
+              title: m.title,
+              artist: "장편",
+              artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
+            },
+          });
+        }
+        const randomTrack = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+        await NativeAudio.play({ assetId: randomTrack.id });
         bgMusicAudioRef.current = true;
       } catch (e) {
         if (bgMusicAudioRef.current === true) return;
@@ -1840,8 +1838,9 @@ async function toggleBgMusic() {
 async function openBatteryOptimizationSettings() {
     setShowBatteryOptHelp(false);
     try {
-      const { DontKillMyApp } = await import("@squareetlabs/capacitor-dont-kill-my-app");
-      await DontKillMyApp.requestIgnoreBatteryOptimizations();
+      const { NativeSettings, AndroidSettings } = await import("capacitor-native-settings");
+      await NativeSettings.openAndroid({ option: AndroidSettings.ApplicationDetails });
+      showToast("설정에서 '배터리' 메뉴를 찾아 '제한 없음'으로 바꿔주세요");
     } catch (e) {
       showToast("설정 화면을 열 수 없어요");
     }
