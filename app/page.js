@@ -1767,13 +1767,14 @@ async function playRandomBgMusic() {
           title: m.title,
           isRadio: false,
         }));
-await Playlist.setItems({ items: tracks });
+        await Playlist.setItems({ items: tracks });
+        try { await Playlist.setOptions({ verbose: false, options: {} }); } catch (e2) {}
         await Playlist.setLoopAll({ loop: true });
         await Playlist.setShuffle({ shuffle: true });
-        bgMusicAudioRef.current = true;
-        try { await Playlist.setOptions({ verbose: false, options: {} }); } catch (e2) {}
         await Playlist.play();
+        bgMusicAudioRef.current = true;
       } catch (e) {
+        if (bgMusicAudioRef.current === true) return;
         const randomIndex = Math.floor(Math.random() * bgMusicList.length);
         const track = bgMusicList[randomIndex];
         const audio = new Audio(track.file_url);
@@ -1809,7 +1810,8 @@ async function toggleBgMusic() {
           const { Playlist } = await import("capacitor-plugin-playlist");
           await Playlist.stop();
         } catch (e) {}
-      } else if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
+      }
+      if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
         bgMusicAudioRef.current.pause();
       }
       bgMusicAudioRef.current = null;
