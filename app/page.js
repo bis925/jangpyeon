@@ -2221,7 +2221,8 @@ const [showAccessPicker, setShowAccessPicker] = useState(false);
 const [faqPage, setFaqPage] = useState(1);
   const [showElevatorHelp, setShowElevatorHelp] = useState(false);
 const [myPageWeather, setMyPageWeather] = useState(null);
-  const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
+const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
+  const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
   const showElevatorHelpRef = useRef(false);
   useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
@@ -3947,6 +3948,39 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
             <button onClick={() => { setVoiceFaqAnswer(null); if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel(); }} className="w-full rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
               확인했어요
             </button>
+          </div>
+        </div>
+      )}
+
+{showLocationDeniedHelp && (
+        <div onClick={() => setShowLocationDeniedHelp(false)} className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: CORAL_TINT }}>
+              <LocateFixed size={26} color={CORAL} />
+            </div>
+            <div className="font-extrabold text-base mb-2" style={{ color: INK }}>위치 권한이 꺼져있어요</div>
+            <div className="text-sm mb-6" style={{ color: INK_SOFT, lineHeight: 1.6 }}>
+              현재 위치로 주소를 찾으려면, 휴대폰 설정에서<br />
+              장편 앱의 위치 권한을 허용해주셔야 해요.
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowLocationDeniedHelp(false)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK }}>
+                나중에
+              </button>
+              <button
+                onClick={async () => {
+                  setShowLocationDeniedHelp(false);
+                  if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+                    const { NativeSettings, AndroidSettings } = await import("capacitor-native-settings");
+                    NativeSettings.openAndroid({ option: AndroidSettings.ApplicationDetails });
+                  }
+                }}
+                className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95"
+                style={{ background: TEAL }}
+              >
+                설정으로 이동
+              </button>
+            </div>
           </div>
         </div>
       )}
