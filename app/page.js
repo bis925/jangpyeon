@@ -113,7 +113,7 @@ function renderRichText(html) {
   return <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원"];
+const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원", "패스트푸드", "약국", "복지시설", "은행", "편의점", "숙박시설", "교통시설"];
 const CATEGORY_MARKERS = {
   공공기관: { emoji: "🏛️", color: "#4A90D9" },
   음식점: { emoji: "🍽️", color: "#F0603D" },
@@ -121,6 +121,13 @@ const CATEGORY_MARKERS = {
   문화시설: { emoji: "🎭", color: "#9B59B6" },
   쇼핑: { emoji: "🛍️", color: "#E8A800" },
   병원: { emoji: "🏥", color: "#00A896" },
+  패스트푸드: { emoji: "🍔", color: "#E67E22" },
+  약국: { emoji: "💊", color: "#27AE60" },
+  복지시설: { emoji: "💚", color: "#16A085" },
+  은행: { emoji: "🏦", color: "#2C3E50" },
+  편의점: { emoji: "🏪", color: "#F39C12" },
+  숙박시설: { emoji: "🛏️", color: "#8E44AD" },
+  교통시설: { emoji: "🚉", color: "#34495E" },
 };
 const WEEKDAYS = [
   { key: "mon", label: "월" }, { key: "tue", label: "화" }, { key: "wed", label: "수" },
