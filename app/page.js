@@ -2479,6 +2479,15 @@ async function handleAvatarChange(e) {
 async function locateMeForRegister() {
     setLocatingAddress(true);
     try {
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { Geolocation } = await import("@capacitor/geolocation");
+        const perm = await Geolocation.checkPermissions();
+        if (perm.location === "denied" && perm.coarseLocation === "denied") {
+          setLocatingAddress(false);
+          setShowLocationDeniedHelp(true);
+          return;
+        }
+      }
       const pos = await getCurrentPositionSmart({ timeout: 15000 });
       const { latitude, longitude } = pos.coords;
       if (!window.kakao) { setLocatingAddress(false); return; }
