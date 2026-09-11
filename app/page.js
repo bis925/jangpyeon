@@ -1778,10 +1778,13 @@ async function playRandomBgMusic() {
         const { Playlist } = await import("capacitor-plugin-playlist");
         const state = await Playlist.getState().catch(() => null);
         if (state && state.isPlaying) return;
-        const tracks = bgMusicList.map((m, i) => ({
+const tracks = bgMusicList.map((m, i) => ({
           trackId: i,
           assetUrl: m.file_url,
           title: m.title,
+          album: "장편",
+          artist: "편이",
+          albumArt: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
           isRadio: false,
         }));
         await Playlist.setItems({ items: tracks });
