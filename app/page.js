@@ -1758,8 +1758,12 @@ async function deleteBgMusic(id, fileUrl) {
 async function stopBgMusic() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const { NativeAudio } = await import("@mediagrid/capacitor-native-audio");
-        await NativeAudio.stop({ assetId: "" }).catch(() => {});
+  const { NativeAudio } = await import("@capacitor-community/native-audio");
+        if (bgMusicList && bgMusicList.length > 0) {
+          for (const m of bgMusicList) {
+            await NativeAudio.stop({ assetId: m.id }).catch(() => {});
+          }
+        }
       } catch (e) {}
     }
     if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
@@ -1775,21 +1779,15 @@ async function playRandomBgMusic() {
     try {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const { NativeAudio } = await import("@mediagrid/capacitor-native-audio");
-        await NativeAudio.configure({ backgroundPlayback: true, showNotification: true });
-        for (const m of bgMusicList) {
-          await NativeAudio.preload({
-            assetId: m.id,
-            assetPath: m.file_url,
-            isUrl: true,
-            notificationMetadata: {
-              title: m.title,
-              artist: "장편",
-              artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
-            },
-          });
-        }
+const { NativeAudio } = await import("@capacitor-community/native-audio");
         const randomTrack = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+        await NativeAudio.preload({
+          assetId: randomTrack.id,
+          assetPath: randomTrack.file_url,
+          audioChannelNum: 1,
+          isUrl: true,
+        });
+        await NativeAudio.loop({ assetId: randomTrack.id });
         await NativeAudio.play({ assetId: randomTrack.id });
         bgMusicAudioRef.current = true;
       } catch (e) {
