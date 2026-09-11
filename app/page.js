@@ -1840,8 +1840,9 @@ async function toggleBgMusic() {
 async function openBatteryOptimizationSettings() {
     setShowBatteryOptHelp(false);
     try {
-      const { DontKillMyApp } = await import("@squareetlabs/capacitor-dont-kill-my-app");
-      await DontKillMyApp.requestIgnoreBatteryOptimizations();
+      const { NativeSettings, AndroidSettings } = await import("capacitor-native-settings");
+      await NativeSettings.openAndroid({ option: AndroidSettings.ApplicationDetails });
+      showToast("설정에서 '배터리' 메뉴를 찾아 '제한 없음'으로 바꿔주세요");
     } catch (e) {
       showToast("설정 화면을 열 수 없어요");
     }
