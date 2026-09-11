@@ -522,13 +522,7 @@ className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:sh
         </div>
       )}
  
-{getPerfectAccessStars(place) && (
-        <div className="flex items-center gap-1 mb-2">
-          {[...Array(5)].map((_, i) => <span key={i} style={{ fontSize: 11 }}>⭐</span>)}
-          <span className="text-[10px] font-extrabold ml-0.5" style={{ color: "#B4620F" }}>접근성 완벽 확인</span>
-        </div>
-      )}
-      <div className="flex items-center justify-between gap-1.5 mb-2">
+<div className="flex items-center justify-between gap-1.5 mb-2">
         <div className="flex items-center gap-1.5 flex-wrap min-w-0">
           {openStatus === true && (
             <div className="flex items-center gap-1 rounded-full px-2 py-1 flex-shrink-0" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
