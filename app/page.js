@@ -1607,6 +1607,18 @@ async function announceTodayWeather() {
       showToast("음성 인식에 실패했어요, 다시 시도해주세요");
     }
   }
+
+    async function fetchSnowEvent() {
+    const { data } = await supabase.from("app_settings").select("value").eq("key", "snow_event_active").single();
+    setSnowEventActive(data?.value === "true");
+  }
+
+  async function toggleSnowEvent() {
+    const newValue = !snowEventActive;
+    setSnowEventActive(newValue);
+    await supabase.from("app_settings").update({ value: newValue ? "true" : "false" }).eq("key", "snow_event_active");
+    showToast(newValue ? "눈 내리기 이벤트를 켰어요" : "눈 내리기 이벤트를 껐어요");
+  }
   
   function showToast(message) {
     setToast(message);
@@ -2314,6 +2326,7 @@ const [faqPage, setFaqPage] = useState(1);
   const [showElevatorHelp, setShowElevatorHelp] = useState(false);
 const [myPageWeather, setMyPageWeather] = useState(null);
 const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
+  const [snowEventActive, setSnowEventActive] = useState(false);
 const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
   const [toiletFloorMax, setToiletFloorMax] = useState(5);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
@@ -2719,6 +2732,12 @@ async function locateMeForRegister() {
 useEffect(() => {
     fetchMaintenanceMode();
     const interval = setInterval(fetchMaintenanceMode, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    fetchSnowEvent();
+    const interval = setInterval(fetchSnowEvent, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -4145,6 +4164,23 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           </button>
         </div>
       )}
+{snowEventActive && (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 45 }}>
+          {[...Array(40)].map((_, i) => (
+            <div key={i} className="absolute rounded-full snow-fall" style={{
+              top: -20,
+              left: `${(i * 2.5) % 100}%`,
+              width: 4 + (i % 4) * 2,
+              height: 4 + (i % 4) * 2,
+              background: "#fff",
+              opacity: 0.6 + (i % 3) * 0.1,
+              animationDelay: `${(i % 10) * 0.8}s`,
+              animationDuration: `${6 + (i % 5)}s`,
+            }} />
+          ))}
+        </div>
+      )}
+
 {showVoiceListeningUI && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8" style={{ background: "rgba(15,110,98,0.95)" }}>
           <div className="relative flex items-center justify-center mb-6" style={{ width: 140, height: 140 }}>
