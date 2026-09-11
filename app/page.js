@@ -1558,6 +1558,38 @@ async function announceTodayWeather() {
       }
     } catch (e) {}
   }
+
+    async function startVoiceNameInput() {
+    setShowNameInputChoice(false);
+    try {
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
+        const { available } = await SpeechRecognition.available();
+        if (!available) { showToast("이 기기에서는 음성 입력을 지원하지 않아요"); return; }
+        const permission = await SpeechRecognition.requestPermissions();
+        if (permission.speechRecognition !== "granted") {
+          showToast("마이크 권한을 허용해주세요");
+          return;
+        }
+        setShowVoiceListeningUI(true);
+        setIsSearchVoice(false);
+        const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
+        setShowVoiceListeningUI(false);
+        const text = (result?.matches?.[0] || "").trim();
+        if (text) {
+          setForm((prev) => ({ ...prev, name: text }));
+          showToast(`"${text}"(으)로 입력했어요`);
+        } else {
+          showToast("인식된 내용이 없어요");
+        }
+      } else {
+        showToast("음성 입력은 모바일 앱에서 사용 가능해요");
+      }
+    } catch (err) {
+      setShowVoiceListeningUI(false);
+      showToast("음성 인식에 실패했어요, 다시 시도해주세요");
+    }
+  }
   
   function showToast(message) {
     setToast(message);
@@ -5332,13 +5364,22 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
         <div onClick={() => setShowNameInputChoice(false)} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl p-5" style={{ background: CARD }}>
             <div className="font-extrabold text-base mb-4 text-center" style={{ color: INK }}>장소명을 어떻게 입력할까요?</div>
-            <button onClick={captureAndRecognizeText} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: TEAL_TINT }}>
+       <button onClick={captureAndRecognizeText} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: TEAL_TINT }}>
               <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: TEAL }}>
                 <Camera size={22} color="#fff" />
               </div>
               <div className="text-left">
                 <div className="font-bold text-sm" style={{ color: TEAL_DARK }}>카메라로 찍기</div>
                 <div className="text-xs" style={{ color: INK_SOFT }}>간판을 촬영하면 자동으로 입력돼요</div>
+              </div>
+            </button>
+            <button onClick={startVoiceNameInput} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: "#FCE4EC" }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: "#D6336C" }}>
+                <Mic size={22} color="#fff" />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-sm" style={{ color: "#D6336C" }}>말해서 입력하기</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>장소 이름을 말하면 자동으로 입력돼요</div>
               </div>
             </button>
           <button onClick={() => { setIsNameInputManual(true); setShowNameInputChoice(false); setTimeout(() => document.getElementById("place-name-input")?.focus(), 100); }} className="w-full flex items-center gap-3 rounded-2xl p-4 transition-all duration-200 active:scale-[0.98]" style={{ background: PAPER }}>
