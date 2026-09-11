@@ -1653,8 +1653,12 @@ async function announceTodayWeather() {
     showToast("음악이 추가됐어요!");
   }
 
-  async function deleteBgMusic(id) {
+async function deleteBgMusic(id, fileUrl) {
     if (!window.confirm("이 곡을 삭제하시겠어요?")) return;
+    const filePath = fileUrl.split("/music/")[1];
+    if (filePath) {
+      await supabase.storage.from("music").remove([decodeURIComponent(filePath)]);
+    }
     await supabase.from("background_music").delete().eq("id", id);
     fetchBgMusicList();
     showToast("삭제됐어요");
@@ -6821,7 +6825,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               {bgMusicList.map((music) => (
                 <div key={music.id} className="px-4 py-3 flex items-center justify-between gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
                   <span className="text-sm font-bold truncate" style={{ color: INK }}>{music.title}</span>
-                  <button onClick={() => deleteBgMusic(music.id)} className="flex-shrink-0" aria-label="삭제">
+          <button onClick={() => deleteBgMusic(music.id, music.file_url)} className="flex-shrink-0" aria-label="삭제">
                     <Trash2 size={16} color={CORAL} />
                   </button>
                 </div>
