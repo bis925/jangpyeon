@@ -2437,6 +2437,7 @@ const [faqPage, setFaqPage] = useState(1);
   const [showElevatorHelp, setShowElevatorHelp] = useState(false);
 const [myPageWeather, setMyPageWeather] = useState(null);
 const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
+  const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
 const [snowEventActive, setSnowEventActive] = useState(false);
 const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
