@@ -113,7 +113,24 @@ function renderRichText(html) {
   return <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원"];
+const CATEGORY_KEYWORD_SUGGESTIONS = {
+  공공기관: ["주민센터", "구청", "시청", "우체국"],
+  음식점: ["한식", "중식", "일식", "양식", "분식", "고기", "국밥", "족발", "갈비", "치킨"],
+  카페: ["커피", "디저트", "베이커리", "빵집"],
+  문화시설: ["도서관", "박물관", "미술관", "영화관", "공연장"],
+  쇼핑: ["마트", "백화점", "시장", "편의점"],
+  병원: ["내과", "외과", "정형외과", "치과", "한의원", "소아과"],
+  패스트푸드: ["햄버거", "피자", "치킨"],
+  약국: ["처방전", "상비약"],
+  복지시설: ["장애인복지관", "주간보호센터", "자립생활센터"],
+  은행: ["예금", "대출", "ATM", "환전"],
+  편의점: ["24시간", "택배", "ATM"],
+  숙박시설: ["호텔", "모텔", "펜션", "게스트하우스"],
+  교통시설: ["지하철역", "버스터미널", "기차역"],
+};
+
+
+const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원", "패스트푸드", "약국", "복지시설", "은행", "편의점", "숙박시설", "교통시설"];
 const CATEGORY_MARKERS = {
   공공기관: { emoji: "🏛️", color: "#4A90D9" },
   음식점: { emoji: "🍽️", color: "#F0603D" },
@@ -121,6 +138,13 @@ const CATEGORY_MARKERS = {
   문화시설: { emoji: "🎭", color: "#9B59B6" },
   쇼핑: { emoji: "🛍️", color: "#E8A800" },
   병원: { emoji: "🏥", color: "#00A896" },
+  패스트푸드: { emoji: "🍔", color: "#E67E22" },
+  약국: { emoji: "💊", color: "#27AE60" },
+  복지시설: { emoji: "💚", color: "#16A085" },
+  은행: { emoji: "🏦", color: "#2C3E50" },
+  편의점: { emoji: "🏪", color: "#F39C12" },
+  숙박시설: { emoji: "🛏️", color: "#8E44AD" },
+  교통시설: { emoji: "🚉", color: "#34495E" },
 };
 const WEEKDAYS = [
   { key: "mon", label: "월" }, { key: "tue", label: "화" }, { key: "wed", label: "수" },
@@ -269,6 +293,16 @@ parking_disabled: {
   },
 };
 
+function getPerfectAccessStars(place) {
+  const entranceOk = place.entrance_step === "none" || place.entrance_step === "ramp";
+  const doorOk = place.door_type && place.door_type !== "unknown";
+  const toiletOk = place.accessible_toilet === "yes";
+  const elevatorOk = place.elevator === "yes" || place.elevator === "none_needed";
+  const parkingOk = place.parking_disabled === "yes";
+  const turningOk = place.turning_space === "yes";
+  return entranceOk && doorOk && toiletOk && elevatorOk && parkingOk && turningOk;
+}
+
 function getOverallAccessSummary(place) {
   const critical = ["entrance_step", "accessible_toilet"];
   const values = critical.map((k) => place[k]);
@@ -282,14 +316,36 @@ function getOverallAccessSummary(place) {
 
 function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onGoToMap, onImageClick, onConfirmInfo, onShowRecencyHelp }) {
   const [showSummaryHelp, setShowSummaryHelp] = useState(false);
+  const [showStars, setShowStars] = useState(false);
+  useEffect(() => {
+    if (place && getPerfectAccessStars(place)) {
+      setShowStars(true);
+      const timer = setTimeout(() => setShowStars(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [place?.id]);
   if (!place) return null;
   const openStatus = isOpenNow(place.business_hours, holidays);
+  const isPerfect = getPerfectAccessStars(place);
   const summary = getOverallAccessSummary(place);
   const recency = place.created_at ? getRecencyInfo(place.created_at, place.last_confirmed_at) : null;
 
   return (
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
 <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden relative" style={{ background: CARD, maxHeight: "88vh", display: "flex", flexDirection: "column", border: `3px solid ${CATEGORY_MARKERS[place.category]?.color || TEAL}` }}>
+          {showStars && (
+            <div className="absolute top-0 left-0 right-0 flex items-center justify-center gap-1.5 py-4 z-20 pointer-events-none" style={{ background: "rgba(255,193,59,0.95)" }}>
+              {[...Array(5)].map((_, i) => (
+                <span key={i} className="perfect-star-blink" style={{ fontSize: 28, animationDelay: `${i * 0.1}s` }}>⭐</span>
+              ))}
+            </div>
+          )}
+          {isPerfect && !showStars && (
+            <div className="flex items-center justify-center gap-1 py-1.5" style={{ background: "#FFF7E0" }}>
+              {[...Array(5)].map((_, i) => <span key={i} style={{ fontSize: 13 }}>⭐</span>)}
+              <span className="text-[11px] font-extrabold ml-1" style={{ color: "#B4620F" }}>접근성 완벽 확인</span>
+            </div>
+          )}
         <button onClick={onClose} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 32, height: 32, background: "rgba(0,0,0,0.4)" }} aria-label="닫기">
           <X size={18} color="#fff" />
         </button>
@@ -346,15 +402,20 @@ function PlaceDetailModal({ place, onClose, holidays, onShare, onDirections, onG
 <div className="rounded-2xl p-4 mb-4" style={{ background: PAPER }}>
               <div className="text-sm font-extrabold mb-3" style={{ color: INK }}>♿ 접근성 정보</div>
               <div className="grid grid-cols-2 gap-2">
-                {Object.entries(ACCESS_INFO_META).map(([key, meta]) => {
+{Object.entries(ACCESS_INFO_META).map(([key, meta]) => {
                   const val = place[key] || "unknown";
                   const info = meta.values[val] || meta.values.unknown;
-const bgColor = info.ok === true ? "#C0392B" : "#F1F1F1";
+        const bgColor = info.ok === true ? "#C0392B" : "#F1F1F1";
                   const textColor = info.ok === true ? "#fff" : "#888";
+                  let displayText = info.text;
+                  if (key === "accessible_toilet" && val === "yes" && place.toilet_floors && place.toilet_floors.length > 0) {
+                    const sorted = place.toilet_floors.slice().sort((a, b) => a - b);
+                    displayText = `있음 (${sorted.join(", ")}층)`;
+                  }
                   return (
                     <div key={key} className="rounded-xl p-2.5" style={{ background: bgColor }}>
                       <div className="text-[10px] font-bold mb-0.5" style={{ color: textColor, opacity: 0.85 }}>{meta.label}</div>
-                      <div className="text-sm font-extrabold" style={{ color: textColor }}>{info.text}</div>
+                      <div className="text-sm font-extrabold" style={{ color: textColor, wordBreak: "break-word" }}>{displayText}</div>
                     </div>
                   );
                 })}
@@ -370,12 +431,7 @@ const bgColor = info.ok === true ? "#C0392B" : "#F1F1F1";
                     <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.door_width_cm}cm</div>
                   </div>
                 )}
-                {place.toilet_floor != null && place.accessible_toilet === "yes" && (
-                  <div className="rounded-xl p-2.5" style={{ background: "#F1F1F1" }}>
-                    <div className="text-[10px] font-bold mb-0.5" style={{ color: "#888", opacity: 0.85 }}>화장실 위치</div>
-                    <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.toilet_floor}층</div>
-                  </div>
-                )}
+
                 <div className="rounded-xl p-2.5" style={{ background: place.has_stroller_access ? "#FCE4EC" : "#F1F1F1" }}>
                   <div className="text-[10px] font-bold mb-0.5" style={{ color: place.has_stroller_access ? "#D6336C" : "#888", opacity: 0.85 }}>유모차</div>
                   <div className="text-sm font-extrabold" style={{ color: place.has_stroller_access ? "#D6336C" : "#888" }}>{place.has_stroller_access ? "가능" : "정보 없음"}</div>
@@ -473,8 +529,8 @@ return (
         onTouchMove={handlePressEnd}
         onContextMenu={handleContextMenu}
         onClick={handleCardClick}
-        className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md active:scale-[0.98] select-none cursor-pointer"
-        style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}
+className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md active:scale-[0.98] select-none cursor-pointer"
+        style={{ background: CARD, border: getPerfectAccessStars(place) ? "2px solid #FFC13B" : `1px solid ${LINE}`, boxShadow: getPerfectAccessStars(place) ? "0 0 0 1px rgba(255,193,59,0.3)" : "none", opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}
       >
 
       {openStatus === false && (
@@ -501,11 +557,11 @@ return (
           <ChevronRight size={14} />
         </button>
       </div>
-      <div className="mb-3 min-w-0">
+<div className="mb-3 min-w-0">
         {place.photo_urls && place.photo_urls.length > 0 ? (
-          <div className="flex gap-1.5 overflow-x-auto min-w-0">
+          <div className="grid gap-1.5 min-w-0" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))", maxWidth: 340 }}>
             {place.photo_urls.map((url, i) => (
- <button key={i} type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_urls, i); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden relative">
+ <button key={i} type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_urls, i); }} className="aspect-square rounded-xl overflow-hidden relative min-w-0">
                 <img src={url} alt={`${place.name} ${i + 1}`} className="w-full h-full object-cover" />
                 {place.photo_urls.length > 1 && i === 0 && (
                   <div className="absolute bottom-0.5 right-0.5 rounded-full px-1.5 py-0.5" style={{ background: "rgba(0,0,0,0.6)" }}>
@@ -516,7 +572,7 @@ return (
             ))}
           </div>
         ) : (
-          <div className="w-16 h-16 rounded-xl" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
+          <div className="rounded-xl" style={{ width: 64, height: 64, background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
         )}
       </div>
   <div className="flex items-center justify-between gap-2 mb-1">
@@ -782,10 +838,14 @@ async function handleSubmit(e) {
           </div>
         </div>
 
- <div className="text-center">
+<div className="text-center">
+          <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 mb-3" style={{ background: "#FEE500" }}>
+            <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#3C1E1E" }}>카카오톡 채널 추가하기</span>
+          </a>
           <p className="text-xs" style={{ color: '#B8B1A0' }}>제작 · 코드람쥐</p>
           <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: '#C9C2B2' }}>
-            상호: 코드람쥐 · 대표: 조은찬 · 사업자등록번호: 303-18-93738<br />
+            상호: 코드람쥐 · 사업자등록번호: 303-18-93738<br />
             사업장 소재지: 경기도 평택시 산단로16번길 26, A동 14층 1408호<br />
             (모곡동, 엠에스원타워 지식산업센터)
           </p>
@@ -1515,6 +1575,161 @@ async function announceTodayWeather() {
       }
     } catch (e) {}
   }
+
+  async function startVoiceAddressDetailInput() {
+    setShowAddressDetailChoice(false);
+    try {
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
+        const { available } = await SpeechRecognition.available();
+        if (!available) { showToast("이 기기에서는 음성 입력을 지원하지 않아요"); return; }
+        const permission = await SpeechRecognition.requestPermissions();
+        if (permission.speechRecognition !== "granted") {
+          showToast("마이크 권한을 허용해주세요");
+          return;
+        }
+        setShowVoiceListeningUI(true);
+        setIsSearchVoice(false);
+        const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
+        setShowVoiceListeningUI(false);
+        const text = (result?.matches?.[0] || "").trim();
+        if (text) {
+          setForm((prev) => ({ ...prev, addressDetail: text }));
+          showToast(`"${text}"(으)로 입력했어요`);
+        } else {
+          showToast("인식된 내용이 없어요");
+        }
+      } else {
+        showToast("음성 입력은 모바일 앱에서 사용 가능해요");
+      }
+    } catch (err) {
+      setShowVoiceListeningUI(false);
+      showToast("음성 인식에 실패했어요, 다시 시도해주세요");
+    }
+  }
+
+    async function startVoiceNameInput() {
+    setShowNameInputChoice(false);
+    try {
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
+        const { available } = await SpeechRecognition.available();
+        if (!available) { showToast("이 기기에서는 음성 입력을 지원하지 않아요"); return; }
+        const permission = await SpeechRecognition.requestPermissions();
+        if (permission.speechRecognition !== "granted") {
+          showToast("마이크 권한을 허용해주세요");
+          return;
+        }
+        setShowVoiceListeningUI(true);
+        setIsSearchVoice(false);
+        const result = await SpeechRecognition.start({ language: "ko-KR", popup: false });
+        setShowVoiceListeningUI(false);
+        const text = (result?.matches?.[0] || "").trim();
+        if (text) {
+          setForm((prev) => ({ ...prev, name: text }));
+          showToast(`"${text}"(으)로 입력했어요`);
+        } else {
+          showToast("인식된 내용이 없어요");
+        }
+      } else {
+        showToast("음성 입력은 모바일 앱에서 사용 가능해요");
+      }
+    } catch (err) {
+      setShowVoiceListeningUI(false);
+      showToast("음성 인식에 실패했어요, 다시 시도해주세요");
+    }
+  }
+
+    async function fetchSnowEvent() {
+    const { data } = await supabase.from("app_settings").select("value").eq("key", "snow_event_active").single();
+    setSnowEventActive(data?.value === "true");
+  }
+
+  async function toggleSnowEvent() {
+    const newValue = !snowEventActive;
+    setSnowEventActive(newValue);
+    await supabase.from("app_settings").update({ value: newValue ? "true" : "false" }).eq("key", "snow_event_active");
+    showToast(newValue ? "눈 내리기 이벤트를 켰어요" : "눈 내리기 이벤트를 껐어요");
+  }
+
+  async function fetchBgMusicEvent() {
+    const { data } = await supabase.from("app_settings").select("value").eq("key", "bg_music_event_active").single();
+    setBgMusicEventActive(data?.value === "true");
+  }
+
+  async function toggleBgMusicEvent() {
+    const newValue = !bgMusicEventActive;
+    setBgMusicEventActive(newValue);
+    await supabase.from("app_settings").update({ value: newValue ? "true" : "false" }).eq("key", "bg_music_event_active");
+    showToast(newValue ? "배경음악 이벤트를 켰어요" : "배경음악 이벤트를 껐어요");
+  }
+
+  async function uploadBgMusic(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("audio/")) { showToast("음악 파일(mp3 등)만 업로드할 수 있어요"); return; }
+    setMusicUploading(true);
+    const filePath = `${Date.now()}_${file.name}`;
+    const { error: uploadError } = await supabase.storage.from("music").upload(filePath, file);
+    if (uploadError) { showToast("업로드 실패: " + uploadError.message); setMusicUploading(false); return; }
+    const { data: urlData } = supabase.storage.from("music").getPublicUrl(filePath);
+    const maxOrder = bgMusicList.length > 0 ? Math.max(...bgMusicList.map((m) => m.display_order)) : 0;
+    const { error } = await supabase.from("background_music").insert({
+      title: file.name.replace(/\.[^/.]+$/, ""),
+      file_url: urlData.publicUrl,
+      display_order: maxOrder + 1,
+    });
+    if (error) { showToast("등록 실패: " + error.message); setMusicUploading(false); return; }
+    fetchBgMusicList();
+    setMusicUploading(false);
+    showToast("음악이 추가됐어요!");
+  }
+
+async function deleteBgMusic(id, fileUrl) {
+    if (!window.confirm("이 곡을 삭제하시겠어요?")) return;
+    const filePath = fileUrl.split("/music/")[1];
+    if (filePath) {
+      await supabase.storage.from("music").remove([decodeURIComponent(filePath)]);
+    }
+    await supabase.from("background_music").delete().eq("id", id);
+    fetchBgMusicList();
+    showToast("삭제됐어요");
+  }
+
+    async function fetchBgMusicList() {
+    const { data } = await supabase.from("background_music").select("*").order("display_order");
+    setBgMusicList(data || []);
+  }
+
+  function playRandomBgMusic() {
+    if (!bgMusicList || bgMusicList.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * bgMusicList.length);
+    const track = bgMusicList[randomIndex];
+    if (bgMusicAudioRef.current) {
+      bgMusicAudioRef.current.pause();
+    }
+    const audio = new Audio(track.file_url);
+    audio.volume = 0.5;
+    audio.onended = () => playRandomBgMusic();
+    audio.play().catch(() => {});
+    bgMusicAudioRef.current = audio;
+  }
+
+  function toggleBgMusic() {
+    const newVal = !bgMusicOn;
+    setBgMusicOn(newVal);
+    if (typeof window !== "undefined") localStorage.setItem("bg_music_on", newVal.toString());
+    if (newVal) {
+      playRandomBgMusic();
+      showToast("배경음악을 켰어요");
+    } else {
+      if (bgMusicAudioRef.current) {
+        bgMusicAudioRef.current.pause();
+        bgMusicAudioRef.current = null;
+      }
+      showToast("배경음악을 껐어요");
+    }
+  }
   
   function showToast(message) {
     setToast(message);
@@ -1734,6 +1949,18 @@ const showFavoritesOnlyRef = useRef(false);
 
 useEffect(() => {
     getCurrentPositionSmart({ enableHighAccuracy: false, timeout: 5000 }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+    let KeepAwakeModule;
+    import("@capacitor-community/keep-awake").then(({ KeepAwake }) => {
+      KeepAwakeModule = KeepAwake;
+      KeepAwake.keepAwake();
+    });
+    return () => {
+      if (KeepAwakeModule) KeepAwakeModule.allowSleep();
+    };
   }, []);
 
   useEffect(() => {
@@ -2223,6 +2450,15 @@ const [faqPage, setFaqPage] = useState(1);
 const [myPageWeather, setMyPageWeather] = useState(null);
 const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
   const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
+const [snowEventActive, setSnowEventActive] = useState(false);
+const [bgMusicList, setBgMusicList] = useState([]);
+  const [bgMusicOn, setBgMusicOn] = useState(false);
+  const bgMusicAudioRef = useRef(null);
+const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
+const [musicUploading, setMusicUploading] = useState(false);
+const [showAddressDetailChoice, setShowAddressDetailChoice] = useState(false);
+  const [isAddressDetailManual, setIsAddressDetailManual] = useState(false);
+  const [toiletFloorMax, setToiletFloorMax] = useState(5);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
   const showElevatorHelpRef = useRef(false);
   useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
@@ -2630,12 +2866,49 @@ useEffect(() => {
   }, []);
 
 useEffect(() => {
+    fetchSnowEvent();
+    const interval = setInterval(fetchSnowEvent, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    fetchBgMusicEvent();
+    const interval = setInterval(fetchBgMusicEvent, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (bgMusicEventActive && bgMusicList.length > 0) {
+      setBgMusicOn(true);
+      if (!bgMusicAudioRef.current) playRandomBgMusic();
+    } else if (!bgMusicEventActive) {
+      setBgMusicOn(false);
+      if (bgMusicAudioRef.current) {
+        bgMusicAudioRef.current.pause();
+        bgMusicAudioRef.current = null;
+      }
+    }
+  }, [bgMusicEventActive, bgMusicList]);
+
+useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("mic_position_percent");
     if (saved) setMicPositionPercent(parseFloat(saved));
     const savedWeather = localStorage.getItem("weather_effect_on");
     if (savedWeather === "false") setWeatherEffectOn(false);
+    const savedMusic = localStorage.getItem("bg_music_on");
+    if (savedMusic === "true") setBgMusicOn(true);
   }, []);
+
+  useEffect(() => {
+    fetchBgMusicList();
+  }, []);
+
+  useEffect(() => {
+    if (bgMusicOn && bgMusicList.length > 0 && !bgMusicAudioRef.current) {
+      playRandomBgMusic();
+    }
+  }, [bgMusicOn, bgMusicList]);
 
 useEffect(() => {
     if (session && tab === "my" && !myPageWeather) fetchMyPageWeather();
@@ -3491,8 +3764,9 @@ useEffect(() => {
       toilet_floor: place.toilet_floor ?? "",
 elevator: place.elevator || "unknown",
       parking_disabled: place.parking_disabled || "unknown",
-      door_width_cm: place.door_width_cm ?? "",
+door_width_cm: place.door_width_cm ?? "",
       turning_space: place.turning_space || "unknown",
+      toilet_floors: place.toilet_floors || [],
       badges: {
         stroller: place.has_stroller_access,
       },
@@ -3527,12 +3801,13 @@ elevator: place.elevator || "unknown",
         p_toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
 p_elevator: form.elevator,
         p_parking_disabled: form.parking_disabled,
-        p_door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
+p_door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
         p_turning_space: form.turning_space,
         p_has_stroller_access: form.badges.stroller,
         p_keywords: form.keywords.trim() || null,
         p_phone: form.phone.trim() || null,
         p_business_hours: finalBusinessHours,
+        p_toilet_floors: form.toilet_floors && form.toilet_floors.length > 0 ? form.toilet_floors : null,
       }));
     } else {
 ({ error } = await supabase
@@ -3548,12 +3823,13 @@ p_elevator: form.elevator,
           toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
 elevator: form.elevator,
           parking_disabled: form.parking_disabled,
-          door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
+door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
           turning_space: form.turning_space,
           has_stroller_access: form.badges.stroller,
           keywords: form.keywords.trim() || null,
                  phone: form.phone.trim() || null,
           business_hours: finalBusinessHours,
+          toilet_floors: form.toilet_floors && form.toilet_floors.length > 0 ? form.toilet_floors : null,
         })
         .eq("id", editingPlaceId));
     }
@@ -3628,8 +3904,9 @@ p_elevator: form.elevator,
       p_keywords: form.keywords.trim() || null,
       p_phone: form.phone.trim() || null,
       p_business_hours: finalBusinessHours,
-      p_lat: placeLat,
+p_lat: placeLat,
       p_lng: placeLng,
+      p_toilet_floors: form.toilet_floors && form.toilet_floors.length > 0 ? form.toilet_floors : null,
     });
     if (error) {
       setIsSubmittingPlace(false);
@@ -4042,12 +4319,29 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
 
 {showShopExplainCard && (
         <div onClick={() => setShowShopExplainCard(false)} className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ background: "#000" }}>
-<img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/3.png" alt="장편 캐릭터" style={{ width: 110, height: 110, objectFit: "contain" }} />
+          <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/f9f62a49-f38a-4f53-8369-044857e51e03.png" alt="장편 안내" className="w-full h-full object-cover" />
           <button onClick={(e) => { e.stopPropagation(); setShowShopExplainCard(false); }} className="absolute top-4 right-4 rounded-full flex items-center justify-center" style={{ width: 40, height: 40, background: "rgba(255,255,255,0.2)" }} aria-label="닫기">
             <X size={22} color="#fff" />
           </button>
         </div>
       )}
+{snowEventActive && (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 45 }}>
+          {[...Array(40)].map((_, i) => (
+            <div key={i} className="absolute rounded-full snow-fall" style={{
+              top: -20,
+              left: `${(i * 2.5) % 100}%`,
+              width: 4 + (i % 4) * 2,
+              height: 4 + (i % 4) * 2,
+              background: "#fff",
+              opacity: 0.6 + (i % 3) * 0.1,
+              animationDelay: `${(i % 10) * 0.8}s`,
+              animationDuration: `${6 + (i % 5)}s`,
+            }} />
+          ))}
+        </div>
+      )}
+
 {showVoiceListeningUI && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8" style={{ background: "rgba(15,110,98,0.95)" }}>
           <div className="relative flex items-center justify-center mb-6" style={{ width: 140, height: 140 }}>
@@ -5280,17 +5574,52 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           <div className="text-white font-bold text-sm">글자를 읽고 있어요...</div>
         </div>
       )}
+
+{showAddressDetailChoice && (
+        <div onClick={() => setShowAddressDetailChoice(false)} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl p-5" style={{ background: CARD }}>
+            <div className="font-extrabold text-base mb-4 text-center" style={{ color: INK }}>상세주소를 어떻게 입력할까요?</div>
+            <button onClick={startVoiceAddressDetailInput} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: "#FCE4EC" }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: "#D6336C" }}>
+                <Mic size={22} color="#fff" />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-sm" style={{ color: "#D6336C" }}>말해서 입력하기</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>동/호수, 층수를 말하면 자동으로 입력돼요</div>
+              </div>
+            </button>
+        <button onClick={() => { setIsAddressDetailManual(true); setShowAddressDetailChoice(false); setTimeout(() => document.getElementById("address-detail-manual-input")?.focus(), 100); }} className="w-full flex items-center gap-3 rounded-2xl p-4 transition-all duration-200 active:scale-[0.98]" style={{ background: PAPER }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: "#fff", border: `1.4px solid ${LINE}` }}>
+                <Pencil size={20} color={INK_SOFT} />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-sm" style={{ color: INK }}>직접 입력하기</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>키보드로 타이핑해서 입력해요</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
       {showNameInputChoice && (
         <div onClick={() => setShowNameInputChoice(false)} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div onClick={(e) => e.stopPropagation()} className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl p-5" style={{ background: CARD }}>
             <div className="font-extrabold text-base mb-4 text-center" style={{ color: INK }}>장소명을 어떻게 입력할까요?</div>
-            <button onClick={captureAndRecognizeText} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: TEAL_TINT }}>
+       <button onClick={captureAndRecognizeText} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: TEAL_TINT }}>
               <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: TEAL }}>
                 <Camera size={22} color="#fff" />
               </div>
               <div className="text-left">
                 <div className="font-bold text-sm" style={{ color: TEAL_DARK }}>카메라로 찍기</div>
                 <div className="text-xs" style={{ color: INK_SOFT }}>간판을 촬영하면 자동으로 입력돼요</div>
+              </div>
+            </button>
+            <button onClick={startVoiceNameInput} className="w-full flex items-center gap-3 rounded-2xl p-4 mb-2.5 transition-all duration-200 active:scale-[0.98]" style={{ background: "#FCE4EC" }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 44, height: 44, background: "#D6336C" }}>
+                <Mic size={22} color="#fff" />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-sm" style={{ color: "#D6336C" }}>말해서 입력하기</div>
+                <div className="text-xs" style={{ color: INK_SOFT }}>장소 이름을 말하면 자동으로 입력돼요</div>
               </div>
             </button>
           <button onClick={() => { setIsNameInputManual(true); setShowNameInputChoice(false); setTimeout(() => document.getElementById("place-name-input")?.focus(), 100); }} className="w-full flex items-center gap-3 rounded-2xl p-4 transition-all duration-200 active:scale-[0.98]" style={{ background: PAPER }}>
@@ -5309,8 +5638,14 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                                                                                                               <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>주소</label>
                   <input value={form.address} readOnly placeholder="주소 검색 버튼을 눌러주세요"
                     className="w-full rounded-xl px-4 py-3 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK, background: PAPER }} />
-                  <input value={form.addressDetail} onChange={(e) => setForm({ ...form, addressDetail: e.target.value })} placeholder="상세주소 (동/호수, 층수 등, 선택)"
-                    className="w-full rounded-xl px-4 py-3 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+      {isAddressDetailManual ? (
+                    <input id="address-detail-manual-input" value={form.addressDetail} onChange={(e) => setForm({ ...form, addressDetail: e.target.value })} onBlur={() => setIsAddressDetailManual(false)} placeholder="상세주소 (동/호수, 층수 등, 선택)"
+                      className="w-full rounded-xl px-4 py-3 mb-2 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                  ) : (
+                    <button type="button" onClick={() => setShowAddressDetailChoice(true)} className="w-full rounded-xl px-4 py-3 mb-2 text-sm text-left outline-none" style={{ border: `1.4px solid ${LINE}`, color: form.addressDetail ? INK : INK_SOFT }}>
+                      {form.addressDetail || "상세주소 (동/호수, 층수 등, 선택)"}
+                    </button>
+                  )}
                   <button type="button" onClick={openAddressSearch} className="w-full rounded-xl px-4 py-3 mb-2 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: TEAL, color: "#fff" }}>
                     주소 검색
                   </button>
@@ -5319,7 +5654,28 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                     {locatingAddress ? "위치 확인 중..." : "현재 위치로 주소 찾기"}
                   </button>
                 </div>
-                              <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>검색 키워드 (선택)</label>
+<label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>검색 키워드 (선택)</label>
+                {CATEGORY_KEYWORD_SUGGESTIONS[form.category] && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {CATEGORY_KEYWORD_SUGGESTIONS[form.category].map((kw) => {
+                      const currentList = form.keywords.split(",").map((k) => k.trim()).filter((k) => k);
+                      const selected = currentList.includes(kw);
+                      return (
+                        <button type="button" key={kw} onClick={() => {
+                          let updated;
+                          if (selected) {
+                            updated = currentList.filter((k) => k !== kw);
+                          } else {
+                            updated = [...currentList, kw];
+                          }
+                          setForm({ ...form, keywords: updated.join(", ") });
+                        }} className="rounded-full px-3 py-1.5 text-xs font-bold border transition-all duration-200" style={{ borderColor: selected ? TEAL : LINE, background: selected ? TEAL_TINT : "#fff", color: selected ? TEAL_DARK : INK_SOFT }}>
+                          {kw}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="예: 족발, 갈비, 한식 (쉼표로 구분)"
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
@@ -5473,29 +5829,56 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </div>
                 </div>
 
-      <div className="mb-4">
+<div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실</div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "unknown", l: "미확인" }].map((o) => (
+                      <button type="button" key={o.v} onClick={() => setForm({ ...form, accessible_toilet: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.accessible_toilet === o.v ? TEAL : LINE, background: form.accessible_toilet === o.v ? TEAL_TINT : "#fff", color: form.accessible_toilet === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
+                    ))}
+                  </div>
+                </div>
+
+{form.accessible_toilet === "yes" && (
+                  <div className="mb-4">
+                    <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실 위치 (해당하는 층을 모두 눌러주세요)</div>
+                    <div className="grid grid-cols-5 gap-1.5 mb-2">
+                      {Array.from({ length: toiletFloorMax }, (_, i) => i + 1).map((floor) => {
+                        const selected = (form.toilet_floors || []).includes(floor);
+                        return (
+                          <button type="button" key={floor} onClick={() => {
+                            const current = form.toilet_floors || [];
+                            const updated = selected ? current.filter((f) => f !== floor) : [...current, floor];
+                            setForm({ ...form, toilet_floors: updated });
+                          }} className="rounded-lg py-2.5 text-xs font-bold border transition-all duration-200" style={{ borderColor: selected ? TEAL : LINE, background: selected ? TEAL_TINT : "#fff", color: selected ? TEAL_DARK : INK_SOFT }}>
+                            {floor}층
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button type="button" onClick={() => {
+                        const allFloors = Array.from({ length: toiletFloorMax }, (_, i) => i + 1);
+                        setForm({ ...form, toilet_floors: allFloors });
+                      }} className="rounded-full px-3 py-1.5 text-[11px] font-bold border" style={{ borderColor: TEAL, background: "#fff", color: TEAL }}>
+                        전체 선택
+                      </button>
+                      <button type="button" onClick={() => setForm({ ...form, toilet_floors: [] })} className="rounded-full px-3 py-1.5 text-[11px] font-bold border" style={{ borderColor: LINE, background: "#fff", color: INK_SOFT }}>
+                        선택 해제
+                      </button>
+                      <button type="button" onClick={() => setToiletFloorMax(toiletFloorMax + 5)} className="rounded-full px-3 py-1.5 text-[11px] font-bold flex items-center gap-1" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                        <Plus size={12} /> 층 추가
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mb-4">
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <div className="text-xs font-bold" style={{ color: INK }}>엘리베이터</div>
                     <button type="button" onClick={() => setShowElevatorHelp(true)} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 15, height: 15, background: TEAL }} aria-label="엘리베이터 안내">
                       <span className="text-[9px] font-extrabold" style={{ color: "#fff" }}>?</span>
                     </button>
                   </div>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "none_needed", l: "1층뿐" }, { v: "unknown", l: "미확인" }].map((o) => (
-                      <button type="button" key={o.v} onClick={() => setForm({ ...form, accessible_toilet: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.accessible_toilet === o.v ? TEAL : LINE, background: form.accessible_toilet === o.v ? TEAL_TINT : "#fff", color: form.accessible_toilet === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
-                    ))}
-                  </div>
-                </div>
-
-                {form.accessible_toilet === "yes" && (
-                  <div className="mb-4">
-                    <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실 위치 (층수)</div>
-                    <input type="number" value={form.toilet_floor} onChange={(e) => setForm({ ...form, toilet_floor: e.target.value })} placeholder="예: 1" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
-                  </div>
-                )}
-
-                <div className="mb-4">
-                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>엘리베이터</div>
                   <div className="grid grid-cols-4 gap-1.5">
                     {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "none_needed", l: "1층뿐" }, { v: "unknown", l: "미확인" }].map((o) => (
                       <button type="button" key={o.v} onClick={() => setForm({ ...form, elevator: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.elevator === o.v ? TEAL : LINE, background: form.elevator === o.v ? TEAL_TINT : "#fff", color: form.elevator === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
@@ -5757,6 +6140,16 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 >
                   {weatherEffectOn ? <Sparkles size={20} color="#fff" /> : <X size={20} color="#fff" />}
                 </button>
+{bgMusicEventActive && bgMusicList.length > 0 && (
+                  <button
+                    onClick={toggleBgMusic}
+                    className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                    style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
+                    aria-label="배경음악 켜고 끄기"
+                  >
+                    {bgMusicOn ? <Heart size={20} color="#fff" fill="#fff" /> : <Heart size={20} color="#fff" />}
+                  </button>
+                )}
                 <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
@@ -6473,6 +6866,50 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 </button>
               </div>
             )}
+              
+<div id="admin-snow" className="font-extrabold text-sm mb-3" style={{ color: INK }}>❄️ 눈 내리기 이벤트</div>
+            <div className="rounded-2xl p-4 mb-4 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자 화면에 눈이 내려요</div>
+              <button
+                onClick={toggleSnowEvent}
+                className="relative rounded-full transition-all duration-200 flex-shrink-0"
+                style={{ width: 48, height: 28, background: snowEventActive ? TEAL : LINE }}
+              >
+                <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: snowEventActive ? 23 : 3 }} />
+              </button>
+            </div>
+
+<div id="admin-music" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎵 배경음악 이벤트 ({bgMusicList.length}곡 등록됨)</div>
+            <div className="rounded-2xl p-4 mb-3 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자에게 배경음악이 자동 재생돼요</div>
+              <button
+                onClick={toggleBgMusicEvent}
+                disabled={bgMusicList.length === 0}
+                className="relative rounded-full transition-all duration-200 flex-shrink-0"
+                style={{ width: 48, height: 28, background: bgMusicEventActive ? TEAL : LINE, opacity: bgMusicList.length === 0 ? 0.5 : 1 }}
+              >
+                <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: bgMusicEventActive ? 23 : 3 }} />
+              </button>
+            </div>
+            <input type="file" accept="audio/*" onChange={uploadBgMusic} className="hidden" id="music-upload" disabled={musicUploading} />
+            <label htmlFor="music-upload" className="w-full flex items-center justify-center gap-2 rounded-xl py-3 mb-3 text-sm font-bold cursor-pointer transition-all duration-200 active:scale-95" style={{ background: musicUploading ? PAPER : TEAL, color: musicUploading ? INK_SOFT : "#fff" }}>
+              <Plus size={16} />
+              {musicUploading ? "업로드 중..." : "음악 추가하기"}
+            </label>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {bgMusicList.length === 0 && (
+                <div className="text-center py-6 text-sm" style={{ color: INK_SOFT }}>등록된 음악이 없어요</div>
+              )}
+              {bgMusicList.map((music) => (
+                <div key={music.id} className="px-4 py-3 flex items-center justify-between gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <span className="text-sm font-bold truncate" style={{ color: INK }}>{music.title}</span>
+          <button onClick={() => deleteBgMusic(music.id, music.file_url)} className="flex-shrink-0" aria-label="삭제">
+                    <Trash2 size={16} color={CORAL} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
 
 <div id="admin-maintenance" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🚧 서비스 점검 모드</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
