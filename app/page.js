@@ -505,8 +505,8 @@ return (
         onTouchMove={handlePressEnd}
         onContextMenu={handleContextMenu}
         onClick={handleCardClick}
-        className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md active:scale-[0.98] select-none cursor-pointer"
-        style={{ background: CARD, border: `1px solid ${LINE}`, opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}
+className="relative rounded-2xl p-4 min-w-0 transition-all duration-200 hover:shadow-md active:scale-[0.98] select-none cursor-pointer"
+        style={{ background: CARD, border: getPerfectAccessStars(place) ? "2px solid #FFC13B" : `1px solid ${LINE}`, boxShadow: getPerfectAccessStars(place) ? "0 0 0 1px rgba(255,193,59,0.3)" : "none", opacity: openStatus === false ? 0.55 : 1, filter: openStatus === false ? "grayscale(0.6)" : "none" }}
       >
 
       {openStatus === false && (
@@ -515,7 +515,13 @@ return (
         </div>
       )}
  
-<div className="flex items-center justify-between gap-1.5 mb-2">
+{getPerfectAccessStars(place) && (
+        <div className="flex items-center gap-1 mb-2">
+          {[...Array(5)].map((_, i) => <span key={i} style={{ fontSize: 11 }}>⭐</span>)}
+          <span className="text-[10px] font-extrabold ml-0.5" style={{ color: "#B4620F" }}>접근성 완벽 확인</span>
+        </div>
+      )}
+      <div className="flex items-center justify-between gap-1.5 mb-2">
         <div className="flex items-center gap-1.5 flex-wrap min-w-0">
           {openStatus === true && (
             <div className="flex items-center gap-1 rounded-full px-2 py-1 flex-shrink-0" style={{ background: "#fff", border: "1.4px solid #22C55E" }}>
