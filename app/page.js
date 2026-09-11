@@ -1619,6 +1619,41 @@ async function announceTodayWeather() {
     await supabase.from("app_settings").update({ value: newValue ? "true" : "false" }).eq("key", "snow_event_active");
     showToast(newValue ? "눈 내리기 이벤트를 켰어요" : "눈 내리기 이벤트를 껐어요");
   }
+
+    async function fetchBgMusicList() {
+    const { data } = await supabase.from("background_music").select("*").order("display_order");
+    setBgMusicList(data || []);
+  }
+
+  function playRandomBgMusic() {
+    if (!bgMusicList || bgMusicList.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * bgMusicList.length);
+    const track = bgMusicList[randomIndex];
+    if (bgMusicAudioRef.current) {
+      bgMusicAudioRef.current.pause();
+    }
+    const audio = new Audio(track.file_url);
+    audio.volume = 0.5;
+    audio.onended = () => playRandomBgMusic();
+    audio.play().catch(() => {});
+    bgMusicAudioRef.current = audio;
+  }
+
+  function toggleBgMusic() {
+    const newVal = !bgMusicOn;
+    setBgMusicOn(newVal);
+    if (typeof window !== "undefined") localStorage.setItem("bg_music_on", newVal.toString());
+    if (newVal) {
+      playRandomBgMusic();
+      showToast("배경음악을 켰어요");
+    } else {
+      if (bgMusicAudioRef.current) {
+        bgMusicAudioRef.current.pause();
+        bgMusicAudioRef.current = null;
+      }
+      showToast("배경음악을 껐어요");
+    }
+  }
   
   function showToast(message) {
     setToast(message);
@@ -2326,7 +2361,10 @@ const [faqPage, setFaqPage] = useState(1);
   const [showElevatorHelp, setShowElevatorHelp] = useState(false);
 const [myPageWeather, setMyPageWeather] = useState(null);
 const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
-  const [snowEventActive, setSnowEventActive] = useState(false);
+const [snowEventActive, setSnowEventActive] = useState(false);
+  const [bgMusicList, setBgMusicList] = useState([]);
+  const [bgMusicOn, setBgMusicOn] = useState(false);
+  const bgMusicAudioRef = useRef(null);
 const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
   const [toiletFloorMax, setToiletFloorMax] = useState(5);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
@@ -2747,7 +2785,19 @@ useEffect(() => {
     if (saved) setMicPositionPercent(parseFloat(saved));
     const savedWeather = localStorage.getItem("weather_effect_on");
     if (savedWeather === "false") setWeatherEffectOn(false);
+    const savedMusic = localStorage.getItem("bg_music_on");
+    if (savedMusic === "true") setBgMusicOn(true);
   }, []);
+
+  useEffect(() => {
+    fetchBgMusicList();
+  }, []);
+
+  useEffect(() => {
+    if (bgMusicOn && bgMusicList.length > 0 && !bgMusicAudioRef.current) {
+      playRandomBgMusic();
+    }
+  }, [bgMusicOn, bgMusicList]);
 
 useEffect(() => {
     if (session && tab === "my" && !myPageWeather) fetchMyPageWeather();
@@ -5947,6 +5997,16 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 >
                   {weatherEffectOn ? <Sparkles size={20} color="#fff" /> : <X size={20} color="#fff" />}
                 </button>
+     {bgMusicList.length > 0 && (
+                  <button
+                    onClick={toggleBgMusic}
+                    className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                    style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
+                    aria-label="배경음악 켜고 끄기"
+                  >
+                    {bgMusicOn ? <Heart size={20} color="#fff" fill="#fff" /> : <Heart size={20} color="#fff" />}
+                  </button>
+                )}
                 <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
                   className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
