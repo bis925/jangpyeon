@@ -1780,11 +1780,10 @@ async function toggleBgMusic() {
           const { ForegroundService } = await import("@capawesome-team/capacitor-android-foreground-service");
           const { display } = await ForegroundService.checkPermissions();
           if (display !== "granted") await ForegroundService.requestPermissions();
-          await ForegroundService.startForegroundService({
+await ForegroundService.startForegroundService({
             id: 1,
             title: "장편",
             body: "배경음악이 재생 중이에요",
-            smallIcon: "ic_launcher",
           });
         } catch (e) {}
       }
