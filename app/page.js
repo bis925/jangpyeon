@@ -2254,7 +2254,8 @@ const [faqPage, setFaqPage] = useState(1);
   const [showElevatorHelp, setShowElevatorHelp] = useState(false);
 const [myPageWeather, setMyPageWeather] = useState(null);
 const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
-  const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
+const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
+  const [toiletFloorMax, setToiletFloorMax] = useState(5);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
   const showElevatorHelpRef = useRef(false);
   useEffect(() => { showElevatorHelpRef.current = showElevatorHelp; }, [showElevatorHelp]);
@@ -3523,8 +3524,9 @@ useEffect(() => {
       toilet_floor: place.toilet_floor ?? "",
 elevator: place.elevator || "unknown",
       parking_disabled: place.parking_disabled || "unknown",
-      door_width_cm: place.door_width_cm ?? "",
+door_width_cm: place.door_width_cm ?? "",
       turning_space: place.turning_space || "unknown",
+      toilet_floors: place.toilet_floors || [],
       badges: {
         stroller: place.has_stroller_access,
       },
@@ -5514,10 +5516,37 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </div>
                 </div>
 
-                {form.accessible_toilet === "yes" && (
+{form.accessible_toilet === "yes" && (
                   <div className="mb-4">
-                    <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실 위치 (층수)</div>
-                    <input type="number" value={form.toilet_floor} onChange={(e) => setForm({ ...form, toilet_floor: e.target.value })} placeholder="예: 1" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
+                    <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실 위치 (해당하는 층을 모두 눌러주세요)</div>
+                    <div className="grid grid-cols-5 gap-1.5 mb-2">
+                      {Array.from({ length: toiletFloorMax }, (_, i) => i + 1).map((floor) => {
+                        const selected = (form.toilet_floors || []).includes(floor);
+                        return (
+                          <button type="button" key={floor} onClick={() => {
+                            const current = form.toilet_floors || [];
+                            const updated = selected ? current.filter((f) => f !== floor) : [...current, floor];
+                            setForm({ ...form, toilet_floors: updated });
+                          }} className="rounded-lg py-2.5 text-xs font-bold border transition-all duration-200" style={{ borderColor: selected ? TEAL : LINE, background: selected ? TEAL_TINT : "#fff", color: selected ? TEAL_DARK : INK_SOFT }}>
+                            {floor}층
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button type="button" onClick={() => {
+                        const allFloors = Array.from({ length: toiletFloorMax }, (_, i) => i + 1);
+                        setForm({ ...form, toilet_floors: allFloors });
+                      }} className="rounded-full px-3 py-1.5 text-[11px] font-bold border" style={{ borderColor: TEAL, background: "#fff", color: TEAL }}>
+                        전체 선택
+                      </button>
+                      <button type="button" onClick={() => setForm({ ...form, toilet_floors: [] })} className="rounded-full px-3 py-1.5 text-[11px] font-bold border" style={{ borderColor: LINE, background: "#fff", color: INK_SOFT }}>
+                        선택 해제
+                      </button>
+                      <button type="button" onClick={() => setToiletFloorMax(toiletFloorMax + 5)} className="rounded-full px-3 py-1.5 text-[11px] font-bold flex items-center gap-1" style={{ background: TEAL_TINT, color: TEAL_DARK }}>
+                        <Plus size={12} /> 층 추가
+                      </button>
+                    </div>
                   </div>
                 )}
 
