@@ -814,10 +814,14 @@ async function handleSubmit(e) {
           </div>
         </div>
 
- <div className="text-center">
+<div className="text-center">
+          <a href="http://pf.kakao.com/_xkuexaX/chat" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 mb-3" style={{ background: "#FEE500" }}>
+            <MessageCircle size={14} color="#3C1E1E" fill="#3C1E1E" />
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#3C1E1E" }}>카카오톡 채널 추가하기</span>
+          </a>
           <p className="text-xs" style={{ color: '#B8B1A0' }}>제작 · 코드람쥐</p>
           <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: '#C9C2B2' }}>
-            상호: 코드람쥐 · 대표: 조은찬 · 사업자등록번호: 303-18-93738<br />
+            상호: 코드람쥐 · 사업자등록번호: 303-18-93738<br />
             사업장 소재지: 경기도 평택시 산단로16번길 26, A동 14층 1408호<br />
             (모곡동, 엠에스원타워 지식산업센터)
           </p>
