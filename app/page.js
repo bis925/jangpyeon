@@ -6664,6 +6664,18 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               </div>
             )}
 
+              <div id="admin-snow" className="font-extrabold text-sm mb-3" style={{ color: INK }}>❄️ 눈 내리기 이벤트</div>
+            <div className="rounded-2xl p-4 mb-8 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자 화면에 눈이 내려요</div>
+              <button
+                onClick={toggleSnowEvent}
+                className="relative rounded-full transition-all duration-200 flex-shrink-0"
+                style={{ width: 48, height: 28, background: snowEventActive ? TEAL : LINE }}
+              >
+                <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: snowEventActive ? 23 : 3 }} />
+              </button>
+            </div>
+
 <div id="admin-maintenance" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🚧 서비스 점검 모드</div>
             <div className="rounded-2xl p-4 mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <div className="flex items-center justify-between gap-2 mb-3">
