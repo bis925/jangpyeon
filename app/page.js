@@ -1759,6 +1759,8 @@ async function playRandomBgMusic() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
         const { Playlist } = await import("capacitor-plugin-playlist");
+        const state = await Playlist.getState().catch(() => null);
+        if (state && state.isPlaying) return;
         const tracks = bgMusicList.map((m, i) => ({
           trackId: i,
           assetUrl: m.file_url,
@@ -2936,11 +2938,13 @@ useEffect(() => {
     fetchBgMusicList();
   }, []);
 
-  useEffect(() => {
-    if (bgMusicOn && bgMusicList.length > 0 && !bgMusicAudioRef.current) {
-      playRandomBgMusic();
+useEffect(() => {
+    if (bgMusicEventActive && bgMusicList.length > 0) {
+      setBgMusicOn(true);
+      if (!bgMusicAudioRef.current) playRandomBgMusic();
     }
-  }, [bgMusicOn, bgMusicList]);
+    ...
+  }, [bgMusicEventActive, bgMusicList]);
 
 useEffect(() => {
     if (session && tab === "my" && !myPageWeather) fetchMyPageWeather();
