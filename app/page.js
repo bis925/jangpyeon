@@ -402,10 +402,10 @@ const bgColor = info.ok === true ? "#C0392B" : "#F1F1F1";
                     <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.door_width_cm}cm</div>
                   </div>
                 )}
-                {place.toilet_floor != null && place.accessible_toilet === "yes" && (
+{place.toilet_floors && place.toilet_floors.length > 0 && place.accessible_toilet === "yes" && (
                   <div className="rounded-xl p-2.5" style={{ background: "#F1F1F1" }}>
                     <div className="text-[10px] font-bold mb-0.5" style={{ color: "#888", opacity: 0.85 }}>화장실 위치</div>
-                    <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.toilet_floor}층</div>
+                    <div className="text-sm font-extrabold" style={{ color: "#888" }}>{place.toilet_floors.slice().sort((a, b) => a - b).join(", ")}층</div>
                   </div>
                 )}
                 <div className="rounded-xl p-2.5" style={{ background: place.has_stroller_access ? "#FCE4EC" : "#F1F1F1" }}>
@@ -3561,12 +3561,13 @@ door_width_cm: place.door_width_cm ?? "",
         p_toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
 p_elevator: form.elevator,
         p_parking_disabled: form.parking_disabled,
-        p_door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
+p_door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
         p_turning_space: form.turning_space,
         p_has_stroller_access: form.badges.stroller,
         p_keywords: form.keywords.trim() || null,
         p_phone: form.phone.trim() || null,
         p_business_hours: finalBusinessHours,
+        p_toilet_floors: form.toilet_floors && form.toilet_floors.length > 0 ? form.toilet_floors : null,
       }));
     } else {
 ({ error } = await supabase
@@ -3582,12 +3583,13 @@ p_elevator: form.elevator,
           toilet_floor: form.toilet_floor === "" ? null : parseInt(form.toilet_floor),
 elevator: form.elevator,
           parking_disabled: form.parking_disabled,
-          door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
+door_width_cm: form.door_width_cm === "" ? null : parseInt(form.door_width_cm),
           turning_space: form.turning_space,
           has_stroller_access: form.badges.stroller,
           keywords: form.keywords.trim() || null,
                  phone: form.phone.trim() || null,
           business_hours: finalBusinessHours,
+          toilet_floors: form.toilet_floors && form.toilet_floors.length > 0 ? form.toilet_floors : null,
         })
         .eq("id", editingPlaceId));
     }
@@ -3662,8 +3664,9 @@ p_elevator: form.elevator,
       p_keywords: form.keywords.trim() || null,
       p_phone: form.phone.trim() || null,
       p_business_hours: finalBusinessHours,
-      p_lat: placeLat,
+p_lat: placeLat,
       p_lng: placeLng,
+      p_toilet_floors: form.toilet_floors && form.toilet_floors.length > 0 ? form.toilet_floors : null,
     });
     if (error) {
       setIsSubmittingPlace(false);
