@@ -2942,8 +2942,13 @@ useEffect(() => {
     if (bgMusicEventActive && bgMusicList.length > 0) {
       setBgMusicOn(true);
       if (!bgMusicAudioRef.current) playRandomBgMusic();
+    } else if (!bgMusicEventActive) {
+      setBgMusicOn(false);
+      if (bgMusicAudioRef.current) {
+        bgMusicAudioRef.current.pause();
+        bgMusicAudioRef.current = null;
+      }
     }
-    ...
   }, [bgMusicEventActive, bgMusicList]);
 
 useEffect(() => {
