@@ -958,6 +958,7 @@ const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
+const bgMusicCreatedRef = useRef(false);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
 const [musicUploading, setMusicUploading] = useState(false);
@@ -1758,11 +1759,11 @@ async function deleteBgMusic(id, fileUrl) {
 async function stopBgMusic() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-  const { NativeAudio } = await import("@capacitor-community/native-audio");
-        if (bgMusicList && bgMusicList.length > 0) {
-          for (const m of bgMusicList) {
-            await NativeAudio.stop({ assetId: m.id }).catch(() => {});
-          }
+        const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+        if (bgMusicCreatedRef.current) {
+          await AudioPlayer.stop({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+          await AudioPlayer.destroy({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+          bgMusicCreatedRef.current = false;
         }
       } catch (e) {}
     }
@@ -1770,7 +1771,18 @@ async function stopBgMusic() {
       bgMusicAudioRef.current.pause();
     }
     bgMusicAudioRef.current = null;
-  } 
+  }
+
+async function playNextBgTrack() {
+    if (!bgMusicList || bgMusicList.length === 0) return;
+    try {
+      const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+      const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+      await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
+      await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "배경음악" });
+      await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+    } catch (e) {}
+  }
 
 async function playRandomBgMusic() {
     if (!bgMusicList || bgMusicList.length === 0) return;
@@ -1779,26 +1791,35 @@ async function playRandomBgMusic() {
     try {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-const { NativeAudio } = await import("@capacitor-community/native-audio");
-        const randomTrack = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
-        await NativeAudio.preload({
-          assetId: randomTrack.id,
-          assetPath: randomTrack.file_url,
-          audioChannelNum: 1,
-          isUrl: true,
-        });
-        await NativeAudio.loop({ assetId: randomTrack.id });
-        await NativeAudio.play({ assetId: randomTrack.id });
+        const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+        const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+        if (!bgMusicCreatedRef.current) {
+          await AudioPlayer.create({
+            audioId: "jangpyeon_bgmusic",
+            audioSource: track.file_url,
+            friendlyTitle: track.title || "배경음악",
+            albumTitle: "장편",
+            artistName: "편이",
+            artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
+            useForNotification: true,
+            isBackgroundMusic: false,
+            loop: false,
+          });
+          await AudioPlayer.onAudioReady({ audioId: "jangpyeon_bgmusic" }, () => {
+            AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+          });
+          await AudioPlayer.onAudioEnd({ audioId: "jangpyeon_bgmusic" }, () => {
+            playNextBgTrack();
+          });
+          await AudioPlayer.initialize({ audioId: "jangpyeon_bgmusic" });
+          bgMusicCreatedRef.current = true;
+        } else {
+          await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
+          await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+        }
         bgMusicAudioRef.current = true;
       } catch (e) {
-        if (bgMusicAudioRef.current === true) return;
-        const randomIndex = Math.floor(Math.random() * bgMusicList.length);
-        const track = bgMusicList[randomIndex];
-        const audio = new Audio(track.file_url);
-        audio.volume = 0.5;
-        audio.onended = () => playRandomBgMusic();
-        audio.play().catch(() => {});
-        bgMusicAudioRef.current = audio;
+        console.log("[BGM] 네이티브 배경음악 실패:", e && e.message, e);
       }
     } else {
       const randomIndex = Math.floor(Math.random() * bgMusicList.length);
