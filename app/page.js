@@ -956,7 +956,8 @@ const [voiceWeatherCache, setVoiceWeatherCache] = useState(null);
 const [snowEventActive, setSnowEventActive] = useState(false);
 const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
-  const bgMusicAudioRef = useRef(null);
+const bgMusicAudioRef = useRef(null);
+  const bgMusicStartingRef = useRef(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
 const [musicUploading, setMusicUploading] = useState(false);
 const [showAddressDetailChoice, setShowAddressDetailChoice] = useState(false);
@@ -1754,8 +1755,24 @@ async function deleteBgMusic(id, fileUrl) {
     setBgMusicList(data || []);
   }
 
+ async function stopBgMusic() {
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        const { Playlist } = await import("capacitor-plugin-playlist");
+        await Playlist.stop();
+      } catch (e) {}
+    }
+    if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
+      bgMusicAudioRef.current.pause();
+    }
+    bgMusicAudioRef.current = null;
+  } 
+
 async function playRandomBgMusic() {
     if (!bgMusicList || bgMusicList.length === 0) return;
+    if (bgMusicStartingRef.current) return;
+    bgMusicStartingRef.current = true;
+    try {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
         const { Playlist } = await import("capacitor-plugin-playlist");
@@ -1789,11 +1806,14 @@ async function playRandomBgMusic() {
       if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
         bgMusicAudioRef.current.pause();
       }
-      const audio = new Audio(track.file_url);
+const audio = new Audio(track.file_url);
       audio.volume = 0.5;
       audio.onended = () => playRandomBgMusic();
       audio.play().catch(() => {});
       bgMusicAudioRef.current = audio;
+    }
+    } finally {
+      bgMusicStartingRef.current = false;
     }
   }
 
@@ -1805,16 +1825,7 @@ async function toggleBgMusic() {
       playRandomBgMusic();
       showToast("배경음악을 켰어요");
     } else {
-      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
-        try {
-          const { Playlist } = await import("capacitor-plugin-playlist");
-          await Playlist.stop();
-        } catch (e) {}
-      }
-      if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
-        bgMusicAudioRef.current.pause();
-      }
-      bgMusicAudioRef.current = null;
+      await stopBgMusic();
       showToast("배경음악을 껐어요");
     }
   }
@@ -2913,20 +2924,7 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (bgMusicEventActive && bgMusicList.length > 0) {
-      setBgMusicOn(true);
-      if (!bgMusicAudioRef.current) playRandomBgMusic();
-    } else if (!bgMusicEventActive) {
-      setBgMusicOn(false);
-      if (bgMusicAudioRef.current) {
-        bgMusicAudioRef.current.pause();
-        bgMusicAudioRef.current = null;
-      }
-    }
-  }, [bgMusicEventActive, bgMusicList]);
-
-useEffect(() => {
+ useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("mic_position_percent");
     if (saved) setMicPositionPercent(parseFloat(saved));
@@ -2946,10 +2944,7 @@ useEffect(() => {
       if (!bgMusicAudioRef.current) playRandomBgMusic();
     } else if (!bgMusicEventActive) {
       setBgMusicOn(false);
-      if (bgMusicAudioRef.current) {
-        bgMusicAudioRef.current.pause();
-        bgMusicAudioRef.current = null;
-      }
+      stopBgMusic();
     }
   }, [bgMusicEventActive, bgMusicList]);
 
