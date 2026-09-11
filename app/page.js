@@ -1789,7 +1789,17 @@ const tracks = bgMusicList.map((m, i) => ({
           isRadio: false,
         }));
         await Playlist.setItems({ items: tracks });
- try { await Playlist.setOptions({ verbose: false, options: { icon: "ic_stat_music" } }); } catch (e2) {}
+try {
+          await Playlist.setOptions({
+            verbose: false,
+            options: {
+              icon: "ic_stat_music",
+              playerId: "jangpyeon_music_player",
+              designatedTrackTitle: tracks[0].title,
+              designatedArtworkSource: tracks[0].albumArt,
+            },
+          });
+        } catch (e2) {}
         await Playlist.setLoopAll({ loop: true });
         await Playlist.setShuffle({ shuffle: true });
         await Playlist.play();
