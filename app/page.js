@@ -1952,6 +1952,18 @@ useEffect(() => {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined" || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+    let KeepAwakeModule;
+    import("@capacitor-community/keep-awake").then(({ KeepAwake }) => {
+      KeepAwakeModule = KeepAwake;
+      KeepAwake.keepAwake();
+    });
+    return () => {
+      if (KeepAwakeModule) KeepAwakeModule.allowSleep();
+    };
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined" || !window.Capacitor || !session) return;
     import("@capacitor/push-notifications").then(({ PushNotifications }) => {
       PushNotifications.requestPermissions().then((result) => {
