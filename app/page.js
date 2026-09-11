@@ -1632,6 +1632,34 @@ async function announceTodayWeather() {
     showToast(newValue ? "배경음악 이벤트를 켰어요" : "배경음악 이벤트를 껐어요");
   }
 
+  async function uploadBgMusic(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("audio/")) { showToast("음악 파일(mp3 등)만 업로드할 수 있어요"); return; }
+    setMusicUploading(true);
+    const filePath = `${Date.now()}_${file.name}`;
+    const { error: uploadError } = await supabase.storage.from("music").upload(filePath, file);
+    if (uploadError) { showToast("업로드 실패: " + uploadError.message); setMusicUploading(false); return; }
+    const { data: urlData } = supabase.storage.from("music").getPublicUrl(filePath);
+    const maxOrder = bgMusicList.length > 0 ? Math.max(...bgMusicList.map((m) => m.display_order)) : 0;
+    const { error } = await supabase.from("background_music").insert({
+      title: file.name.replace(/\.[^/.]+$/, ""),
+      file_url: urlData.publicUrl,
+      display_order: maxOrder + 1,
+    });
+    if (error) { showToast("등록 실패: " + error.message); setMusicUploading(false); return; }
+    fetchBgMusicList();
+    setMusicUploading(false);
+    showToast("음악이 추가됐어요!");
+  }
+
+  async function deleteBgMusic(id) {
+    if (!window.confirm("이 곡을 삭제하시겠어요?")) return;
+    await supabase.from("background_music").delete().eq("id", id);
+    fetchBgMusicList();
+    showToast("삭제됐어요");
+  }
+
     async function fetchBgMusicList() {
     const { data } = await supabase.from("background_music").select("*").order("display_order");
     setBgMusicList(data || []);
@@ -2377,7 +2405,8 @@ const [snowEventActive, setSnowEventActive] = useState(false);
 const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
   const bgMusicAudioRef = useRef(null);
-  const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
+const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
+  const [musicUploading, setMusicUploading] = useState(false);
 const [showLocationDeniedHelp, setShowLocationDeniedHelp] = useState(false);
   const [toiletFloorMax, setToiletFloorMax] = useState(5);
   const [weatherEffectOn, setWeatherEffectOn] = useState(true);
@@ -6768,8 +6797,8 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               </button>
             </div>
 
-            <div id="admin-music" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎵 배경음악 이벤트 ({bgMusicList.length}곡 등록됨)</div>
-            <div className="rounded-2xl p-4 mb-8 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+<div id="admin-music" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎵 배경음악 이벤트 ({bgMusicList.length}곡 등록됨)</div>
+            <div className="rounded-2xl p-4 mb-3 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자에게 배경음악이 자동 재생돼요</div>
               <button
                 onClick={toggleBgMusicEvent}
@@ -6779,6 +6808,24 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               >
                 <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: bgMusicEventActive ? 23 : 3 }} />
               </button>
+            </div>
+            <input type="file" accept="audio/*" onChange={uploadBgMusic} className="hidden" id="music-upload" disabled={musicUploading} />
+            <label htmlFor="music-upload" className="w-full flex items-center justify-center gap-2 rounded-xl py-3 mb-3 text-sm font-bold cursor-pointer transition-all duration-200 active:scale-95" style={{ background: musicUploading ? PAPER : TEAL, color: musicUploading ? INK_SOFT : "#fff" }}>
+              <Plus size={16} />
+              {musicUploading ? "업로드 중..." : "음악 추가하기"}
+            </label>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              {bgMusicList.length === 0 && (
+                <div className="text-center py-6 text-sm" style={{ color: INK_SOFT }}>등록된 음악이 없어요</div>
+              )}
+              {bgMusicList.map((music) => (
+                <div key={music.id} className="px-4 py-3 flex items-center justify-between gap-2" style={{ borderBottom: `1px solid ${LINE}` }}>
+                  <span className="text-sm font-bold truncate" style={{ color: INK }}>{music.title}</span>
+                  <button onClick={() => deleteBgMusic(music.id)} className="flex-shrink-0" aria-label="삭제">
+                    <Trash2 size={16} color={CORAL} />
+                  </button>
+                </div>
+              ))}
             </div>
 
 
