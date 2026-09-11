@@ -5505,15 +5505,10 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                   </div>
                 </div>
 
-      <div className="mb-4">
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <div className="text-xs font-bold" style={{ color: INK }}>엘리베이터</div>
-                    <button type="button" onClick={() => setShowElevatorHelp(true)} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 15, height: 15, background: TEAL }} aria-label="엘리베이터 안내">
-                      <span className="text-[9px] font-extrabold" style={{ color: "#fff" }}>?</span>
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "none_needed", l: "1층뿐" }, { v: "unknown", l: "미확인" }].map((o) => (
+<div className="mb-4">
+                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>장애인 화장실</div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "unknown", l: "미확인" }].map((o) => (
                       <button type="button" key={o.v} onClick={() => setForm({ ...form, accessible_toilet: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.accessible_toilet === o.v ? TEAL : LINE, background: form.accessible_toilet === o.v ? TEAL_TINT : "#fff", color: form.accessible_toilet === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
                     ))}
                   </div>
@@ -5527,7 +5522,12 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 )}
 
                 <div className="mb-4">
-                  <div className="text-xs font-bold mb-1.5" style={{ color: INK }}>엘리베이터</div>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className="text-xs font-bold" style={{ color: INK }}>엘리베이터</div>
+                    <button type="button" onClick={() => setShowElevatorHelp(true)} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 15, height: 15, background: TEAL }} aria-label="엘리베이터 안내">
+                      <span className="text-[9px] font-extrabold" style={{ color: "#fff" }}>?</span>
+                    </button>
+                  </div>
                   <div className="grid grid-cols-4 gap-1.5">
                     {[{ v: "yes", l: "있음" }, { v: "no", l: "없음" }, { v: "none_needed", l: "1층뿐" }, { v: "unknown", l: "미확인" }].map((o) => (
                       <button type="button" key={o.v} onClick={() => setForm({ ...form, elevator: o.v })} className="rounded-lg py-2 text-[11px] font-bold border transition-all duration-200" style={{ borderColor: form.elevator === o.v ? TEAL : LINE, background: form.elevator === o.v ? TEAL_TINT : "#fff", color: form.elevator === o.v ? TEAL_DARK : INK_SOFT }}>{o.l}</button>
