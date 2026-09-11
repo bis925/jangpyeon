@@ -1754,18 +1754,44 @@ async function deleteBgMusic(id, fileUrl) {
     setBgMusicList(data || []);
   }
 
-  function playRandomBgMusic() {
+async function playRandomBgMusic() {
     if (!bgMusicList || bgMusicList.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * bgMusicList.length);
-    const track = bgMusicList[randomIndex];
-    if (bgMusicAudioRef.current) {
-      bgMusicAudioRef.current.pause();
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        const { Playlist } = await import("capacitor-plugin-playlist");
+        const tracks = bgMusicList.map((m, i) => ({
+          trackId: i,
+          assetUrl: m.file_url,
+          title: m.title,
+          isRadio: false,
+        }));
+        await Playlist.setItems({ items: tracks });
+        await Playlist.setLoopAll({ loop: true });
+        await Playlist.setShuffle({ shuffle: true });
+        await Playlist.setOptions({ verbose: false, options: {} });
+        await Playlist.play();
+        bgMusicAudioRef.current = true;
+      } catch (e) {
+        const randomIndex = Math.floor(Math.random() * bgMusicList.length);
+        const track = bgMusicList[randomIndex];
+        const audio = new Audio(track.file_url);
+        audio.volume = 0.5;
+        audio.onended = () => playRandomBgMusic();
+        audio.play().catch(() => {});
+        bgMusicAudioRef.current = audio;
+      }
+    } else {
+      const randomIndex = Math.floor(Math.random() * bgMusicList.length);
+      const track = bgMusicList[randomIndex];
+      if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
+        bgMusicAudioRef.current.pause();
+      }
+      const audio = new Audio(track.file_url);
+      audio.volume = 0.5;
+      audio.onended = () => playRandomBgMusic();
+      audio.play().catch(() => {});
+      bgMusicAudioRef.current = audio;
     }
-    const audio = new Audio(track.file_url);
-    audio.volume = 0.5;
-    audio.onended = () => playRandomBgMusic();
-    audio.play().catch(() => {});
-    bgMusicAudioRef.current = audio;
   }
 
 async function toggleBgMusic() {
