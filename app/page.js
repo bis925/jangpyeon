@@ -957,7 +957,8 @@ const [snowEventActive, setSnowEventActive] = useState(false);
 const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
 const bgMusicAudioRef = useRef(null);
-  const bgMusicStartingRef = useRef(false);
+const bgMusicStartingRef = useRef(false);
+  const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
 const [musicUploading, setMusicUploading] = useState(false);
 const [showAddressDetailChoice, setShowAddressDetailChoice] = useState(false);
@@ -1827,9 +1828,22 @@ async function toggleBgMusic() {
     if (newVal) {
       playRandomBgMusic();
       showToast("배경음악을 켰어요");
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        setShowBatteryOptHelp(true);
+      }
     } else {
       await stopBgMusic();
       showToast("배경음악을 껐어요");
+    }
+  }
+
+async function openBatteryOptimizationSettings() {
+    setShowBatteryOptHelp(false);
+    try {
+      const { DontKillMyApp } = await import("@squareetlabs/capacitor-dont-kill-my-app");
+      await DontKillMyApp.requestIgnoreBatteryOptimizations();
+    } catch (e) {
+      showToast("설정 화면을 열 수 없어요");
     }
   }
   
@@ -4266,6 +4280,31 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
             <button onClick={() => { setVoiceFaqAnswer(null); if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel(); }} className="w-full rounded-full py-3 text-sm font-bold text-white" style={{ background: TEAL }}>
               확인했어요
             </button>
+          </div>
+        </div>
+      )}
+
+{showBatteryOptHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: CARD }}>
+            <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: TEAL_TINT }}>
+              <Heart size={26} color={TEAL} fill={TEAL} />
+            </div>
+            <div className="font-extrabold text-base mb-2" style={{ color: INK }}>배경음악을 계속 들으시려면</div>
+            <div className="text-sm mb-2" style={{ color: INK_SOFT, lineHeight: 1.6 }}>
+              이 설정을 하시면, 화면이 꺼져도 음악이 끊기지 않고 계속 들리며, 장편의 다른 기능들도 더 원활하게 이용하실 수 있어요.
+            </div>
+            <div className="text-xs mb-6" style={{ color: CORAL, lineHeight: 1.6 }}>
+              설정하지 않으시면, 화면이 꺼졌을 때 음악이 멈출 수 있어요.
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowBatteryOptHelp(false)} className="flex-1 rounded-full py-3 text-sm font-bold transition-all duration-200 active:scale-95" style={{ background: PAPER, color: INK_SOFT }}>
+                닫기
+              </button>
+              <button onClick={openBatteryOptimizationSettings} className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95" style={{ background: TEAL }}>
+                설정하러 가기
+              </button>
+            </div>
           </div>
         </div>
       )}
