@@ -1767,12 +1767,12 @@ async function playRandomBgMusic() {
           title: m.title,
           isRadio: false,
         }));
-        await Playlist.setItems({ items: tracks });
+await Playlist.setItems({ items: tracks });
         await Playlist.setLoopAll({ loop: true });
         await Playlist.setShuffle({ shuffle: true });
-        await Playlist.setOptions({ verbose: false, options: {} });
-        await Playlist.play();
         bgMusicAudioRef.current = true;
+        try { await Playlist.setOptions({ verbose: false, options: {} }); } catch (e2) {}
+        await Playlist.play();
       } catch (e) {
         const randomIndex = Math.floor(Math.random() * bgMusicList.length);
         const track = bgMusicList[randomIndex];
