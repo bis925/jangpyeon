@@ -533,11 +533,11 @@ return (
           <ChevronRight size={14} />
         </button>
       </div>
-      <div className="mb-3 min-w-0">
+<div className="mb-3 min-w-0">
         {place.photo_urls && place.photo_urls.length > 0 ? (
-          <div className="flex gap-1.5 overflow-x-auto min-w-0">
+          <div className="grid gap-1.5 min-w-0" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))", maxWidth: 340 }}>
             {place.photo_urls.map((url, i) => (
- <button key={i} type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_urls, i); }} className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden relative">
+ <button key={i} type="button" onClick={(e) => { e.stopPropagation(); onImageClick(place.photo_urls, i); }} className="aspect-square rounded-xl overflow-hidden relative min-w-0">
                 <img src={url} alt={`${place.name} ${i + 1}`} className="w-full h-full object-cover" />
                 {place.photo_urls.length > 1 && i === 0 && (
                   <div className="absolute bottom-0.5 right-0.5 rounded-full px-1.5 py-0.5" style={{ background: "rgba(0,0,0,0.6)" }}>
@@ -548,7 +548,7 @@ return (
             ))}
           </div>
         ) : (
-          <div className="w-16 h-16 rounded-xl" style={{ background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
+          <div className="rounded-xl" style={{ width: 64, height: 64, background: `linear-gradient(135deg, ${TEAL_TINT}, ${YELLOW})` }} />
         )}
       </div>
   <div className="flex items-center justify-between gap-2 mb-1">
