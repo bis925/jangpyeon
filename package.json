@@ -21,6 +21,7 @@
     "@capacitor/push-notifications": "^8.1.2",
     "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
+    "@capawesome-team/capacitor-android-foreground-service": "^8.1.0",
     "@capgo/capacitor-social-login": "^8.5.5",
     "@capgo/capacitor-speech-recognition": "^8.2.0",
     "@capgo/capacitor-speech-synthesis": "^8.0.21",
