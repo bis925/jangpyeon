@@ -1768,19 +1768,38 @@ async function deleteBgMusic(id, fileUrl) {
     bgMusicAudioRef.current = audio;
   }
 
-  function toggleBgMusic() {
+async function toggleBgMusic() {
     const newVal = !bgMusicOn;
     setBgMusicOn(newVal);
     if (typeof window !== "undefined") localStorage.setItem("bg_music_on", newVal.toString());
     if (newVal) {
       playRandomBgMusic();
       showToast("배경음악을 켰어요");
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+          const { ForegroundService } = await import("@capawesome-team/capacitor-android-foreground-service");
+          const { display } = await ForegroundService.checkPermissions();
+          if (display !== "granted") await ForegroundService.requestPermissions();
+          await ForegroundService.startForegroundService({
+            id: 1,
+            title: "장편",
+            body: "배경음악이 재생 중이에요",
+            smallIcon: "ic_launcher",
+          });
+        } catch (e) {}
+      }
     } else {
       if (bgMusicAudioRef.current) {
         bgMusicAudioRef.current.pause();
         bgMusicAudioRef.current = null;
       }
       showToast("배경음악을 껐어요");
+      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+          const { ForegroundService } = await import("@capawesome-team/capacitor-android-foreground-service");
+          await ForegroundService.stopForegroundService();
+        } catch (e) {}
+      }
     }
   }
   
