@@ -113,6 +113,23 @@ function renderRichText(html) {
   return <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
+const CATEGORY_KEYWORD_SUGGESTIONS = {
+  공공기관: ["주민센터", "구청", "시청", "우체국"],
+  음식점: ["한식", "중식", "일식", "양식", "분식", "고기", "국밥", "족발", "갈비", "치킨"],
+  카페: ["커피", "디저트", "베이커리", "빵집"],
+  문화시설: ["도서관", "박물관", "미술관", "영화관", "공연장"],
+  쇼핑: ["마트", "백화점", "시장", "편의점"],
+  병원: ["내과", "외과", "정형외과", "치과", "한의원", "소아과"],
+  패스트푸드: ["햄버거", "피자", "치킨"],
+  약국: ["처방전", "상비약"],
+  복지시설: ["장애인복지관", "주간보호센터", "자립생활센터"],
+  은행: ["예금", "대출", "ATM", "환전"],
+  편의점: ["24시간", "택배", "ATM"],
+  숙박시설: ["호텔", "모텔", "펜션", "게스트하우스"],
+  교통시설: ["지하철역", "버스터미널", "기차역"],
+};
+
+
 const CATEGORIES = ["공공기관", "음식점", "카페", "문화시설", "쇼핑", "병원", "패스트푸드", "약국", "복지시설", "은행", "편의점", "숙박시설", "교통시설"];
 const CATEGORY_MARKERS = {
   공공기관: { emoji: "🏛️", color: "#4A90D9" },
@@ -5408,7 +5425,28 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                     {locatingAddress ? "위치 확인 중..." : "현재 위치로 주소 찾기"}
                   </button>
                 </div>
-                              <label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>검색 키워드 (선택)</label>
+<label className="block text-xs font-bold mb-1.5" style={{ color: INK_SOFT }}>검색 키워드 (선택)</label>
+                {CATEGORY_KEYWORD_SUGGESTIONS[form.category] && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {CATEGORY_KEYWORD_SUGGESTIONS[form.category].map((kw) => {
+                      const currentList = form.keywords.split(",").map((k) => k.trim()).filter((k) => k);
+                      const selected = currentList.includes(kw);
+                      return (
+                        <button type="button" key={kw} onClick={() => {
+                          let updated;
+                          if (selected) {
+                            updated = currentList.filter((k) => k !== kw);
+                          } else {
+                            updated = [...currentList, kw];
+                          }
+                          setForm({ ...form, keywords: updated.join(", ") });
+                        }} className="rounded-full px-3 py-1.5 text-xs font-bold border transition-all duration-200" style={{ borderColor: selected ? TEAL : LINE, background: selected ? TEAL_TINT : "#fff", color: selected ? TEAL_DARK : INK_SOFT }}>
+                          {kw}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="예: 족발, 갈비, 한식 (쉼표로 구분)"
                   className="w-full rounded-xl px-4 py-3 mb-4 text-sm outline-none" style={{ border: `1.4px solid ${LINE}`, color: INK }} />
 
