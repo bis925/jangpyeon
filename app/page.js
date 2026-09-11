@@ -1801,30 +1801,17 @@ async function toggleBgMusic() {
     if (newVal) {
       playRandomBgMusic();
       showToast("배경음악을 켰어요");
-      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
-        try {
-          const { ForegroundService } = await import("@capawesome-team/capacitor-android-foreground-service");
-          const { display } = await ForegroundService.checkPermissions();
-          if (display !== "granted") await ForegroundService.requestPermissions();
-await ForegroundService.startForegroundService({
-            id: 1,
-            title: "장편",
-            body: "배경음악이 재생 중이에요",
-          });
-        } catch (e) {}
-      }
     } else {
-      if (bgMusicAudioRef.current) {
-        bgMusicAudioRef.current.pause();
-        bgMusicAudioRef.current = null;
-      }
-      showToast("배경음악을 껐어요");
       if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
         try {
-          const { ForegroundService } = await import("@capawesome-team/capacitor-android-foreground-service");
-          await ForegroundService.stopForegroundService();
+          const { Playlist } = await import("capacitor-plugin-playlist");
+          await Playlist.stop();
         } catch (e) {}
+      } else if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
+        bgMusicAudioRef.current.pause();
       }
+      bgMusicAudioRef.current = null;
+      showToast("배경음악을 껐어요");
     }
   }
   
