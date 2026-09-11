@@ -1951,17 +1951,17 @@ useEffect(() => {
     getCurrentPositionSmart({ enableHighAccuracy: false, timeout: 5000 }).catch(() => {});
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     if (typeof window === "undefined" || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
-    let KeepAwakeModule;
-    import("@capacitor-community/keep-awake").then(({ KeepAwake }) => {
-      KeepAwakeModule = KeepAwake;
-      KeepAwake.keepAwake();
-    });
-    return () => {
-      if (KeepAwakeModule) KeepAwakeModule.allowSleep();
-    };
-  }, []);
+    (async () => {
+      const { KeepAwake } = await import("@capacitor-community/keep-awake");
+      if (showVoiceListeningUI || isVoiceCommandListening) {
+        await KeepAwake.keepAwake();
+      } else {
+        await KeepAwake.allowSleep();
+      }
+    })();
+  }, [showVoiceListeningUI, isVoiceCommandListening]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.Capacitor || !session) return;
