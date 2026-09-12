@@ -958,7 +958,8 @@ const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
-  const bgMusicLastPlayedRef = useRef(null);
+const bgMusicLastPlayedRef = useRef(null);
+  const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
 const bgMusicCreatedRef = useRef(false);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
@@ -1757,7 +1758,27 @@ async function deleteBgMusic(id, fileUrl) {
     const { data } = await supabase.from("background_music").select("*").order("display_order");
     setBgMusicList(data || []);
   }
-async function stopBgMusic() {
+
+  async function togglePauseBgMusic() {
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+        const state = await AudioPlayer.isPlaying({ audioId: "jangpyeon_bgmusic" }).catch(() => ({ isPlaying: false }));
+        if (state.isPlaying) {
+          await AudioPlayer.pause({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+        } else {
+          await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+        }
+      } catch (e) {}
+    }
+  }
+
+  function playPrevBgTrack() {
+    playNextBgTrack();
+  }
+
+  async function stopBgMusic() {
+    setBgMusicCurrentTrack(null);
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
         const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
@@ -1782,8 +1803,9 @@ async function playNextBgTrack() {
       if (bgMusicLastPlayedRef.current && bgMusicList.length > 1) {
         candidates = bgMusicList.filter((m) => m.id !== bgMusicLastPlayedRef.current);
       }
-      const track = candidates[Math.floor(Math.random() * candidates.length)];
+const track = candidates[Math.floor(Math.random() * candidates.length)];
       bgMusicLastPlayedRef.current = track.id;
+      setBgMusicCurrentTrack(track);
       await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
       await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편" });
       await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
@@ -1798,8 +1820,9 @@ async function playRandomBgMusic() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
 const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-        const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
         bgMusicLastPlayedRef.current = track.id;
+        setBgMusicCurrentTrack(track);
         if (!bgMusicCreatedRef.current) {
           await AudioPlayer.create({
             audioId: "jangpyeon_bgmusic",
@@ -4444,6 +4467,30 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               animationDuration: `${6 + (i % 5)}s`,
             }} />
           ))}
+        </div>
+      )}
+
+{bgMusicOn && bgMusicCurrentTrack && (
+        <div className="fixed left-0 right-0 z-40 flex items-center gap-3 px-4 py-2.5" style={{ bottom: 64, background: CARD, borderTop: `1px solid ${LINE}`, boxShadow: "0 -2px 8px rgba(0,0,0,0.08)" }}>
+          <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 36, height: 36, background: TEAL_TINT }}>
+            <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편" className="w-full h-full object-cover rounded-full" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold truncate" style={{ color: INK }}>{bgMusicCurrentTrack.title || "장편 노래"}</div>
+            <div className="text-[10px]" style={{ color: INK_SOFT }}>장편</div>
+          </div>
+          <button onClick={playPrevBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 32, height: 32 }} aria-label="이전 곡">
+            <ChevronRight size={20} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+          </button>
+          <button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 36, height: 36, background: TEAL }} aria-label="재생/일시정지">
+            <Heart size={16} color="#fff" fill="#fff" />
+          </button>
+          <button onClick={playNextBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 32, height: 32 }} aria-label="다음 곡">
+            <ChevronRight size={20} color={INK_SOFT} />
+          </button>
+          <button onClick={toggleBgMusic} className="flex items-center justify-center flex-shrink-0" style={{ width: 28, height: 28 }} aria-label="닫기">
+            <X size={16} color={INK_SOFT} />
+          </button>
         </div>
       )}
 
