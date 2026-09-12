@@ -1870,7 +1870,7 @@ const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
    friendlyTitle: track.title || "장편 노래",
             albumTitle: "장편",
             artistName: "장편",
-            artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
+            artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png",
             useForNotification: true,
             isBackgroundMusic: false,
             loop: false,
@@ -4221,7 +4221,8 @@ await stopBgMusicForExit();
             </span>
           )}
           {bgMusicOn && bgMusicCurrentTrack && (
-            <div className="hidden sm:flex items-center gap-1.5 ml-4 rounded-full pl-3 pr-1 py-1 min-w-0" style={{ background: PAPER, maxWidth: 300 }}>
+<div className="hidden sm:flex items-center gap-1.5 ml-4 rounded-full pl-1 pr-1 py-1 min-w-0" style={{ background: PAPER, maxWidth: 320 }}>
+              <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png" alt="장편" className={`rounded-full flex-shrink-0 ${!bgMusicIsPaused ? "album-art-spinning" : ""}`} style={{ width: 24, height: 24, objectFit: "cover" }} />
               <span className="text-xs font-bold truncate" style={{ color: INK, maxWidth: 110 }}>
                 {bgMusicCurrentTrack.title || "장편 노래"}
               </span>
@@ -4540,8 +4541,8 @@ await stopBgMusicForExit();
       )}
       {bgMusicOn && bgMusicCurrentTrack && isMusicBarExpanded && (
         <div className="sm:hidden fixed left-0 right-0 z-40 flex items-center gap-2 px-3 py-3" style={{ bottom: 0, background: CARD, borderTop: `1px solid ${LINE}`, boxShadow: "0 -2px 8px rgba(0,0,0,0.08)" }}>
-          <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, background: TEAL_TINT }}>
-            <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편" className="w-full h-full object-cover rounded-full" />
+<div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, background: TEAL_TINT }}>
+    <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png" alt="장편" className={`w-full h-full object-cover rounded-full ${!bgMusicIsPaused ? "album-art-spinning" : ""}`} />
           </div>
           <div className="flex-1 min-w-0 mr-1">
             <div className="text-xs font-bold truncate" style={{ color: INK }}>{bgMusicCurrentTrack.title || "장편 노래"}</div>
