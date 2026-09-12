@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabaseClient";
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle, Palette, Mic,
+Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle, Palette, Mic, Play, Pause,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -958,6 +958,10 @@ const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
+const bgMusicLastPlayedRef = useRef(null);
+const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
+const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
+  const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
 const bgMusicCreatedRef = useRef(false);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
@@ -1757,7 +1761,39 @@ async function deleteBgMusic(id, fileUrl) {
     const { data } = await supabase.from("background_music").select("*").order("display_order");
     setBgMusicList(data || []);
   }
-async function stopBgMusic() {
+
+async function togglePauseBgMusic() {
+    if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+        const state = await AudioPlayer.isPlaying({ audioId: "jangpyeon_bgmusic" }).catch(() => ({ isPlaying: false }));
+        if (state.isPlaying) {
+          await AudioPlayer.pause({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+          setBgMusicIsPaused(true);
+        } else {
+          await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+          setBgMusicIsPaused(false);
+        }
+      } catch (e) {}
+    } else {
+      if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
+        if (bgMusicAudioRef.current.paused) {
+          bgMusicAudioRef.current.play().catch(() => {});
+          setBgMusicIsPaused(false);
+        } else {
+          bgMusicAudioRef.current.pause();
+          setBgMusicIsPaused(true);
+        }
+      }
+    }
+  }
+
+  function playPrevBgTrack() {
+    playNextBgTrack();
+  }
+
+  async function stopBgMusic() {
+    setBgMusicCurrentTrack(null);
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
         const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
@@ -1778,9 +1814,15 @@ async function playNextBgTrack() {
     if (!bgMusicList || bgMusicList.length === 0) return;
     try {
       const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-      const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+      let candidates = bgMusicList;
+      if (bgMusicLastPlayedRef.current && bgMusicList.length > 1) {
+        candidates = bgMusicList.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+      }
+const track = candidates[Math.floor(Math.random() * candidates.length)];
+      bgMusicLastPlayedRef.current = track.id;
+      setBgMusicCurrentTrack(track);
       await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
-      await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "배경음악" });
+      await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편" });
       await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
     } catch (e) {}
   }
@@ -1792,15 +1834,17 @@ async function playRandomBgMusic() {
     try {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-        const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+        bgMusicLastPlayedRef.current = track.id;
+        setBgMusicCurrentTrack(track);
         if (!bgMusicCreatedRef.current) {
           await AudioPlayer.create({
             audioId: "jangpyeon_bgmusic",
             audioSource: track.file_url,
-   friendlyTitle: track.title || "편이의 노래",
-            albumTitle: "장편 - 접근성 정보 지도",
-            artistName: "편이의 쉼표",
+   friendlyTitle: track.title || "장편 노래",
+            albumTitle: "장편",
+            artistName: "장편",
             artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
             useForNotification: true,
             isBackgroundMusic: false,
@@ -1833,6 +1877,7 @@ const audio = new Audio(track.file_url);
       audio.onended = () => playRandomBgMusic();
       audio.play().catch(() => {});
       bgMusicAudioRef.current = audio;
+      setBgMusicCurrentTrack(track);
     }
     } finally {
       bgMusicStartingRef.current = false;
@@ -4142,10 +4187,29 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
             )}
           </div>
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: `${24 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
-          {getTodaySpecialEvent()?.message && (
+{getTodaySpecialEvent()?.message && (
             <span className="hidden sm:inline-block ml-3 text-xs font-bold rounded-full px-3 py-1" style={{ background: CORAL_TINT, color: CORAL }}>
               {getTodaySpecialEvent().emoji} {getTodaySpecialEvent().message}
             </span>
+          )}
+          {bgMusicOn && bgMusicCurrentTrack && (
+            <div className="hidden sm:flex items-center gap-1.5 ml-4 rounded-full pl-3 pr-1 py-1 min-w-0" style={{ background: PAPER, maxWidth: 300 }}>
+              <span className="text-xs font-bold truncate" style={{ color: INK, maxWidth: 110 }}>
+                {bgMusicCurrentTrack.title || "장편 노래"}
+              </span>
+              <button onClick={playPrevBgTrack} className="rounded-full p-1 flex-shrink-0 transition-all duration-150 active:scale-90" aria-label="이전 곡">
+                <ChevronRight size={15} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+              </button>
+              <button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 active:scale-90" style={{ width: 26, height: 26, background: TEAL }} aria-label="재생/일시정지">
+                {bgMusicIsPaused ? <Play size={12} color="#fff" fill="#fff" /> : <Pause size={12} color="#fff" fill="#fff" />}
+              </button>
+              <button onClick={playNextBgTrack} className="rounded-full p-1 flex-shrink-0 transition-all duration-150 active:scale-90" aria-label="다음 곡">
+                <ChevronRight size={15} color={INK_SOFT} />
+              </button>
+              <button onClick={toggleBgMusic} className="rounded-full p-1 flex-shrink-0 transition-all duration-150 active:scale-90" aria-label="배경음악 끄기">
+                <X size={14} color={INK_SOFT} />
+              </button>
+            </div>
           )}
         </div>
         <div className="hidden sm:flex items-center gap-1 rounded-full p-1 flex-shrink-0 my-3.5 sm:absolute sm:left-1/2 sm:-translate-x-1/2" style={{ background: PAPER }}>
@@ -4441,6 +4505,35 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           ))}
         </div>
       )}
+{bgMusicOn && bgMusicCurrentTrack && !isMusicBarExpanded && (
+        <button onClick={() => setIsMusicBarExpanded(true)} className="sm:hidden fixed z-40 rounded-full flex items-center justify-center active:scale-90 transition-all duration-300" style={{ bottom: 12, left: 12, width: 52, height: 52, background: TEAL, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }} aria-label="음악 플레이어 펼치기">
+          {bgMusicIsPaused ? <Play size={22} color="#fff" fill="#fff" /> : <Pause size={22} color="#fff" fill="#fff" />}
+        </button>
+      )}
+      {bgMusicOn && bgMusicCurrentTrack && isMusicBarExpanded && (
+        <div className="sm:hidden fixed left-0 right-0 z-40 flex items-center gap-2 px-3 py-3" style={{ bottom: 0, background: CARD, borderTop: `1px solid ${LINE}`, boxShadow: "0 -2px 8px rgba(0,0,0,0.08)" }}>
+          <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, background: TEAL_TINT }}>
+            <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편" className="w-full h-full object-cover rounded-full" />
+          </div>
+          <div className="flex-1 min-w-0 mr-1">
+            <div className="text-xs font-bold truncate" style={{ color: INK }}>{bgMusicCurrentTrack.title || "장편 노래"}</div>
+            <div className="text-[10px]" style={{ color: INK_SOFT }}>장편</div>
+          </div>
+          <button onClick={playPrevBgTrack} className="flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150" style={{ width: 44, height: 44 }} aria-label="이전 곡">
+            <ChevronRight size={26} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+          </button>
+          <button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150" style={{ width: 52, height: 52, background: TEAL }} aria-label="재생/일시정지">
+            {bgMusicIsPaused ? <Play size={22} color="#fff" fill="#fff" /> : <Pause size={22} color="#fff" fill="#fff" />}
+          </button>
+          <button onClick={playNextBgTrack} className="flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150" style={{ width: 44, height: 44 }} aria-label="다음 곡">
+            <ChevronRight size={26} color={INK_SOFT} />
+          </button>
+          <button onClick={() => setIsMusicBarExpanded(false)} className="flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150" style={{ width: 40, height: 40 }} aria-label="접기">
+            <ChevronRight size={20} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
+          </button>
+        </div>
+      )}
+
 
 {showVoiceListeningUI && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8" style={{ background: "rgba(15,110,98,0.95)" }}>
