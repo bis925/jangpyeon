@@ -961,7 +961,8 @@ const bgMusicStartingRef = useRef(false);
 const bgMusicLastPlayedRef = useRef(null);
 const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
 const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
-  const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
+const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
+  const [showMusicHint, setShowMusicHint] = useState(false);
 const bgMusicCreatedRef = useRef(false);
 const bgMusicStoppedResolveRef = useRef(null);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
@@ -3043,9 +3044,19 @@ useEffect(() => {
     if (savedMusic === "true") setBgMusicOn(true);
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     fetchBgMusicList();
   }, []);
+
+  useEffect(() => {
+    if (tab === "my" && bgMusicEventActive && bgMusicList.length > 0 && !bgMusicOn) {
+      setShowMusicHint(true);
+      const timer = setTimeout(() => setShowMusicHint(false), 30000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowMusicHint(false);
+    }
+  }, [tab, bgMusicEventActive, bgMusicList, bgMusicOn]);
 
 useEffect(() => {
     if (bgMusicEventActive && bgMusicList.length > 0) {
@@ -6364,14 +6375,22 @@ await stopBgMusicForExit();
                   {weatherEffectOn ? <Sparkles size={20} color="#fff" /> : <X size={20} color="#fff" />}
                 </button>
 {bgMusicEventActive && bgMusicList.length > 0 && (
-                  <button
-                    onClick={toggleBgMusic}
-                    className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
-                    style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
-                    aria-label="배경음악 켜고 끄기"
-                  >
-                    {bgMusicOn ? <Heart size={20} color="#fff" fill="#fff" /> : <Heart size={20} color="#fff" />}
-                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => { toggleBgMusic(); setShowMusicHint(false); }}
+                      className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                      style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
+                      aria-label="배경음악 켜고 끄기"
+                    >
+                      <Megaphone size={20} color="#fff" fill={bgMusicOn ? "#fff" : "none"} />
+                    </button>
+                    {showMusicHint && (
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 rounded-xl px-3 py-2 whitespace-nowrap z-20" style={{ background: INK, color: "#fff" }}>
+                        <div className="text-xs font-bold">🎵 음악을 켜보세요!</div>
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 rotate-45" style={{ width: 8, height: 8, background: INK }} />
+                      </div>
+                    )}
+                  </div>
                 )}
                 <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
