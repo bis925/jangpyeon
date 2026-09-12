@@ -199,15 +199,15 @@ function getTodaySpecialEvent() {
   return null;
 }
 
-function maskEmail(email) {
-  if (!email) return "익명";
-  const atIndex = email.indexOf("@");
-  if (atIndex === -1) return email.slice(0, 3) + "***";
-  const localPart = email.slice(0, atIndex);
-  const domain = email.slice(atIndex);
-  const visible = localPart.slice(0, 3);
-  return visible + "***" + domain;
-}
+async function fetchPointRanking() {
+    const { data, error } = await supabase.rpc("get_monthly_point_ranking");
+    if (error) { console.error("랭킹 불러오기 실패:", error); return; }
+    const mapped = (data || []).map((r) => ({
+      email: r.email,
+      points: r.total_points,
+    }));
+    setPointRanking(mapped);
+  }
 
 function getRecencyInfo(createdAt, lastConfirmedAt) {
   const baseDate = lastConfirmedAt || createdAt;
