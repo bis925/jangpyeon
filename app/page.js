@@ -3327,12 +3327,11 @@ fetchUnrecognizedVoiceCommands();
   }
 
   
-  async function fetchPointRanking() {
+async function fetchPointRanking() {
     const { data, error } = await supabase.rpc("get_monthly_point_ranking");
     if (error) { console.error("랭킹 불러오기 실패:", error); return; }
-    // 보안: 이메일을 클라이언트로 가져오지 않음. RPC가 nickname/login_provider만 반환.
     const mapped = (data || []).map((r) => ({
-      nickname: r.nickname,
+      email: r.email,
       points: r.total_points,
       login_provider: r.login_provider,
     }));
