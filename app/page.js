@@ -959,7 +959,8 @@ const [bgMusicList, setBgMusicList] = useState([]);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
 const bgMusicLastPlayedRef = useRef(null);
-  const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
+const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
+  const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
 const bgMusicCreatedRef = useRef(false);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
@@ -1766,16 +1767,20 @@ async function togglePauseBgMusic() {
         const state = await AudioPlayer.isPlaying({ audioId: "jangpyeon_bgmusic" }).catch(() => ({ isPlaying: false }));
         if (state.isPlaying) {
           await AudioPlayer.pause({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+          setBgMusicIsPaused(true);
         } else {
           await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+          setBgMusicIsPaused(false);
         }
       } catch (e) {}
     } else {
       if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
         if (bgMusicAudioRef.current.paused) {
           bgMusicAudioRef.current.play().catch(() => {});
+          setBgMusicIsPaused(false);
         } else {
           bgMusicAudioRef.current.pause();
+          setBgMusicIsPaused(true);
         }
       }
     }
@@ -4191,9 +4196,9 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               <button onClick={playPrevBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 22, height: 22 }} aria-label="이전 곡">
                 <ChevronRight size={14} color={TEAL_DARK} style={{ transform: "rotate(180deg)" }} />
               </button>
-<button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 36, height: 36, background: TEAL }} aria-label="재생/일시정지">
-            <Play size={16} color="#fff" fill="#fff" />
-          </button>
+<button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 24, height: 24, background: TEAL }} aria-label="재생/일시정지">
+                {bgMusicIsPaused ? <Play size={12} color="#fff" fill="#fff" /> : <Pause size={12} color="#fff" fill="#fff" />}
+              </button>
               <button onClick={playNextBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 22, height: 22 }} aria-label="다음 곡">
                 <ChevronRight size={14} color={TEAL_DARK} />
               </button>
@@ -4509,9 +4514,9 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           <button onClick={playPrevBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 32, height: 32 }} aria-label="이전 곡">
             <ChevronRight size={20} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
           </button>
-<button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 24, height: 24, background: TEAL }} aria-label="재생/일시정지">
-                <Play size={12} color="#fff" fill="#fff" />
-              </button>
+<button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 36, height: 36, background: TEAL }} aria-label="재생/일시정지">
+            {bgMusicIsPaused ? <Play size={16} color="#fff" fill="#fff" /> : <Pause size={16} color="#fff" fill="#fff" />}
+          </button>
           <button onClick={playNextBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 32, height: 32 }} aria-label="다음 곡">
             <ChevronRight size={20} color={INK_SOFT} />
           </button>
