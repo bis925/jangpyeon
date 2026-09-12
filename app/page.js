@@ -958,6 +958,7 @@ const [bgMusicList, setBgMusicList] = useState([]);
   const [bgMusicOn, setBgMusicOn] = useState(false);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
+  const bgMusicLastPlayedRef = useRef(null);
 const bgMusicCreatedRef = useRef(false);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
@@ -1777,9 +1778,14 @@ async function playNextBgTrack() {
     if (!bgMusicList || bgMusicList.length === 0) return;
     try {
       const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-      const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+      let candidates = bgMusicList;
+      if (bgMusicLastPlayedRef.current && bgMusicList.length > 1) {
+        candidates = bgMusicList.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+      }
+      const track = candidates[Math.floor(Math.random() * candidates.length)];
+      bgMusicLastPlayedRef.current = track.id;
       await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
-      await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "배경음악" });
+      await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편" });
       await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
     } catch (e) {}
   }
