@@ -959,7 +959,6 @@ const [bgMusicList, setBgMusicList] = useState([]);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
   const bgMusicLastPlayedRef = useRef(null);
-  const bgMusicLastPlayedRef = useRef(null);
 const bgMusicCreatedRef = useRef(false);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
