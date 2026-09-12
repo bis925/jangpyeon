@@ -1252,7 +1252,7 @@ function processVoiceCommand(text) {
       showToast("앱을 종료할게요");
       setTimeout(async () => {
         if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
-          await stopBgMusicForExit();
+await stopBgMusicForExit();
           const { App } = await import("@capacitor/app");
           App.exitApp();
         }
@@ -4154,7 +4154,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 </button>
                 <button
                   onClick={async () => {
-                    await stopBgMusicForExit();
+await stopBgMusicForExit();
                     const { App } = await import("@capacitor/app");
                     App.exitApp();
                   }}
@@ -5342,7 +5342,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               </button>
               <button
                 onClick={async () => {
-                  await stopBgMusicForExit();
+await stopBgMusicForExit();
                   const { App } = await import("@capacitor/app");
                   App.exitApp();
                 }}
