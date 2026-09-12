@@ -1915,7 +1915,6 @@ const audio = new Audio(track.file_url);
       bgMusicStartingRef.current = false;
     }
   }
-
 async function toggleBgMusic() {
     const newVal = !bgMusicOn;
     setBgMusicOn(newVal);
@@ -1923,9 +1922,6 @@ async function toggleBgMusic() {
     if (newVal) {
       playRandomBgMusic();
       showToast("배경음악을 켰어요");
-      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
-        setShowBatteryOptHelp(true);
-      }
     } else {
       await stopBgMusic();
       showToast("배경음악을 껐어요");
