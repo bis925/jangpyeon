@@ -1862,6 +1862,7 @@ const audio = new Audio(track.file_url);
       audio.onended = () => playRandomBgMusic();
       audio.play().catch(() => {});
       bgMusicAudioRef.current = audio;
+      setBgMusicCurrentTrack(track);
     }
     } finally {
       bgMusicStartingRef.current = false;
