@@ -1252,6 +1252,7 @@ function processVoiceCommand(text) {
       setTimeout(async () => {
         if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
           await stopBgMusic();
+          await new Promise((r) => setTimeout(r, 400)); // 서비스가 알림/포그라운드를 완전히 정리할 시간 확보
           const { App } = await import("@capacitor/app");
           App.exitApp();
         }
@@ -4123,6 +4124,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 <button
                   onClick={async () => {
                     await stopBgMusic();
+                    await new Promise((r) => setTimeout(r, 400)); // 서비스가 알림/포그라운드를 완전히 정리할 시간 확보
                     const { App } = await import("@capacitor/app");
                     App.exitApp();
                   }}
@@ -5311,6 +5313,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               <button
                 onClick={async () => {
                   await stopBgMusic();
+                  await new Promise((r) => setTimeout(r, 400)); // 서비스가 알림/포그라운드를 완전히 정리할 시간 확보
                   const { App } = await import("@capacitor/app");
                   App.exitApp();
                 }}
