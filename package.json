@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package || true"
   },
   "dependencies": {
     "@capacitor-community/keep-awake": "^8.0.1",
@@ -28,7 +28,7 @@
     "@capgo/capacitor-speech-recognition": "^8.2.0",
     "@capgo/capacitor-speech-synthesis": "^8.0.21",
     "@kichunsung/capacitor-kakao-login-plugin": "^3.1.0-beta.1",
-    "@mediagrid/capacitor-native-audio": "^3.0.0",
+    "@mediagrid/capacitor-native-audio": "3.0.0",
     "@squareetlabs/capacitor-dont-kill-my-app": "^7.0.0",
     "@supabase/supabase-js": "2.45.4",
     "capacitor-native-settings": "^8.2.0",
