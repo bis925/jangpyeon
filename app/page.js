@@ -1799,7 +1799,7 @@ async function playRandomBgMusic() {
             audioSource: track.file_url,
    friendlyTitle: track.title || "편이의 노래",
             albumTitle: "장편 - 접근성 정보 지도",
-            artistName: "편이의 쉼표",
+            artistName: "장편",
             artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
             useForNotification: true,
             isBackgroundMusic: false,
