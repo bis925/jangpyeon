@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabaseClient";
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle, Palette, Mic, Play, Pause,
+Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle, Palette, Mic, Play, Pause, ListMusic,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -966,6 +966,10 @@ const bgMusicCreatedRef = useRef(false);
 const bgMusicStoppedResolveRef = useRef(null);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
+const [bgMusicSelectedIds, setBgMusicSelectedIds] = useState(null); // null = 아직 로드 전(전체 취급)
+const bgMusicSelectedIdsRef = useRef(null); // 재생 함수의 stale closure 대비 (항상 최신)
+const bgMusicListRef = useRef([]);
+const [showBgMusicListPopup, setShowBgMusicListPopup] = useState(false);
 const [musicUploading, setMusicUploading] = useState(false);
 const [showAddressDetailChoice, setShowAddressDetailChoice] = useState(false);
   const [isAddressDetailManual, setIsAddressDetailManual] = useState(false);
@@ -1793,6 +1797,28 @@ async function togglePauseBgMusic() {
     playNextBgTrack();
   }
 
+  // 체크된 곡만 재생 대상으로. 선택이 없거나(전체) 결과가 비면 안전하게 전체 반환
+  function getPlayableBgTracks() {
+    const list = bgMusicListRef.current || [];
+    const sel = bgMusicSelectedIdsRef.current;
+    if (!sel || sel.length === 0) return list;
+    const filtered = list.filter((m) => sel.includes(m.id));
+    return filtered.length > 0 ? filtered : list;
+  }
+
+  // 곡 체크/해제 → 상태 + ref + localStorage 동시 반영
+  function toggleBgMusicTrackSelected(id) {
+    setBgMusicSelectedIds((prev) => {
+      const base = prev || bgMusicList.map((m) => m.id);
+      const next = base.includes(id) ? base.filter((x) => x !== id) : [...base, id];
+      bgMusicSelectedIdsRef.current = next;
+      if (typeof window !== "undefined") {
+        try { localStorage.setItem("bg_music_selected", JSON.stringify(next)); } catch (e) {}
+      }
+      return next;
+    });
+  }
+
   async function stopBgMusic() {
     setBgMusicCurrentTrack(null);
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
@@ -1839,9 +1865,12 @@ async function playNextBgTrack() {
     if (!bgMusicList || bgMusicList.length === 0) return;
     try {
       const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-      let candidates = bgMusicList;
-      if (bgMusicLastPlayedRef.current && bgMusicList.length > 1) {
-        candidates = bgMusicList.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+      const playable = getPlayableBgTracks();
+      if (playable.length === 0) return;
+      let candidates = playable;
+      if (bgMusicLastPlayedRef.current && playable.length > 1) {
+        candidates = playable.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+        if (candidates.length === 0) candidates = playable;
       }
 const track = candidates[Math.floor(Math.random() * candidates.length)];
       bgMusicLastPlayedRef.current = track.id;
@@ -1860,7 +1889,9 @@ async function playRandomBgMusic() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
 const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+const playable = getPlayableBgTracks();
+        if (playable.length === 0) return;
+const track = playable[Math.floor(Math.random() * playable.length)];
         bgMusicLastPlayedRef.current = track.id;
         setBgMusicCurrentTrack(track);
         if (!bgMusicCreatedRef.current) {
@@ -1899,8 +1930,9 @@ const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
         console.log("[BGM] 네이티브 배경음악 실패:", e && e.message, e);
       }
     } else {
-      const randomIndex = Math.floor(Math.random() * bgMusicList.length);
-      const track = bgMusicList[randomIndex];
+      const playable = getPlayableBgTracks();
+      if (playable.length === 0) return;
+      const track = playable[Math.floor(Math.random() * playable.length)];
       if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
         bgMusicAudioRef.current.pause();
       }
@@ -3050,6 +3082,23 @@ useEffect(() => {
   useEffect(() => {
     fetchBgMusicList();
   }, []);
+
+  // 곡 목록이 로드되면: localStorage의 선택을 복원하거나, 없으면 전체 선택으로 초기화
+  useEffect(() => {
+    bgMusicListRef.current = bgMusicList;
+    if (!bgMusicList || bgMusicList.length === 0) return;
+    if (bgMusicSelectedIds !== null) return; // 이미 로드/설정됨
+    let ids = null;
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("bg_music_selected");
+        if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) ids = parsed; }
+      } catch (e) {}
+    }
+    if (ids === null) ids = bgMusicList.map((m) => m.id); // 저장값 없으면 전체
+    setBgMusicSelectedIds(ids);
+    bgMusicSelectedIdsRef.current = ids;
+  }, [bgMusicList, bgMusicSelectedIds]);
 
 useEffect(() => {
     if (bgMusicEventActive && bgMusicList.length > 0) {
@@ -4238,6 +4287,9 @@ await stopBgMusicForExit();
               <button onClick={playNextBgTrack} className="rounded-full p-1 flex-shrink-0 transition-all duration-150 active:scale-90" aria-label="다음 곡">
                 <ChevronRight size={15} color={INK_SOFT} />
               </button>
+              <button onClick={() => setShowBgMusicListPopup(true)} className="rounded-full p-1 flex-shrink-0 transition-all duration-150 active:scale-90" aria-label="곡 목록">
+                <ListMusic size={15} color={INK_SOFT} />
+              </button>
               <button onClick={toggleBgMusic} className="rounded-full p-1 flex-shrink-0 transition-all duration-150 active:scale-90" aria-label="배경음악 끄기">
                 <X size={14} color={INK_SOFT} />
               </button>
@@ -4560,9 +4612,41 @@ await stopBgMusicForExit();
           <button onClick={playNextBgTrack} className="flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150" style={{ width: 44, height: 44 }} aria-label="다음 곡">
             <ChevronRight size={26} color={INK_SOFT} />
           </button>
+          <button onClick={() => setShowBgMusicListPopup(true)} className="flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150" style={{ width: 44, height: 44 }} aria-label="곡 목록">
+            <ListMusic size={24} color={INK_SOFT} />
+          </button>
           <button onClick={() => setIsMusicBarExpanded(false)} className="flex items-center justify-center flex-shrink-0 active:scale-90 transition-all duration-150" style={{ width: 40, height: 40 }} aria-label="접기">
             <ChevronRight size={20} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
           </button>
+        </div>
+      )}
+
+      {showBgMusicListPopup && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowBgMusicListPopup(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col" style={{ background: CARD, maxWidth: 420, maxHeight: "72vh" }}>
+            <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${LINE}` }}>
+              <div className="font-extrabold text-base" style={{ color: INK }}>재생할 곡 선택</div>
+              <button onClick={() => setShowBgMusicListPopup(false)} className="rounded-full p-1 active:scale-90 transition-all duration-150" aria-label="닫기">
+                <X size={20} color={INK_SOFT} />
+              </button>
+            </div>
+            <div className="px-2 py-2 overflow-y-auto flex-1">
+              {bgMusicList.length === 0 ? (
+                <div className="text-sm text-center py-10" style={{ color: INK_SOFT }}>등록된 배경음악이 없어요</div>
+              ) : bgMusicList.map((m) => {
+                const checked = !bgMusicSelectedIds || bgMusicSelectedIds.includes(m.id);
+                return (
+                  <button key={m.id} onClick={() => toggleBgMusicTrackSelected(m.id)} className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl active:scale-95 transition-all duration-150" aria-label={`${m.title || "제목 없음"} ${checked ? "선택 해제" : "선택"}`}>
+                    <div className="flex items-center justify-center rounded-md flex-shrink-0" style={{ width: 22, height: 22, background: checked ? TEAL : "transparent", border: `2px solid ${checked ? TEAL : LINE}` }}>
+                      {checked && <Check size={14} color="#fff" />}
+                    </div>
+                    <span className="text-sm font-bold truncate text-left flex-1" style={{ color: INK }}>{m.title || "제목 없음"}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="px-5 py-3 text-xs flex-shrink-0" style={{ color: INK_SOFT, borderTop: `1px solid ${LINE}` }}>체크한 곡만 재생돼요. 선택은 자동 저장됩니다.</div>
+          </div>
         </div>
       )}
 
