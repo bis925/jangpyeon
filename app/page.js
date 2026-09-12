@@ -7155,7 +7155,7 @@ await stopBgMusicForExit();
               </button>
             </div>
             <div className="rounded-2xl p-4 mb-3 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
-              <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자에게 배경음악이 자동 재생돼요</div>
+              <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자에게 음악 버튼이 나타나요 (재생은 각자 선택)</div>
               <button
                 onClick={toggleBgMusicEvent}
                 disabled={bgMusicList.length === 0}
