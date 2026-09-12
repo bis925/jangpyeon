@@ -963,6 +963,7 @@ const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
 const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
   const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
 const bgMusicCreatedRef = useRef(false);
+const bgMusicStoppedResolveRef = useRef(null);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
 const [musicUploading, setMusicUploading] = useState(false);
@@ -1251,8 +1252,7 @@ function processVoiceCommand(text) {
       showToast("앱을 종료할게요");
       setTimeout(async () => {
         if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
-          await stopBgMusic();
-          await new Promise((r) => setTimeout(r, 400)); // 서비스가 알림/포그라운드를 완전히 정리할 시간 확보
+          await stopBgMusicForExit();
           const { App } = await import("@capacitor/app");
           App.exitApp();
         }
@@ -1811,6 +1811,30 @@ async function togglePauseBgMusic() {
     bgMusicAudioRef.current = null;
   }
 
+// 앱 종료 직전용: 플레이어가 실제로 멈춘 걸(onPlaybackStatusChange 'stopped') 확인한 뒤 정리
+async function stopBgMusicForExit() {
+    const isNative = typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform();
+    setBgMusicCurrentTrack(null);
+    if (!isNative || !bgMusicCreatedRef.current) {
+      await stopBgMusic();
+      return;
+    }
+    try {
+      const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+      // 1) 정지 요청 → 플레이어가 실제로 'stopped'를 보고할 때까지 대기 (최대 1.5초 안전 타임아웃)
+      const waitStopped = new Promise((resolve) => { bgMusicStoppedResolveRef.current = resolve; });
+      await AudioPlayer.stop({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+      await Promise.race([waitStopped, new Promise((r) => setTimeout(r, 1500))]);
+      bgMusicStoppedResolveRef.current = null;
+      // 2) 세션/알림 제거 (destroy 내부 controller.stop → 플레이어 IDLE → media3가 알림 취소)
+      await AudioPlayer.destroy({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
+      // 3) destroy는 리스너를 먼저 떼므로 마지막 알림 취소는 관측 불가 → 최소 안전 여유
+      await new Promise((r) => setTimeout(r, 300));
+    } catch (e) {}
+    bgMusicCreatedRef.current = false;
+    bgMusicAudioRef.current = null;
+  }
+
 async function playNextBgTrack() {
     if (!bgMusicList || bgMusicList.length === 0) return;
     try {
@@ -1856,6 +1880,13 @@ const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
           });
           await AudioPlayer.onAudioEnd({ audioId: "jangpyeon_bgmusic" }, () => {
             playNextBgTrack();
+          });
+          await AudioPlayer.onPlaybackStatusChange({ audioId: "jangpyeon_bgmusic" }, (res) => {
+            if (res && res.status === "stopped" && bgMusicStoppedResolveRef.current) {
+              const resolve = bgMusicStoppedResolveRef.current;
+              bgMusicStoppedResolveRef.current = null;
+              resolve();
+            }
           });
           await AudioPlayer.initialize({ audioId: "jangpyeon_bgmusic" });
           bgMusicCreatedRef.current = true;
@@ -4123,8 +4154,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
                 </button>
                 <button
                   onClick={async () => {
-                    await stopBgMusic();
-                    await new Promise((r) => setTimeout(r, 400)); // 서비스가 알림/포그라운드를 완전히 정리할 시간 확보
+                    await stopBgMusicForExit();
                     const { App } = await import("@capacitor/app");
                     App.exitApp();
                   }}
@@ -5312,8 +5342,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               </button>
               <button
                 onClick={async () => {
-                  await stopBgMusic();
-                  await new Promise((r) => setTimeout(r, 400)); // 서비스가 알림/포그라운드를 완전히 정리할 시간 확보
+                  await stopBgMusicForExit();
                   const { App } = await import("@capacitor/app");
                   App.exitApp();
                 }}
