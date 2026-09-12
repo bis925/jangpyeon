@@ -3086,7 +3086,12 @@ useEffect(() => {
     }
   }, [tab, bgMusicEventActive, bgMusicList, bgMusicOn]);
 
-useEffect(() => {
+const bgMusicEventLoadedRef = useRef(false);
+  useEffect(() => {
+    if (!bgMusicEventLoadedRef.current) {
+      bgMusicEventLoadedRef.current = true;
+      return;
+    }
     if (!bgMusicEventActive) {
       setBgMusicOn(false);
       stopBgMusic();
