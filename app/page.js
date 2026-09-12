@@ -3055,7 +3055,7 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, []);
 
- useEffect(() => {
+useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("mic_position_percent");
     if (saved) setMicPositionPercent(parseFloat(saved));
@@ -3064,6 +3064,12 @@ useEffect(() => {
     const savedMusic = localStorage.getItem("bg_music_on");
     if (savedMusic === "true") setBgMusicOn(true);
   }, []);
+
+  useEffect(() => {
+    if (bgMusicOn && bgMusicList.length > 0 && !bgMusicAudioRef.current) {
+      playRandomBgMusic();
+    }
+  }, [bgMusicOn, bgMusicList]);
 
 useEffect(() => {
     fetchBgMusicList();
