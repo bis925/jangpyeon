@@ -1759,7 +1759,7 @@ async function deleteBgMusic(id, fileUrl) {
     setBgMusicList(data || []);
   }
 
-  async function togglePauseBgMusic() {
+async function togglePauseBgMusic() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
         const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
@@ -1770,6 +1770,14 @@ async function deleteBgMusic(id, fileUrl) {
           await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
         }
       } catch (e) {}
+    } else {
+      if (bgMusicAudioRef.current && bgMusicAudioRef.current.pause) {
+        if (bgMusicAudioRef.current.paused) {
+          bgMusicAudioRef.current.play().catch(() => {});
+        } else {
+          bgMusicAudioRef.current.pause();
+        }
+      }
     }
   }
 
@@ -4171,10 +4179,28 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
             )}
           </div>
           <span style={{ fontFamily: DISPLAY_FONT, fontSize: `${24 * FONT_SCALES[fontScale] * (fontScale === "xsmall" ? 0.55 : 1)}px`, color: INK, lineHeight: 1 }} className="ml-2.5">장편</span>
-          {getTodaySpecialEvent()?.message && (
+      {getTodaySpecialEvent()?.message && (
             <span className="hidden sm:inline-block ml-3 text-xs font-bold rounded-full px-3 py-1" style={{ background: CORAL_TINT, color: CORAL }}>
               {getTodaySpecialEvent().emoji} {getTodaySpecialEvent().message}
             </span>
+          )}
+          {bgMusicOn && bgMusicCurrentTrack && (
+            <div className="hidden sm:flex items-center gap-2 ml-4 rounded-full pl-2 pr-1 py-1" style={{ background: TEAL_TINT }}>
+              <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편" className="rounded-full flex-shrink-0" style={{ width: 22, height: 22, objectFit: "cover" }} />
+              <span className="text-xs font-bold truncate" style={{ color: TEAL_DARK, maxWidth: 100 }}>{bgMusicCurrentTrack.title || "장편 노래"}</span>
+              <button onClick={playPrevBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 22, height: 22 }} aria-label="이전 곡">
+                <ChevronRight size={14} color={TEAL_DARK} style={{ transform: "rotate(180deg)" }} />
+              </button>
+              <button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 24, height: 24, background: TEAL }} aria-label="재생/일시정지">
+                <Megaphone size={12} color="#fff" />
+              </button>
+              <button onClick={playNextBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 22, height: 22 }} aria-label="다음 곡">
+                <ChevronRight size={14} color={TEAL_DARK} />
+              </button>
+              <button onClick={toggleBgMusic} className="flex items-center justify-center flex-shrink-0" style={{ width: 20, height: 20 }} aria-label="닫기">
+                <X size={12} color={TEAL_DARK} />
+              </button>
+            </div>
           )}
         </div>
         <div className="hidden sm:flex items-center gap-1 rounded-full p-1 flex-shrink-0 my-3.5 sm:absolute sm:left-1/2 sm:-translate-x-1/2" style={{ background: PAPER }}>
@@ -4472,7 +4498,7 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
       )}
 
 {bgMusicOn && bgMusicCurrentTrack && (
-        <div className="fixed left-0 right-0 z-40 flex items-center gap-3 px-4 py-2.5" style={{ bottom: 64, background: CARD, borderTop: `1px solid ${LINE}`, boxShadow: "0 -2px 8px rgba(0,0,0,0.08)" }}>
+        <div className="sm:hidden fixed left-0 right-0 z-40 flex items-center gap-3 px-4 py-2.5" style={{ bottom: 64, background: CARD, borderTop: `1px solid ${LINE}`, boxShadow: "0 -2px 8px rgba(0,0,0,0.08)" }}>
           <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 36, height: 36, background: TEAL_TINT }}>
             <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편" className="w-full h-full object-cover rounded-full" />
           </div>
