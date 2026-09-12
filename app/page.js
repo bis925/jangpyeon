@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabaseClient";
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import {
   Search, MapPin, Plus, User, Check, ChevronRight,
-    Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle, Palette, Mic,
+Accessibility, DoorOpen, Baby, MoveVertical, Sparkles, X, Star, LogOut, Mail, Camera, Pencil, Megaphone, ShieldCheck, Paperclip, Bold, MessageCircle, Headset, Italic, Underline, Highlighter, Link2, Locate, LocateFixed, Trash2, Clipboard, ZoomIn, ZoomOut, Type, Navigation, Flag, Bell, Gift, Phone, MessageSquare, Heart, CheckCircle, Palette, Mic, Play, Pause,
 } from "lucide-react";
 
 /* ===================== 글자 크기 훅 ===================== */
@@ -4191,9 +4191,9 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
               <button onClick={playPrevBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 22, height: 22 }} aria-label="이전 곡">
                 <ChevronRight size={14} color={TEAL_DARK} style={{ transform: "rotate(180deg)" }} />
               </button>
-              <button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 24, height: 24, background: TEAL }} aria-label="재생/일시정지">
-                <Megaphone size={12} color="#fff" />
-              </button>
+<button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 36, height: 36, background: TEAL }} aria-label="재생/일시정지">
+            <Play size={16} color="#fff" fill="#fff" />
+          </button>
               <button onClick={playNextBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 22, height: 22 }} aria-label="다음 곡">
                 <ChevronRight size={14} color={TEAL_DARK} />
               </button>
@@ -4509,9 +4509,9 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
           <button onClick={playPrevBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 32, height: 32 }} aria-label="이전 곡">
             <ChevronRight size={20} color={INK_SOFT} style={{ transform: "rotate(180deg)" }} />
           </button>
-          <button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 36, height: 36, background: TEAL }} aria-label="재생/일시정지">
-            <Heart size={16} color="#fff" fill="#fff" />
-          </button>
+<button onClick={togglePauseBgMusic} className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 24, height: 24, background: TEAL }} aria-label="재생/일시정지">
+                <Play size={12} color="#fff" fill="#fff" />
+              </button>
           <button onClick={playNextBgTrack} className="flex items-center justify-center flex-shrink-0" style={{ width: 32, height: 32 }} aria-label="다음 곡">
             <ChevronRight size={20} color={INK_SOFT} />
           </button>
