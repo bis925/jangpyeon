@@ -3081,15 +3081,11 @@ useEffect(() => {
   }, [tab, bgMusicEventActive, bgMusicList, bgMusicOn]);
 
 useEffect(() => {
-    if (bgMusicEventActive && bgMusicList.length > 0) {
-      setBgMusicOn(true);
-      if (!bgMusicAudioRef.current) playRandomBgMusic();
-    } else if (!bgMusicEventActive) {
+    if (!bgMusicEventActive) {
       setBgMusicOn(false);
       stopBgMusic();
     }
   }, [bgMusicEventActive, bgMusicList]);
-
 useEffect(() => {
     if (session && tab === "my" && !myPageWeather) fetchMyPageWeather();
   }, [session, tab]);
