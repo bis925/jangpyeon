@@ -962,7 +962,8 @@ const bgMusicLastPlayedRef = useRef(null);
 const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
 const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
 const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
-  const [showMusicHint, setShowMusicHint] = useState(false);
+const [showMusicHint, setShowMusicHint] = useState(false);
+  const [bgMusicShuffle, setBgMusicShuffle] = useState(true);
 const bgMusicCreatedRef = useRef(false);
 const bgMusicStoppedResolveRef = useRef(null);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
@@ -1760,6 +1761,18 @@ async function deleteBgMusic(id, fileUrl) {
     showToast("삭제됐어요");
   }
 
+  async function fetchBgMusicShuffle() {
+    const { data } = await supabase.from("app_settings").select("value").eq("key", "bg_music_shuffle").single();
+    setBgMusicShuffle(data?.value !== "false");
+  }
+
+  async function toggleBgMusicShuffle() {
+    const newValue = !bgMusicShuffle;
+    setBgMusicShuffle(newValue);
+    await supabase.from("app_settings").update({ value: newValue ? "true" : "false" }).eq("key", "bg_music_shuffle");
+    showToast(newValue ? "무작위 재생으로 설정했어요" : "등록 순서대로 재생하도록 설정했어요");
+  }
+
     async function fetchBgMusicList() {
     const { data } = await supabase.from("background_music").select("*").order("display_order");
     setBgMusicList(data || []);
@@ -1841,11 +1854,18 @@ async function playNextBgTrack() {
     if (!bgMusicList || bgMusicList.length === 0) return;
     try {
       const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-      let candidates = bgMusicList;
-      if (bgMusicLastPlayedRef.current && bgMusicList.length > 1) {
-        candidates = bgMusicList.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+      let track;
+      if (bgMusicShuffle) {
+        let candidates = bgMusicList;
+        if (bgMusicLastPlayedRef.current && bgMusicList.length > 1) {
+          candidates = bgMusicList.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+        }
+        track = candidates[Math.floor(Math.random() * candidates.length)];
+      } else {
+        const currentIndex = bgMusicList.findIndex((m) => m.id === bgMusicLastPlayedRef.current);
+        const nextIndex = (currentIndex + 1) % bgMusicList.length;
+        track = bgMusicList[nextIndex];
       }
-const track = candidates[Math.floor(Math.random() * candidates.length)];
       bgMusicLastPlayedRef.current = track.id;
       setBgMusicCurrentTrack(track);
       await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
@@ -1862,7 +1882,7 @@ async function playRandomBgMusic() {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
 const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+        const track = bgMusicShuffle ? bgMusicList[Math.floor(Math.random() * bgMusicList.length)] : bgMusicList[0];
         bgMusicLastPlayedRef.current = track.id;
         setBgMusicCurrentTrack(track);
         if (!bgMusicCreatedRef.current) {
@@ -3047,6 +3067,7 @@ useEffect(() => {
 
 useEffect(() => {
     fetchBgMusicList();
+    fetchBgMusicShuffle();
   }, []);
 
   useEffect(() => {
@@ -7123,6 +7144,16 @@ await stopBgMusicForExit();
             </div>
 
 <div id="admin-music" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎵 배경음악 이벤트 ({bgMusicList.length}곡 등록됨)</div>
+            <div className="rounded-2xl p-4 mb-3 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs" style={{ color: INK_SOFT }}>{bgMusicShuffle ? "무작위 순서로 재생돼요" : "등록한 순서대로 재생돼요"}</div>
+              <button
+                onClick={toggleBgMusicShuffle}
+                className="relative rounded-full transition-all duration-200 flex-shrink-0"
+                style={{ width: 48, height: 28, background: bgMusicShuffle ? TEAL : LINE }}
+              >
+                <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: bgMusicShuffle ? 23 : 3 }} />
+              </button>
+            </div>
             <div className="rounded-2xl p-4 mb-3 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
               <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자에게 배경음악이 자동 재생돼요</div>
               <button
