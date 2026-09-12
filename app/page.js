@@ -961,7 +961,9 @@ const bgMusicStartingRef = useRef(false);
 const bgMusicLastPlayedRef = useRef(null);
 const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
 const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
-  const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
+const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
+const [showMusicHint, setShowMusicHint] = useState(false);
+  const [bgMusicShuffle, setBgMusicShuffle] = useState(true);
 const bgMusicCreatedRef = useRef(false);
 const bgMusicStoppedResolveRef = useRef(null);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
@@ -1730,12 +1732,13 @@ async function announceTodayWeather() {
     showToast(newValue ? "배경음악 이벤트를 켰어요" : "배경음악 이벤트를 껐어요");
   }
 
-  async function uploadBgMusic(e) {
+async function uploadBgMusic(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("audio/")) { showToast("음악 파일(mp3 등)만 업로드할 수 있어요"); return; }
     setMusicUploading(true);
-    const filePath = `${Date.now()}_${file.name}`;
+    const ext = file.name.split(".").pop();
+    const filePath = `${Date.now()}.${ext}`;
     const { error: uploadError } = await supabase.storage.from("music").upload(filePath, file);
     if (uploadError) { showToast("업로드 실패: " + uploadError.message); setMusicUploading(false); return; }
     const { data: urlData } = supabase.storage.from("music").getPublicUrl(filePath);
@@ -1760,6 +1763,18 @@ async function deleteBgMusic(id, fileUrl) {
     await supabase.from("background_music").delete().eq("id", id);
     fetchBgMusicList();
     showToast("삭제됐어요");
+  }
+
+  async function fetchBgMusicShuffle() {
+    const { data } = await supabase.from("app_settings").select("value").eq("key", "bg_music_shuffle").single();
+    setBgMusicShuffle(data?.value !== "false");
+  }
+
+  async function toggleBgMusicShuffle() {
+    const newValue = !bgMusicShuffle;
+    setBgMusicShuffle(newValue);
+    await supabase.from("app_settings").update({ value: newValue ? "true" : "false" }).eq("key", "bg_music_shuffle");
+    showToast(newValue ? "무작위 재생으로 설정했어요" : "등록 순서대로 재생하도록 설정했어요");
   }
 
     async function fetchBgMusicList() {
@@ -1865,14 +1880,21 @@ async function playNextBgTrack() {
     if (!bgMusicList || bgMusicList.length === 0) return;
     try {
       const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-      const playable = getPlayableBgTracks();
+const playable = getPlayableBgTracks();
       if (playable.length === 0) return;
-      let candidates = playable;
-      if (bgMusicLastPlayedRef.current && playable.length > 1) {
-        candidates = playable.filter((m) => m.id !== bgMusicLastPlayedRef.current);
-        if (candidates.length === 0) candidates = playable;
+      let track;
+      if (bgMusicShuffle) {
+        let candidates = playable;
+        if (bgMusicLastPlayedRef.current && playable.length > 1) {
+          candidates = playable.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+          if (candidates.length === 0) candidates = playable;
+        }
+        track = candidates[Math.floor(Math.random() * candidates.length)];
+      } else {
+        const currentIndex = playable.findIndex((m) => m.id === bgMusicLastPlayedRef.current);
+        const nextIndex = (currentIndex + 1) % playable.length;
+        track = playable[nextIndex];
       }
-const track = candidates[Math.floor(Math.random() * candidates.length)];
       bgMusicLastPlayedRef.current = track.id;
       setBgMusicCurrentTrack(track);
       await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
@@ -1891,7 +1913,7 @@ async function playRandomBgMusic() {
 const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
 const playable = getPlayableBgTracks();
         if (playable.length === 0) return;
-const track = playable[Math.floor(Math.random() * playable.length)];
+        const track = bgMusicShuffle ? playable[Math.floor(Math.random() * playable.length)] : playable[0];
         bgMusicLastPlayedRef.current = track.id;
         setBgMusicCurrentTrack(track);
         if (!bgMusicCreatedRef.current) {
@@ -1901,7 +1923,7 @@ const track = playable[Math.floor(Math.random() * playable.length)];
    friendlyTitle: track.title || "장편 노래",
             albumTitle: "장편",
             artistName: "장편",
-            artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
+            artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png",
             useForNotification: true,
             isBackgroundMusic: false,
             loop: false,
@@ -1947,7 +1969,6 @@ const audio = new Audio(track.file_url);
       bgMusicStartingRef.current = false;
     }
   }
-
 async function toggleBgMusic() {
     const newVal = !bgMusicOn;
     setBgMusicOn(newVal);
@@ -1955,9 +1976,6 @@ async function toggleBgMusic() {
     if (newVal) {
       playRandomBgMusic();
       showToast("배경음악을 켰어요");
-      if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
-        setShowBatteryOptHelp(true);
-      }
     } else {
       await stopBgMusic();
       showToast("배경음악을 껐어요");
@@ -3069,7 +3087,7 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, []);
 
- useEffect(() => {
+useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("mic_position_percent");
     if (saved) setMicPositionPercent(parseFloat(saved));
@@ -3080,8 +3098,10 @@ useEffect(() => {
   }, []);
 
   useEffect(() => {
-    fetchBgMusicList();
-  }, []);
+    if (bgMusicOn && bgMusicList.length > 0 && !bgMusicAudioRef.current) {
+      playRandomBgMusic();
+    }
+  }, [bgMusicOn, bgMusicList]);
 
   // 곡 목록이 로드되면: localStorage의 선택을 복원하거나, 없으면 전체 선택으로 초기화
   useEffect(() => {
@@ -3101,15 +3121,31 @@ useEffect(() => {
   }, [bgMusicList, bgMusicSelectedIds]);
 
 useEffect(() => {
-    if (bgMusicEventActive && bgMusicList.length > 0) {
-      setBgMusicOn(true);
-      if (!bgMusicAudioRef.current) playRandomBgMusic();
-    } else if (!bgMusicEventActive) {
+    fetchBgMusicList();
+    fetchBgMusicShuffle();
+  }, []);
+
+  useEffect(() => {
+    if (tab === "my" && bgMusicEventActive && bgMusicList.length > 0 && !bgMusicOn) {
+      setShowMusicHint(true);
+      const timer = setTimeout(() => setShowMusicHint(false), 30000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowMusicHint(false);
+    }
+  }, [tab, bgMusicEventActive, bgMusicList, bgMusicOn]);
+
+const bgMusicEventLoadedRef = useRef(false);
+  useEffect(() => {
+    if (!bgMusicEventLoadedRef.current) {
+      bgMusicEventLoadedRef.current = true;
+      return;
+    }
+    if (!bgMusicEventActive) {
       setBgMusicOn(false);
       stopBgMusic();
     }
   }, [bgMusicEventActive, bgMusicList]);
-
 useEffect(() => {
     if (session && tab === "my" && !myPageWeather) fetchMyPageWeather();
   }, [session, tab]);
@@ -4274,7 +4310,8 @@ await stopBgMusicForExit();
             </span>
           )}
           {bgMusicOn && bgMusicCurrentTrack && (
-            <div className="hidden sm:flex items-center gap-1.5 ml-4 rounded-full pl-3 pr-1 py-1 min-w-0" style={{ background: PAPER, maxWidth: 300 }}>
+<div className="hidden sm:flex items-center gap-1.5 ml-4 rounded-full pl-1 pr-1 py-1 min-w-0" style={{ background: PAPER, maxWidth: 320 }}>
+              <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png" alt="장편" className={`rounded-full flex-shrink-0 ${!bgMusicIsPaused ? "album-art-spinning" : ""}`} style={{ width: 24, height: 24, objectFit: "cover" }} />
               <span className="text-xs font-bold truncate" style={{ color: INK, maxWidth: 110 }}>
                 {bgMusicCurrentTrack.title || "장편 노래"}
               </span>
@@ -4596,8 +4633,8 @@ await stopBgMusicForExit();
       )}
       {bgMusicOn && bgMusicCurrentTrack && isMusicBarExpanded && (
         <div className="sm:hidden fixed left-0 right-0 z-40 flex items-center gap-2 px-3 py-3" style={{ bottom: 0, background: CARD, borderTop: `1px solid ${LINE}`, boxShadow: "0 -2px 8px rgba(0,0,0,0.08)" }}>
-          <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, background: TEAL_TINT }}>
-            <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png" alt="장편" className="w-full h-full object-cover rounded-full" />
+<div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, background: TEAL_TINT }}>
+    <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png" alt="장편" className={`w-full h-full object-cover rounded-full ${!bgMusicIsPaused ? "album-art-spinning" : ""}`} />
           </div>
           <div className="flex-1 min-w-0 mr-1">
             <div className="text-xs font-bold truncate" style={{ color: INK }}>{bgMusicCurrentTrack.title || "장편 노래"}</div>
@@ -6451,14 +6488,22 @@ await stopBgMusicForExit();
                   {weatherEffectOn ? <Sparkles size={20} color="#fff" /> : <X size={20} color="#fff" />}
                 </button>
 {bgMusicEventActive && bgMusicList.length > 0 && (
-                  <button
-                    onClick={toggleBgMusic}
-                    className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
-                    style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
-                    aria-label="배경음악 켜고 끄기"
-                  >
-                    {bgMusicOn ? <Heart size={20} color="#fff" fill="#fff" /> : <Heart size={20} color="#fff" />}
-                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => { toggleBgMusic(); setShowMusicHint(false); }}
+                      className="flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-150 active:scale-90"
+                      style={{ width: 44, height: 44, background: "rgba(255,255,255,0.3)" }}
+                      aria-label="배경음악 켜고 끄기"
+                    >
+                      <Megaphone size={20} color="#fff" fill={bgMusicOn ? "#fff" : "none"} />
+                    </button>
+                    {showMusicHint && (
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 rounded-xl px-3 py-2 whitespace-nowrap z-20" style={{ background: INK, color: "#fff" }}>
+                        <div className="text-xs font-bold">🎵 음악을 켜보세요!</div>
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 rotate-45" style={{ width: 8, height: 8, background: INK }} />
+                      </div>
+                    )}
+                  </div>
                 )}
                 <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
@@ -7191,7 +7236,17 @@ await stopBgMusicForExit();
 
 <div id="admin-music" className="font-extrabold text-sm mb-3" style={{ color: INK }}>🎵 배경음악 이벤트 ({bgMusicList.length}곡 등록됨)</div>
             <div className="rounded-2xl p-4 mb-3 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
-              <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자에게 배경음악이 자동 재생돼요</div>
+              <div className="text-xs" style={{ color: INK_SOFT }}>{bgMusicShuffle ? "무작위 순서로 재생돼요" : "등록한 순서대로 재생돼요"}</div>
+              <button
+                onClick={toggleBgMusicShuffle}
+                className="relative rounded-full transition-all duration-200 flex-shrink-0"
+                style={{ width: 48, height: 28, background: bgMusicShuffle ? TEAL : LINE }}
+              >
+                <div className="absolute rounded-full bg-white transition-all duration-200" style={{ width: 22, height: 22, top: 3, left: bgMusicShuffle ? 23 : 3 }} />
+              </button>
+            </div>
+            <div className="rounded-2xl p-4 mb-3 flex items-center justify-between" style={{ border: `1px solid ${LINE}`, background: CARD }}>
+              <div className="text-xs" style={{ color: INK_SOFT }}>켜면 모든 사용자에게 음악 버튼이 나타나요 (재생은 각자 선택)</div>
               <button
                 onClick={toggleBgMusicEvent}
                 disabled={bgMusicList.length === 0}
