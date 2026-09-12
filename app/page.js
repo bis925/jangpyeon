@@ -4191,8 +4191,6 @@ if (maintenanceMode && session && session?.user?.email !== ADMIN_EMAIL) {
             </span>
           )}
         </div>
-      )}
-        </div>
         <div className="hidden sm:flex items-center gap-1 rounded-full p-1 flex-shrink-0 my-3.5 sm:absolute sm:left-1/2 sm:-translate-x-1/2" style={{ background: PAPER }}>
           {NAV.map((n) => {
             const Icon = n.icon;
