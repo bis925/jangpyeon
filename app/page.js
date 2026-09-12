@@ -959,6 +959,7 @@ const [bgMusicList, setBgMusicList] = useState([]);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
   const bgMusicLastPlayedRef = useRef(null);
+  const bgMusicLastPlayedRef = useRef(null);
 const bgMusicCreatedRef = useRef(false);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
 const [bgMusicEventActive, setBgMusicEventActive] = useState(false);
@@ -1797,14 +1798,15 @@ async function playRandomBgMusic() {
     try {
     if (typeof window !== "undefined" && window.Capacitor && window.Capacitor.isNativePlatform()) {
       try {
-        const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
         const track = bgMusicList[Math.floor(Math.random() * bgMusicList.length)];
+        bgMusicLastPlayedRef.current = track.id;
         if (!bgMusicCreatedRef.current) {
           await AudioPlayer.create({
             audioId: "jangpyeon_bgmusic",
             audioSource: track.file_url,
-   friendlyTitle: track.title || "편이의 노래",
-            albumTitle: "장편 - 접근성 정보 지도",
+   friendlyTitle: track.title || "장편 노래",
+            albumTitle: "장편",
             artistName: "장편",
             artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/19b259a9-47c8-44a6-926e-2c393f9650fb.png",
             useForNotification: true,
