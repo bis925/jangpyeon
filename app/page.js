@@ -2493,7 +2493,7 @@ useEffect(() => {
     const { data: reviews } = await supabase.from("place_reviews").select("*").eq("place_id", placeId).order("created_at", { ascending: false });
     if (!reviews || reviews.length === 0) { setPlaceReviews([]); return; }
     const userIds = [...new Set(reviews.map((r) => r.user_id))];
-    const { data: profilesData } = await supabase.from("profiles").select("id, nickname").in("id", userIds);
+    const { data: profilesData } = await supabase.from("public_profiles").select("id, nickname").in("id", userIds);
     const nicknameMap = {};
     (profilesData || []).forEach((p) => { nicknameMap[p.id] = p.nickname; });
     const merged = reviews.map((r) => ({ ...r, profiles: { nickname: nicknameMap[r.user_id] } }));
@@ -3319,11 +3319,12 @@ fetchUnrecognizedVoiceCommands();
   async function fetchPointRanking() {
     const { data, error } = await supabase.rpc("get_monthly_point_ranking");
     if (error) { console.error("랭킹 불러오기 실패:", error); return; }
-    const emails = (data || []).map((r) => r.email);
-    const { data: providerData } = await supabase.from("profiles").select("email, login_provider").in("email", emails);
-    const providerMap = {};
-    (providerData || []).forEach((p) => { providerMap[p.email] = p.login_provider; });
-    const mapped = (data || []).map((r) => ({ email: r.email, points: r.total_points, login_provider: providerMap[r.email] }));
+    // 보안: 이메일을 클라이언트로 가져오지 않음. RPC가 nickname/login_provider만 반환.
+    const mapped = (data || []).map((r) => ({
+      nickname: r.nickname,
+      points: r.total_points,
+      login_provider: r.login_provider,
+    }));
     setPointRanking(mapped);
   }
 
@@ -6752,7 +6753,7 @@ await stopBgMusicForExit();
                             <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
                           </svg>
                         )}
-                                <span className={isFirst ? "font-extrabold truncate" : "text-sm font-bold truncate"} style={{ color: INK, fontSize: isFirst ? 16 : undefined }}>{maskEmail(p.email)}</span>
+                                <span className={isFirst ? "font-extrabold truncate" : "text-sm font-bold truncate"} style={{ color: INK, fontSize: isFirst ? 16 : undefined }}>{p.nickname || "익명"}</span>
                       </span>
                     </div>
                     <span className="flex-shrink-0" style={{ fontFamily: MONO_FONT, color: isTop3 ? CORAL : INK_SOFT, fontWeight: 800, fontSize: isFirst ? 18 : (isTop3 ? 15 : 13) }}>{p.points.toLocaleString()}P</span>
