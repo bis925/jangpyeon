@@ -1727,12 +1727,13 @@ async function announceTodayWeather() {
     showToast(newValue ? "배경음악 이벤트를 켰어요" : "배경음악 이벤트를 껐어요");
   }
 
-  async function uploadBgMusic(e) {
+async function uploadBgMusic(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("audio/")) { showToast("음악 파일(mp3 등)만 업로드할 수 있어요"); return; }
     setMusicUploading(true);
-    const filePath = `${Date.now()}_${file.name}`;
+    const ext = file.name.split(".").pop();
+    const filePath = `${Date.now()}.${ext}`;
     const { error: uploadError } = await supabase.storage.from("music").upload(filePath, file);
     if (uploadError) { showToast("업로드 실패: " + uploadError.message); setMusicUploading(false); return; }
     const { data: urlData } = supabase.storage.from("music").getPublicUrl(filePath);
