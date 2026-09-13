@@ -973,7 +973,6 @@ const bgMusicLastPlayedRef = useRef(null);
   const bgMusicShuffleRef = useRef(true);
   useEffect(() => { bgMusicShuffleRef.current = bgMusicShuffle; }, [bgMusicShuffle]);
 const playNextBgTrackRef = useRef(null);
-  useEffect(() => { playNextBgTrackRef.current = playNextBgTrack; });
 const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
 const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
 const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
@@ -1914,10 +1913,11 @@ async function playNextBgTrack() {
     await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
     await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편", artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/150c7998-4807-484c-89df-ea933edb96d2.png" });
     await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" });
-  } catch (e) {
+} catch (e) {
     console.log("[BGM] 다음 곡 실패:", e && e.message, e);
   }
 }
+  useEffect(() => { playNextBgTrackRef.current = playNextBgTrack; });
 
 async function playRandomBgMusic() {
     if (!bgMusicList || bgMusicList.length === 0) return;
