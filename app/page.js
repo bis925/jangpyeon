@@ -970,6 +970,10 @@ const [bgMusicList, setBgMusicList] = useState([]);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
 const bgMusicLastPlayedRef = useRef(null);
+  const bgMusicShuffleRef = useRef(true);
+  useEffect(() => { bgMusicShuffleRef.current = bgMusicShuffle; }, [bgMusicShuffle]);
+const playNextBgTrackRef = useRef(null);
+  useEffect(() => { playNextBgTrackRef.current = playNextBgTrack; });
 const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
 const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
 const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
@@ -1888,31 +1892,32 @@ async function stopBgMusicForExit() {
   }
 
 async function playNextBgTrack() {
-    if (!bgMusicList || bgMusicList.length === 0) return;
-    try {
-      const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-const playable = getPlayableBgTracks();
-      if (playable.length === 0) return;
-      let track;
-      if (bgMusicShuffle) {
-        let candidates = playable;
-        if (bgMusicLastPlayedRef.current && playable.length > 1) {
-          candidates = playable.filter((m) => m.id !== bgMusicLastPlayedRef.current);
-          if (candidates.length === 0) candidates = playable;
-        }
-        track = candidates[Math.floor(Math.random() * candidates.length)];
-      } else {
-        const currentIndex = playable.findIndex((m) => m.id === bgMusicLastPlayedRef.current);
-        const nextIndex = (currentIndex + 1) % playable.length;
-        track = playable[nextIndex];
+  const playable = getPlayableBgTracks();
+  if (playable.length === 0) return;
+  try {
+    const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+    let track;
+    if (bgMusicShuffleRef.current) {
+      let candidates = playable;
+      if (bgMusicLastPlayedRef.current && playable.length > 1) {
+        candidates = playable.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+        if (candidates.length === 0) candidates = playable;
       }
-      bgMusicLastPlayedRef.current = track.id;
-      setBgMusicCurrentTrack(track);
-      await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
-await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편", artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/150c7998-4807-484c-89df-ea933edb96d2.png" });
-      await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
-    } catch (e) {}
+      track = candidates[Math.floor(Math.random() * candidates.length)];
+    } else {
+      const currentIndex = playable.findIndex((m) => m.id === bgMusicLastPlayedRef.current);
+      track = playable[(currentIndex + 1) % playable.length];
+    }
+    bgMusicLastPlayedRef.current = track.id;
+    setBgMusicCurrentTrack(track);
+    setBgMusicIsPaused(false);
+    await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
+    await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편", artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/150c7998-4807-484c-89df-ea933edb96d2.png" });
+    await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" });
+  } catch (e) {
+    console.log("[BGM] 다음 곡 실패:", e && e.message, e);
   }
+}
 
 async function playRandomBgMusic() {
     if (!bgMusicList || bgMusicList.length === 0) return;
@@ -1936,14 +1941,14 @@ const playable = getPlayableBgTracks();
             artistName: "장편",
             artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/150c7998-4807-484c-89df-ea933edb96d2.png",
             useForNotification: true,
-            isBackgroundMusic: false,
+           isBackgroundMusic: true,
             loop: false,
           });
           await AudioPlayer.onAudioReady({ audioId: "jangpyeon_bgmusic" }, () => {
             AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
           });
-          await AudioPlayer.onAudioEnd({ audioId: "jangpyeon_bgmusic" }, () => {
-            playNextBgTrack();
+ await AudioPlayer.onAudioEnd({ audioId: "jangpyeon_bgmusic" }, () => {
+            playNextBgTrackRef.current?.();
           });
           await AudioPlayer.onPlaybackStatusChange({ audioId: "jangpyeon_bgmusic" }, (res) => {
             if (res && res.status === "stopped" && bgMusicStoppedResolveRef.current) {
@@ -1971,7 +1976,7 @@ const playable = getPlayableBgTracks();
       }
 const audio = new Audio(track.file_url);
       audio.volume = 0.5;
-      audio.onended = () => playRandomBgMusic();
+      audio.onended = () => playNextBgTrackRef.current?.();
       audio.play().catch(() => {});
       bgMusicAudioRef.current = audio;
       setBgMusicCurrentTrack(track);
