@@ -960,11 +960,14 @@ const [bgMusicList, setBgMusicList] = useState([]);
 const bgMusicAudioRef = useRef(null);
 const bgMusicStartingRef = useRef(false);
 const bgMusicLastPlayedRef = useRef(null);
+  const playNextBgTrackRef = useRef(null);
 const [bgMusicCurrentTrack, setBgMusicCurrentTrack] = useState(null);
 const [bgMusicIsPaused, setBgMusicIsPaused] = useState(false);
 const [isMusicBarExpanded, setIsMusicBarExpanded] = useState(true);
 const [showMusicHint, setShowMusicHint] = useState(false);
-  const [bgMusicShuffle, setBgMusicShuffle] = useState(true);
+const [bgMusicShuffle, setBgMusicShuffle] = useState(true);
+  const bgMusicShuffleRef = useRef(true);
+  useEffect(() => { bgMusicShuffleRef.current = bgMusicShuffle; }, [bgMusicShuffle]);
 const bgMusicCreatedRef = useRef(false);
 const bgMusicStoppedResolveRef = useRef(null);
   const [showBatteryOptHelp, setShowBatteryOptHelp] = useState(false);
@@ -1878,31 +1881,33 @@ async function stopBgMusicForExit() {
   }
 
 async function playNextBgTrack() {
-    if (!bgMusicList || bgMusicList.length === 0) return;
-    try {
-      const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
-const playable = getPlayableBgTracks();
-      if (playable.length === 0) return;
-      let track;
-      if (bgMusicShuffle) {
-        let candidates = playable;
-        if (bgMusicLastPlayedRef.current && playable.length > 1) {
-          candidates = playable.filter((m) => m.id !== bgMusicLastPlayedRef.current);
-          if (candidates.length === 0) candidates = playable;
-        }
-        track = candidates[Math.floor(Math.random() * candidates.length)];
-      } else {
-        const currentIndex = playable.findIndex((m) => m.id === bgMusicLastPlayedRef.current);
-        const nextIndex = (currentIndex + 1) % playable.length;
-        track = playable[nextIndex];
+  const playable = getPlayableBgTracks();
+  if (playable.length === 0) return;
+  try {
+    const { AudioPlayer } = await import("@mediagrid/capacitor-native-audio");
+    let track;
+    if (bgMusicShuffleRef.current) {
+      let candidates = playable;
+      if (bgMusicLastPlayedRef.current && playable.length > 1) {
+        candidates = playable.filter((m) => m.id !== bgMusicLastPlayedRef.current);
+        if (candidates.length === 0) candidates = playable;
       }
-      bgMusicLastPlayedRef.current = track.id;
-      setBgMusicCurrentTrack(track);
-      await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
-      await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편" });
-      await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
-    } catch (e) {}
+      track = candidates[Math.floor(Math.random() * candidates.length)];
+    } else {
+      const currentIndex = playable.findIndex((m) => m.id === bgMusicLastPlayedRef.current);
+      track = playable[(currentIndex + 1) % playable.length];
+    }
+    bgMusicLastPlayedRef.current = track.id;
+    setBgMusicCurrentTrack(track);
+    setBgMusicIsPaused(false);
+    await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
+    await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편", artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/150c7998-4807-484c-89df-ea933edb96d2.png" });
+    await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" });
+} catch (e) {
+    console.log("[BGM] 다음 곡 실패:", e && e.message, e);
   }
+}
+  useEffect(() => { playNextBgTrackRef.current = playNextBgTrack; });
 
 async function playRandomBgMusic() {
     if (!bgMusicList || bgMusicList.length === 0) return;
@@ -1924,16 +1929,16 @@ const playable = getPlayableBgTracks();
    friendlyTitle: track.title || "장편 노래",
             albumTitle: "장편",
             artistName: "장편",
-            artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png",
+            artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/150c7998-4807-484c-89df-ea933edb96d2.png",
             useForNotification: true,
-            isBackgroundMusic: false,
+           isBackgroundMusic: true,
             loop: false,
           });
           await AudioPlayer.onAudioReady({ audioId: "jangpyeon_bgmusic" }, () => {
             AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
           });
-          await AudioPlayer.onAudioEnd({ audioId: "jangpyeon_bgmusic" }, () => {
-            playNextBgTrack();
+ await AudioPlayer.onAudioEnd({ audioId: "jangpyeon_bgmusic" }, () => {
+            playNextBgTrackRef.current?.();
           });
           await AudioPlayer.onPlaybackStatusChange({ audioId: "jangpyeon_bgmusic" }, (res) => {
             if (res && res.status === "stopped" && bgMusicStoppedResolveRef.current) {
@@ -1961,7 +1966,7 @@ const playable = getPlayableBgTracks();
       }
 const audio = new Audio(track.file_url);
       audio.volume = 0.5;
-      audio.onended = () => playRandomBgMusic();
+      audio.onended = () => playNextBgTrackRef.current?.();
       audio.play().catch(() => {});
       bgMusicAudioRef.current = audio;
       setBgMusicCurrentTrack(track);
@@ -4312,7 +4317,7 @@ await stopBgMusicForExit();
           )}
           {bgMusicOn && bgMusicCurrentTrack && (
 <div className="hidden sm:flex items-center gap-1.5 ml-4 rounded-full pl-1 pr-1 py-1 min-w-0" style={{ background: PAPER, maxWidth: 320 }}>
-              <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png" alt="장편" className={`rounded-full flex-shrink-0 ${!bgMusicIsPaused ? "album-art-spinning" : ""}`} style={{ width: 24, height: 24, objectFit: "cover" }} />
+              <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/150c7998-4807-484c-89df-ea933edb96d2.png" alt="장편" className={`rounded-full flex-shrink-0 ${!bgMusicIsPaused ? "album-art-spinning" : ""}`} style={{ width: 24, height: 24, objectFit: "cover" }} />
               <span className="text-xs font-bold truncate" style={{ color: INK, maxWidth: 110 }}>
                 {bgMusicCurrentTrack.title || "장편 노래"}
               </span>
@@ -4635,7 +4640,7 @@ await stopBgMusicForExit();
       {bgMusicOn && bgMusicCurrentTrack && isMusicBarExpanded && (
         <div className="sm:hidden fixed left-0 right-0 z-40 flex items-center gap-2 px-3 py-3" style={{ bottom: 0, background: CARD, borderTop: `1px solid ${LINE}`, boxShadow: "0 -2px 8px rgba(0,0,0,0.08)" }}>
 <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, background: TEAL_TINT }}>
-    <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png" alt="장편" className={`w-full h-full object-cover rounded-full ${!bgMusicIsPaused ? "album-art-spinning" : ""}`} />
+    <img src="https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/150c7998-4807-484c-89df-ea933edb96d2.png" alt="장편" className={`w-full h-full object-cover rounded-full ${!bgMusicIsPaused ? "album-art-spinning" : ""}`} />
           </div>
           <div className="flex-1 min-w-0 mr-1">
             <div className="text-xs font-bold truncate" style={{ color: INK }}>{bgMusicCurrentTrack.title || "장편 노래"}</div>
