@@ -3131,6 +3131,19 @@ useEffect(() => {
     fetchBgMusicShuffle();
   }, []);
 
+  // 알림(상단바/잠금화면)의 이전곡/다음곡 버튼 → 네이티브 브리지 이벤트 → 기존 트랙 로직
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+    let subPromise;
+    import("@mediagrid/capacitor-native-audio").then(({ AudioPlayer }) => {
+      subPromise = AudioPlayer.addListener("bgMusicNotifCommand", ({ action }) => {
+        if (action === "prev") playPrevBgTrack();
+        else playNextBgTrack();
+      });
+    });
+    return () => { if (subPromise) subPromise.then((s) => s.remove()).catch(() => {}); };
+  }, []);
+
   useEffect(() => {
     if (tab === "my" && bgMusicEventActive && bgMusicList.length > 0 && !bgMusicOn) {
       setShowMusicHint(true);
