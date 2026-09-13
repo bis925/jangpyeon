@@ -210,16 +210,6 @@ function maskEmail(email) {
 }
 
 
-async function fetchPointRanking() {
-    const { data, error } = await supabase.rpc("get_monthly_point_ranking");
-    if (error) { console.error("랭킹 불러오기 실패:", error); return; }
-    const mapped = (data || []).map((r) => ({
-      email: r.email,
-      points: r.total_points,
-    }));
-    setPointRanking(mapped);
-  }
-
 function getRecencyInfo(createdAt, lastConfirmedAt) {
   const baseDate = lastConfirmedAt || createdAt;
   const days = Math.floor((Date.now() - new Date(baseDate).getTime()) / (1000 * 60 * 60 * 24));
