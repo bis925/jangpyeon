@@ -1909,7 +1909,7 @@ const playable = getPlayableBgTracks();
       bgMusicLastPlayedRef.current = track.id;
       setBgMusicCurrentTrack(track);
       await AudioPlayer.changeAudioSource({ audioId: "jangpyeon_bgmusic", source: track.file_url });
-      await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편" });
+await AudioPlayer.changeMetadata({ audioId: "jangpyeon_bgmusic", friendlyTitle: track.title || "장편 노래", albumTitle: "장편", artistName: "장편", artworkSource: "https://xyyewfqfurtrzfonplat.supabase.co/storage/v1/object/public/app-assets/782236e6-535a-4f28-ab3c-4c5cf1e9b906.png" });
       await AudioPlayer.play({ audioId: "jangpyeon_bgmusic" }).catch(() => {});
     } catch (e) {}
   }
